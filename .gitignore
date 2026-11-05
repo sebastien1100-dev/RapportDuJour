@@ -1,0 +1,18 @@
+# Exports réels du logiciel hôtelier : noms des clients, ne jamais les envoyer sur GitHub
+tests/fixtures/*.xlsx
+tests/fixtures/*.xlsm
+tests/fixtures/*.xls
+tests/fixtures/*.csv
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+
+# Sauvegardes de l'application (contiennent aussi les données des clients)
+RapportDuJour_sauvegarde_*.json
+*.json
+
+# Fichiers temporaires
+*.tmp
+Thumbs.db
+.DS_Store

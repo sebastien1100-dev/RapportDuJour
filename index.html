@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapport du jour</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="barre">
+    <div class="marque">
+      <span class="logo"><img src="img/logo-campanile.png" alt="Campanile"></span>    </div>
+    <nav id="onglets" aria-label="Feuilles">
+      <button data-vue="accueil">Accueil</button>
+      <button data-vue="rapport">Rapport</button>
+      <button data-vue="fdc">Femme de chambre</button>
+      <button data-vue="plan">Plan de chambre</button>
+      <button data-vue="pdj">Cuisson PDJ</button>
+      <button data-vue="recap">Historique</button>
+      <button data-vue="reglages">Réglages</button>
+      <button data-vue="changelog">Change log</button>
+    </nav>
+    <div class="menu-import">
+      <button class="btn primaire" data-action="menu-import" aria-haspopup="true" aria-expanded="false">Importer ▾</button>
+      <div class="menu-import-liste" id="menu-import" hidden>
+        <button data-action="importer"><b>Rapport clients présents</b><small>chambres, clients, départs, PDJ, paiement</small></button>
+        <button data-action="importer-soldes"><b>Rapport des soldes</b><small>montant dû des chambres en départ</small></button>
+      </div>
+    </div>
+  </header>
+
+  <div id="notice" class="notice" hidden role="status"></div>
+  <main id="vue"></main>
+  <div id="impression" class="nb"></div>
+  <dialog id="dialogue"></dialog>
+  <div id="apercu" hidden role="dialog" aria-modal="true" aria-label="Aperçu avant impression"></div>
+  <div class="voile-depot">Déposez le fichier exporté pour l'importer</div>
+
+  <input type="file" id="fichier-import" accept=".xlsx,.xlsm,.csv" hidden>
+  <input type="file" id="fichier-soldes" accept=".xlsx,.xlsm,.csv" hidden>
+  <input type="file" id="fichier-restaurer" accept=".json,application/json" hidden>
+
+  <script src="js/config.js"></script>
+  <script src="js/changelog.js"></script>
+  <script src="js/xlsx-reader.js"></script>
+  <script src="js/calculs.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/vues.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

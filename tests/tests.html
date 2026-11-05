@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Tests · Rapport du jour</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; background: #fff; color: #111; }
+    li.ok { color: #1a7f4b; } li.ko { color: #b42318; font-weight: 600; }
+    #resume { font-size: 20px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Tests du Rapport du jour</h1>
+  <p>À ouvrir via le serveur local (<code>outils/serveur.ps1</code>), car la page charge l'export d'exemple.</p>
+  <div id="resume">…</div>
+  <ul id="liste"></ul>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/xlsx-reader.js"></script>
+  <script src="../js/calculs.js"></script>
+  <script>
+  (async function () {
+    const resultats = [];
+    const egal = (nom, obtenu, attendu) => {
+      const ok = JSON.stringify(obtenu) === JSON.stringify(attendu);
+      resultats.push({ nom, ok, detail: ok ? '' : ' — obtenu ' + JSON.stringify(obtenu) + ', attendu ' + JSON.stringify(attendu) });
+    };
+
+    /* ---- Fonctions unitaires ---- */
+    egal('normTitre accents/ponctuation', RDJ.normTitre("Statut d'enrg."), 'statutdenrg');
+    egal('normTitre Arrivée', RDJ.normTitre(' Arrivée '), 'arrivee');
+    egal('versISO numéro de série', RDJ.versISO(45986), '2025-11-25');
+    egal('versISO avec heure', RDJ.versISO(45986.75), '2025-11-25');
+    egal('versISO texte FR', RDJ.versISO('25/11/2025'), '2025-11-25');
+    egal('versISO ISO', RDJ.versISO('2025-11-25'), '2025-11-25');
+    egal('jours fin de mois', RDJ.jours('2025-11-30', 1), '2025-12-01');
+    egal('jourSemaine', RDJ.jourSemaine('2025-11-25'), 'mardi');
+    egal('normChambre lettre O', RDJ.normChambre('OO1'), '001');
+    egal('normChambre 2 chiffres', RDJ.normChambre('44'), '044');
+    egal('normChambre 5bis', RDJ.normChambre('5bis'), '5BIS');
+    egal('avecPdj HB2', RDJ.avecPdj('HB2'), true);
+    egal('avecPdj RO', RDJ.avecPdj('RO'), false);
+    egal('dateMep import 22h -> lendemain', RDJ.dateMep('2025-11-25T22:10', '2025-11-25'), '2025-11-26');
+    egal('dateMep import 1h -> jour même', RDJ.dateMep('2025-11-26T01:05', '2025-11-25'), '2025-11-26');
+    egal('dateMep sans import -> nuit + 1', RDJ.dateMep(null, '2025-11-25'), '2025-11-26');
+    const croissant = RDJ.CONFIG_DEFAUT.produitsPdj[0];
+    egal('PDJ croissants business 55', RDJ.quantitePdj(croissant, 55, 'business'), 38);
+    egal('PDJ croissants loisir 55', RDJ.quantitePdj(croissant, 55, 'loisir'), 52);
+    egal('PDJ croissants mixte 100 (pas d\'arrondi parasite)', RDJ.quantitePdj(croissant, 100, 'mixte'), 75);
+    egal('cycle FDC', ['', 'B', 'R', 'BR', 'HS', 'X'].map(RDJ.etatSuivant), ['B', 'R', 'BR', 'HS', '', 'B']);
+    egal('correction = import -> supprimée', RDJ.correctionApres('B', 'B'), null);
+    egal('correction vide sur chambre importée -> X', RDJ.correctionApres('', 'R'), 'X');
+    egal('CSV point-virgule', RDJ._lireCsv('a;b\n"x;y";2\n'), [['a', 'b'], ['x;y', '2']]);
+    egal('export sans colonnes obligatoires', RDJ.lireExport([['Nom', 'Chambre']]).manquants.length, 5);
+
+    /* ---- Export réel du 25/11/2025 ---- */
+    try {
+      const rep = await fetch('fixtures/export_25-11-2025.xlsx');
+      if (!rep.ok) throw new Error('fixture introuvable (HTTP ' + rep.status + ')');
+      const buf = await rep.arrayBuffer();
+      const lignes = await RDJ.lireFichierTableur({ name: 'export.xlsx', arrayBuffer: async () => buf });
+      const lu = RDJ.lireExport(lignes);
+      const res = lu.reservations;
+      egal('export : aucune colonne manquante', lu.manquants, []);
+      egal('export : 69 réservations', res.length, 69);
+      egal('export : trié par chambre', res[0].chambre, '001');
+      egal('export : vide = vide (pas "Réservation")', res.filter((r) => r.groupeId).length, 8);
+
+      const nuit = RDJ.dateRapportAuto(res);
+      egal('nuit du rapport', nuit, '2025-11-25');
+      const c = RDJ.chiffres(res, nuit, 81);
+      // valeurs du récap Excel pour cette nuit
+      egal('chambres occupées', c.chambres, 69);
+      egal('clients', c.clients, 83);
+      egal('départs', c.departs, 40);
+      egal('recouches', c.recouches, 29);
+      egal('petits déjeuners', c.pdj, 55);
+      egal("taux d'occupation", Math.round(c.taux * 10000) / 10000, 0.8519);
+      egal('non payées (indiv. + groupe) = 16', c.nonPayees.length + c.groupeNonPayees.length, 16);
+      egal('à encaisser (départs) + autres = individuels non payés', c.aEncaisser.length + c.nonPayeesRestent.length, c.nonPayees.length);
+      egal('à encaisser : départs seulement, sans montant (export sans solde)',
+        [c.aEncaisser.every((e) => res.find((r) => r.chambre === e.chambre).depart <= RDJ.jours(nuit, 1)), c.totalDu], [true, null]);
+      egal('groupes non payés regroupés par ID', c.groupes.reduce((s, g) => s + g.chambres.length, 0), c.groupeNonPayees.length);
+
+      // Montant dû : colonne facultative, utilisée si l'export la contient
+      const avecSolde = lignes.map((l, i) => [...l, i === 0 ? 'Solde' : '120,50 €']);
+      const resS = RDJ.lireExport(avecSolde).reservations;
+      const cS = RDJ.chiffres(resS, nuit, 81);
+      egal('solde lu dans l\'export', cS.aEncaisser[0].montant, 120.5);
+      egal('total dû = départs individuels seulement', cS.totalDu, 120.5 * cS.aEncaisser.length);
+      egal('lireMontant', [RDJ.lireMontant('1 234,5 €'), RDJ.lireMontant(''), RDJ.lireMontant(80)], [1234.5, null, 80]);
+
+      // Source de la réservation (colonne « Client »)
+      egal('sources : répartition de l\'export', c.parSource.filter((s) => s.chambres).map((s) => s.code + ' ' + s.chambres),
+        ['DIR 25', 'BKG 21', 'EXP 14', 'AGO 1', 'GRP 8']);
+      egal('sources : les 8 « GROUPS » sont les chambres de groupe', res.filter((r) => RDJ.sourceReservation(r.canal).code === 'GRP').every((r) => r.groupeId), true);
+      egal('source inconnue -> Autre, texte gardé', RDJ.sourceReservation('HRS GmbH'), { code: 'AUT', nom: 'HRS GmbH', brut: 'HRS GmbH' });
+      egal('source : majuscules / ponctuation ignorées', ['direct guest', 'Booking.com', 'EXPEDIA GROUP, INC.', 'AGODA COMPANY PTE. LTD.', 'GROUPS + M&E'].map((t) => RDJ.sourceReservation(t).code),
+        ['DIR', 'BKG', 'EXP', 'AGO', 'GRP']);
+      egal('récap : chambres par source', RDJ.ligneRecap(nuit, c).sources, { DIR: 25, BKG: 21, EXP: 14, AGO: 1, GRP: 8, AUT: 0 });
+
+      // Plan : chambre libre mise en sale / hors service (correction de la feuille de chambre)
+      egal('cycle du plan : libre → sale (B) → HS → libre', ['', 'B', 'HS'].map(RDJ.etatSuivantPlan), ['B', 'HS', '']);
+      const libre0 = RDJ.chambresLibres(RDJ.CONFIG_DEFAUT.planFdc, res)[0];
+      const efs = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, { [libre0]: 'B' });
+      const sts = RDJ.statutsChambres(res, efs, nuit);
+      egal('chambre libre en B = « sale », sans client', [sts[libre0].statut, sts[libre0].sansClient, sts[res[0].chambre].statut], ['sale', true, 'depart']);
+      egal('chambre sale comptée en B sur la feuille de chambre', RDJ.compteursFdc(efs, {}).B, 41);
+
+      // Rapport des soldes (montant dû des départs)
+      const soldesLignes = [['Rapport des soldes'], [], ['Chambre', 'Nom', 'Solde dû'], ['001', 'X', '89,50 €'], ['1', 'X', '10'], ['155', 'Y', 120], ['', '', 'Total 219,50']];
+      const sl = RDJ.lireSoldes(soldesLignes);
+      egal('soldes : titres trouvés plus bas, lignes additionnées par chambre', [sl.lignes, sl.chambres['001'], sl.chambres['155']], [3, 99.5, 120]);
+      egal('soldes : fichier sans colonne utile -> refusé', RDJ.lireSoldes([['A', 'B'], [1, 2]]).manquants.length > 0, true);
+      const resSoldes = RDJ.appliquerSoldes(res, sl);
+      const cSol = RDJ.chiffres(resSoldes, nuit, 81);
+      egal('soldes : montant reporté sur le départ non payé', cSol.aEncaisser.find((e) => e.chambre === '155').montant, 120);
+      egal('soldes : l\'import d\'origine n\'est pas modifié', res.find((r) => r.chambre === '155').montantDu, null);
+      egal('soldes : par n° de réservation en priorité', RDJ.appliquerSoldes([{ chambre: '001', reservation: 'R1', montantDu: null }], { chambres: { '001': 5 }, resas: { R1: 7 } })[0].montantDu, 7);
+
+      // Types de chambre
+      const tdef = RDJ.typesChambres(RDJ.CONFIG_DEFAUT.typesChambresDefaut, {});
+      egal('types : 001, 002, 003 PMR par défaut', tdef, { '001': 'PMR', '002': 'PMR', '003': 'PMR' });
+      egal('types : un réglage remplace le défaut, « — » efface', RDJ.typesChambres(RDJ.CONFIG_DEFAUT.typesChambresDefaut, { '003': '', '258': '1K' }), { '001': 'PMR', '002': 'PMR', '258': '1K' });
+      egal('type depuis la catégorie', ['BSTD----1Q', 'PSUP----1K', 'BSTD----2S', 'XYZ'].map((x) => RDJ.typeDepuisCategorie(x, RDJ.CONFIG_DEFAUT.typesChambre)), ['1Q', '1K', '2S', '']);
+      const compl = RDJ.completerTypes(tdef, res, RDJ.CONFIG_DEFAUT.typesChambre);
+      egal('compléter depuis l\'import : PMR gardés, 66 chambres complétées', [compl['001'], compl['258'], Object.keys(compl).length], [undefined, '1K', 66]);
+
+      // Chambres ajoutées à la main
+      const libres = RDJ.chambresLibres(RDJ.CONFIG_DEFAUT.planFdc, res);
+      egal('chambres libres = 81 - 69', libres.length, 12);
+      const ajout = { chambre: libres[0], nom: 'Test', nbClients: 2, depart: RDJ.jours(nuit, 1), pdj: true, paye: false, montantDu: 75 };
+      const avec = RDJ.avecAjouts(res, [ajout], nuit);
+      const cA = RDJ.chiffres(avec, nuit, 81);
+      egal('ajout : compté dans les chiffres', [cA.chambres, cA.clients, cA.departs, cA.pdj], [70, 85, 41, 57]);
+      egal('ajout : à encaisser avec son montant', cA.aEncaisser.find((e) => e.chambre === libres[0]).montant, 75);
+      egal('ajout : compté en B sur la feuille de chambre', RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, avec, nuit, {})[libres[0]].etat, 'B');
+      egal('ajout : retiré si la chambre est dans l\'import', RDJ.nettoyerAjouts(res, [{ ...ajout, chambre: res[0].chambre }]).retires.length, 1);
+      egal('ajout : l\'import n\'est pas modifié', res.length, 69);
+
+      // Plan des chambres
+      const etg = RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc);
+      egal('plan : 4 étages, du 3e au RDC', etg.map((e) => e.etage), [3, 2, 1, 0]);
+      egal('disposition : un seul bâtiment par étage', RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc, RDJ.CONFIG_DEFAUT.dispositionEtages).map((e) => e.ailes.length), [1, 1, 1, 1]);
+      egal('plan auto : 81 chambres, 2 ailes par étage', [etg.reduce((s, e) => s + RDJ.chambresEtage(e).length, 0), etg.map((e) => e.ailes.length)], [81, [2, 2, 2, 2]]);
+      const etgR = RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc, RDJ.CONFIG_DEFAUT.dispositionEtages);
+      const rdc = etgR.find((e) => e.etage === 0);
+      egal('RDC selon le croquis : 1 couloir, 045→049 côté rue, 006→001 côté Mac Donald',
+        [rdc.ailes.length, rdc.ailes[0].haut.filter((c) => typeof c === 'string').join(' '), rdc.ailes[0].bas.filter((c) => typeof c === 'string').join(' ')], [1, '045 046 047 048 049', '006 005 004 003 002 001']);
+      egal('disposition : toujours 81 chambres', etgR.reduce((s, e) => s + RDJ.chambresEtage(e).length, 0), 81);
+      const a2 = etgR.find((e) => e.etage === 2).ailes[0];
+      egal('2e : cage entre 264 et 263 (rue) et entre 222 et 221 (Mac Donald)',
+        [RDJ.couperCage(a2.haut).map((p) => p[p.length - 1] && p[0] + '-' + p[p.length - 1]), RDJ.couperCage(a2.bas).map((p) => p[0] + '-' + p[p.length - 1])],
+        [['271-264', '263-258'], ['229-222', '221-216']]);
+      egal('cage présente à tous les étages', etgR.map((e) => !!RDJ.couperCage(e.ailes[0].haut)[1]), [true, true, true, true]);
+      egal('003 et 004 communicantes (dans les deux sens)', RDJ.communicantes(RDJ.CONFIG_DEFAUT.chambresCommunicantes), { '003': '004', '004': '003' });
+      const bas3 = etgR.find((e) => e.etage === 3).ailes[0].bas;
+      egal('3e : bureau de direction entre 333 et 330, sur 2 cases', [bas3.find((c) => typeof c !== 'string' && c.local).local, RDJ.largeurRang(bas3)], ['Bureau de direction', 14]);
+      egal('disposition : chambre oubliée ajoutée à part', RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc, { 0: [{ haut: ['045'], bas: ['001'] }] })
+        .find((e) => e.etage === 0).ailes.length, 2);
+      const er1 = etgR.find((e) => e.etage === 1).ailes;
+      egal('1er étage : 150-157 côté rue, 107-115 côté Mac Donald', [er1.length, er1[0].hautLib, RDJ.largeurRang(er1[0].haut), er1[0].basLib, RDJ.largeurRang(er1[0].bas)], [1, 'Côté rue', 8, 'Côté Mac Donald', 8]);
+      const efdc = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, { [libres[0]]: 'HS' });
+      const stp = Object.values(RDJ.statutsChambres(res, efdc, nuit));
+      egal('plan : statuts = feuille de chambre', ['depart', 'recouche', 'libre', 'hs'].map((k) => stp.filter((s) => s.statut === k).length), [40, 29, 11, 1]);
+
+      const g = RDJ.grilleRapport(res, nuit);
+      egal('grille : 23 lignes par bloc', g.parBloc, 23);
+      egal('grille : toutes les chambres', g.blocs.flat().length, 69);
+
+      const hors = RDJ.chambresHorsPlan(RDJ.CONFIG_DEFAUT.planFdc, res);
+      egal('toutes les chambres sont sur la feuille de chambre', hors, []);
+      const etats = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, {});
+      const cpt = RDJ.compteursFdc(etats, {});
+      egal('feuille de chambre : B = départs', cpt.B, 40);
+      egal('feuille de chambre : R = recouches', cpt.R, 29);
+      egal('plan : 81 chambres remplissables', Object.keys(etats).length, 81);
+
+      // Modifications du rapport
+      const np = res.find((r) => !RDJ.estPaye(r));
+      const dep = res.find((r) => r.depart <= RDJ.jours(nuit, 1));
+      const ro = res.find((r) => !RDJ.avecPdj(r.mealPlan));
+      const modifs = [{ chambre: np.chambre, type: 'PAYE' }, { chambre: dep.chambre, type: 'RECOUCHE' }, { chambre: ro.chambre, type: 'PDJ' }];
+      const eff = RDJ.appliquerModifs(res, modifs, nuit);
+      const c2 = RDJ.chiffres(eff, nuit, 81);
+      egal('modif PAYE : un impayé de moins', c2.nonPayees.length + c2.groupeNonPayees.length, 15);
+      egal('modif RECOUCHE : départ -> recouche', [c2.departs, c2.recouches], [39, 30]);
+      egal('modif PDJ : couverts ajoutés', c2.pdj, 55 + ro.nbClients);
+      egal("modif PAYE inutile si déjà payée", RDJ.nettoyerModifs(res, [{ chambre: res.find(RDJ.estPaye).chambre, type: 'PAYE' }], nuit), []);
+      egal('import non modifié par appliquerModifs', RDJ.chiffres(res, nuit, 81).departs, 40);
+      const e2 = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, eff, nuit, { [RDJ.normChambre(dep.chambre)]: 'HS' });
+      egal('correction FDC prioritaire', e2[RDJ.normChambre(dep.chambre)].etat, 'HS');
+    } catch (err) {
+      resultats.push({ nom: 'chargement de l\'export', ok: false, detail: ' — ' + err.message });
+    }
+
+    const ko = resultats.filter((r) => !r.ok).length;
+    document.getElementById('resume').textContent = ko ? ko + ' test(s) en échec sur ' + resultats.length : 'Tous les tests passent (' + resultats.length + ')';
+    document.getElementById('resume').style.color = ko ? '#b42318' : '#1a7f4b';
+    document.getElementById('liste').innerHTML = resultats.map((r) => `<li class="${r.ok ? 'ok' : 'ko'}">${r.ok ? '✔' : '✘'} ${r.nom}${r.detail}</li>`).join('');
+    window.__resultats = { total: resultats.length, echecs: resultats.filter((r) => !r.ok) };
+  })();
+  </script>
+</body>
+</html>
