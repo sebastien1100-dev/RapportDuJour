@@ -1,10 +1,19 @@
 /* ====== Jetons (tons Campanile : vert canard, bleu nuit ; impression en noir et blanc) ====== */
 :root {
-  --fond: #f2f6f6;
+  --fond: #f6f4ef;            /* crème clair, à plat */
   --surface: #ffffff;
   --texte: #1f2a3d;
   --doux: #5f6b7a;
-  --bord: #d6e2e0;
+  --bord: #e6e2d8;
+  /* pastels (une couleur par onglet), accordés au vert Campanile */
+  --menthe: #d5f2ea;  --menthe-fonce: #0e625c;
+  --ciel: #dde9f8;    --ciel-fonce: #1c3d6e;
+  --beurre: #fbefc6;  --beurre-fonce: #7a5a0c;
+  --rose: #fadcdc;    --rose-fonce: #9b2c2c;
+  --lilas: #e8e1fb;   --lilas-fonce: #4b3a8c;
+  --peche: #fde3d4;   --peche-fonce: #94451c;
+  --sauge: #e9ece5;   --sauge-fonce: #46524a;
+  --gris-btn: #eceae3;
   --marine: #1c2a48;          /* bleu nuit (« PRIME ») : textes forts, en-têtes de tableaux */
   --marine-clair: #eaf6f4;    /* vert très clair : fonds des tuiles et zones douces */
   --accent: #157f77;          /* vert canard Campanile */
@@ -545,6 +554,155 @@ body.depot .voile-depot { display: grid; }
 .types-ch label.tc-1K { background: var(--marine-clair); border-color: #b9ddd8; }
 .types-ch label.tc-2S { background: #fff5e5; border-color: #f3c98b; }
 .types-ch label.tc-1Q { background: #f3eefc; border-color: #cbb9ee; }
+
+/* ====== Thème flat pastel (écran uniquement ; les feuilles imprimées ne sont pas concernées) ======
+   À plat : ni dégradé, ni ombre, ni liseré. Une couleur pastel par onglet, vert Campanile pour les actions,
+   bleu nuit pour les textes forts. */
+
+/* barre du haut : blanche, onglets en pilules, logo posé directement */
+.barre { background: var(--surface); color: var(--marine); box-shadow: none; border-bottom: 1px solid var(--bord); }
+.logo { background: none; padding: 0; height: 34px; }
+#onglets button { color: var(--doux); border-radius: 999px; padding: 8px 14px; font-weight: 500; }
+#onglets button:hover { background: var(--menthe); color: var(--menthe-fonce); }
+#onglets button.actif { background: var(--accent); color: #fff; font-weight: 600; }
+.barre .btn.primaire { background: var(--accent); border-color: var(--accent); color: #fff; }
+.barre .btn.primaire:hover { background: var(--accent-fonce); }
+.menu-import-liste { border: 0; border-radius: 16px; padding: 8px; box-shadow: 0 16px 40px rgba(28,42,72,.16); }
+.menu-import-liste button { border-radius: 10px; }
+.menu-import-liste button:hover { background: var(--menthe); }
+
+/* boutons à plat */
+.btn { border: 0; background: var(--gris-btn); border-radius: 10px; padding: 9px 16px; font-weight: 500; transition: background .15s; }
+.btn:hover:not(:disabled) { background: #e1ded4; }
+.btn.primaire { background: var(--accent); color: #fff; font-weight: 600; }
+.btn.primaire:hover:not(:disabled) { background: var(--accent-fonce); filter: none; }
+.btn.lien, .btn.lien:hover:not(:disabled) { background: none; }
+.btn.danger { background: var(--rose); color: var(--rose-fonce); font-weight: 600; }
+.btn.danger:hover:not(:disabled) { background: #f6c9c9; }
+.btn.danger-plein { background: var(--rouge); color: #fff; }
+
+/* messages */
+.notice { border: 0; border-radius: 14px; }
+.notice.info, .notice.ok { background: var(--menthe); color: var(--menthe-fonce); }
+.notice.alerte { background: var(--beurre); color: var(--beurre-fonce); }
+.notice.erreur { background: var(--rose); color: var(--rose-fonce); }
+.bandeau-sauv { background: var(--beurre); border: 0; border-radius: 14px; color: var(--beurre-fonce); }
+
+/* accueil : bandeau vert Campanile à plat */
+.hero { background: var(--accent); box-shadow: none; border-radius: 22px; }
+.hero::before, .hero::after { display: none; }
+.hero-dessin svg { filter: none; }
+.pastille { background: rgba(255,255,255,.16); border: 0; backdrop-filter: none; }
+.anneau-fond { fill: rgba(255,255,255,.1); stroke: rgba(255,255,255,.18); }
+.anneau-val { filter: none; }
+.anneau-lib { background: rgba(255,255,255,.16); }
+
+.acc-import { border: 0; border-radius: 18px; box-shadow: none; padding: 16px 18px; }
+.acc-pastille { border: 0; background: var(--menthe); color: var(--menthe-fonce); }
+.acc-import.option:not(.fait) .acc-pastille { background: var(--sauge); color: var(--sauge-fonce); border: 0; }
+.acc-import.fait .acc-pastille { background: var(--accent); color: #fff; }
+
+.acc-groupe { border: 0; border-radius: 18px; box-shadow: none; padding: 16px 20px 18px; transition: transform .15s, filter .15s; }
+.acc-groupe:hover { box-shadow: none; transform: translateY(-2px); filter: saturate(1.25) brightness(.98); }
+.acc-groupe.g-plan { background: var(--menthe); }   .acc-groupe.g-plan .acc-groupe-titre { color: var(--menthe-fonce); }
+.acc-groupe.g-fdc { background: var(--ciel); }      .acc-groupe.g-fdc .acc-groupe-titre { color: var(--ciel-fonce); }
+.acc-groupe.g-pdj { background: var(--beurre); }    .acc-groupe.g-pdj .acc-groupe-titre { color: var(--beurre-fonce); }
+.acc-groupe.g-rapport { background: var(--rose); }  .acc-groupe.g-rapport .acc-groupe-titre { color: var(--rose-fonce); }
+.acc-valeur small { color: var(--marine); opacity: .7; }
+.acc-valeur.ok b { color: var(--menthe-fonce); }
+
+.acc-imprimer { background: var(--marine); border-radius: 18px; transition: background .15s; }
+.acc-imprimer:hover { background: #26385e; filter: none; box-shadow: none; transform: none; }
+.acc-imprimer .ai-texte span { color: #c9d3e6; }
+
+/* en-tête des onglets : fond pastel propre à chaque onglet */
+.ecran-tete { border: 0; border-radius: 18px; box-shadow: none; padding: 16px 20px; background: var(--sauge); }
+.et-rapport { background: var(--rose); }        .et-rapport .et-sous { color: var(--rose-fonce); }
+.et-fdc { background: var(--ciel); }            .et-fdc .et-sous { color: var(--ciel-fonce); }
+.et-plan { background: var(--menthe); }         .et-plan .et-sous { color: var(--menthe-fonce); }
+.et-pdj { background: var(--beurre); }          .et-pdj .et-sous { color: var(--beurre-fonce); }
+.et-historique { background: var(--lilas); }    .et-historique .et-sous { color: var(--lilas-fonce); }
+.et-reglages { background: var(--sauge); }      .et-reglages .et-sous { color: var(--sauge-fonce); }
+.et-changelog { background: var(--peche); }     .et-changelog .et-sous { color: var(--peche-fonce); }
+.ecran-tete .et-aide { color: var(--marine); opacity: .7; }
+.ecran-tete .btn:not(.primaire) { background: rgba(255,255,255,.7); }
+.ecran-tete .btn:not(.primaire):hover:not(:disabled) { background: #fff; }
+.ecran-tete .choix-affichage { border-left-color: rgba(28,42,72,.12); color: var(--marine); }
+.choix-affichage select { border: 0; border-radius: 10px; background: rgba(255,255,255,.7); padding: 7px 10px; }
+
+/* zone de la feuille */
+.papier { background: #ebe8e0; border-radius: 18px; }
+.papier .feuille { box-shadow: 0 0 0 1px rgba(28,42,72,.06); }
+
+/* cartes blanches à plat, titre en pastille pastel */
+.carte, .panneau, .mode-emploi, .tuile, .cl-carte, .cs-carte, .hi-bloc, .me-bloc,
+.carte.rg-carte, .carte.types-ch, .reglages .carte.rg-carte, .reglages .carte.types-ch {
+  border: 0; border-radius: 18px; box-shadow: none;
+}
+.reglages .carte.rg-carte.danger { border: 0; }
+.rg-carte h3, .reglages .carte.rg-carte h3, .hi-bloc h3, .me-bloc h3, .cs-carte h3 {
+  display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px;
+  background: var(--menthe); color: var(--menthe-fonce);
+}
+.hi-bloc h3 { background: var(--lilas); color: var(--lilas-fonce); }
+.me-bloc h3 { background: var(--ciel); color: var(--ciel-fonce); }
+.cs-carte h3 { background: var(--beurre); color: var(--beurre-fonce); }
+.reglages .carte.rg-carte.danger h3, .rg-carte.danger h3 { background: var(--rose); color: var(--rose-fonce); }
+.types-ch summary > b { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; background: var(--lilas); color: var(--lilas-fonce); }
+.panneau input, .panneau select, .carte input, #dialogue input, #dialogue .fiche-ajout input, .fiche-ajout select {
+  border: 1px solid var(--bord); border-radius: 10px; background: #faf9f6;
+}
+.panneau input:focus, .carte input:focus, #dialogue input:focus, .fiche-ajout select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; background: #fff; }
+.rg-carte > label.rg-case { border: 0; border-radius: 14px; background: var(--fond); }
+
+/* réglages : types de chambre en pastilles pastel */
+.types-ch label.tc { border: 0; border-radius: 10px; background: var(--fond); }
+.types-ch label.tc-vide { border: 1.5px dashed #e2a29c; background: #fff; }
+.types-ch label.tc-PMR { background: var(--ciel); }
+.types-ch label.tc-1K { background: var(--menthe); }
+.types-ch label.tc-2S { background: var(--beurre); }
+.types-ch label.tc-1Q { background: var(--lilas); }
+
+/* historique : cartes de synthèse pastel */
+.hi-carte { border: 0; border-radius: 18px; box-shadow: none; background: var(--lilas); }
+.hi-carte:nth-child(2) { background: var(--menthe); }
+.hi-carte:nth-child(3) { background: var(--beurre); }
+.hi-carte:nth-child(4) { background: var(--ciel); }
+.hi-carte:nth-child(5) { background: var(--peche); }
+.hi-carte.taux.haut { background: var(--menthe); } .hi-carte.taux.moyen { background: var(--beurre); } .hi-carte.taux.bas { background: var(--rose); }
+.hi-carte span, .hi-carte small { color: var(--marine); opacity: .7; }
+.hi-table tbody tr:hover td { background: var(--fond); }
+.hi-vide { border: 2px dashed var(--bord); border-radius: 18px; }
+
+/* mode d'emploi */
+.me-astuces li { border-left: 0; border-radius: 12px; background: var(--fond); }
+.me-sauv { border: 0; border-radius: 12px; background: var(--beurre); }
+.me-sauv b { color: var(--beurre-fonce); }
+
+/* cuisson PDJ : saisie */
+.cs-carte { border-top: 0; }
+.cs-compteur { border: 0; border-radius: 12px; background: var(--fond); }
+.cs-compteur input:focus { background: #fff; }
+.cs-pas { background: var(--beurre); color: var(--beurre-fonce); }
+.cs-pas:hover { background: #f6e3a3; }
+.cs-segments label { border: 2px solid transparent; border-radius: 12px; background: var(--fond); }
+.cs-segments label:hover { border-color: var(--beurre); }
+.cs-segments label.actif, .cs-segments label:has(input:checked) { border-color: var(--accent); background: var(--menthe); box-shadow: none; }
+
+/* change log */
+.cl-liste::before { background: #e1ddd2; }
+.cl-repere span { border: 0; background: var(--peche); color: var(--peche-fonce); }
+.cl-version.actuelle .cl-repere span { background: var(--accent); color: #fff; }
+.cl-version.actuelle .cl-carte { box-shadow: none; outline: 2px solid var(--accent); }
+.cl-carte li { border-top-color: var(--fond); }
+.cl-type { border-radius: 999px; }
+.cl-type.nouveau { background: var(--menthe); color: var(--menthe-fonce); }
+.cl-type.amelioration { background: var(--ciel); color: var(--ciel-fonce); }
+.cl-type.correction { background: var(--rose); color: var(--rose-fonce); }
+
+/* boîte de dialogue et aperçu */
+#dialogue { border-radius: 20px; }
+.apercu-barre { box-shadow: none; }
 
 /* ====== Feuilles imprimables (mm) ====== */
 .feuille {

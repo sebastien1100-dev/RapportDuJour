@@ -7,6 +7,16 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.0', date: '2026-11-07', titre: 'Nouveau design : flat et pastel',
+      changements: [
+        ['amelioration', "Tout l'écran passe en design « flat » : couleurs à plat, sans dégradé, sans ombre ni liseré, coins plus arrondis, fond crème clair."],
+        ['amelioration', "Une couleur pastel par onglet (Rapport rose, Femme de chambre bleu ciel, Plan de chambre menthe, Cuisson PDJ jaune beurre, Historique lilas, Réglages sauge, Change log pêche), reprise dans l'en-tête de l'onglet et sur les cartes de l'accueil."],
+        ['amelioration', "Barre du haut blanche avec le logo Campanile posé directement et des onglets en pastilles ; vert Campanile pour l'onglet actif et les boutons principaux, bleu nuit pour les textes forts et le bandeau « Impressions de la nuit »."],
+        ['amelioration', "Cartes blanches avec un titre en pastille pastel (Réglages, Historique, Mode d'emploi, Cuisson PDJ) ; types de chambre, compteurs et choix en pastilles de couleur."],
+        ['amelioration', "Les feuilles imprimées ne changent pas : toujours en noir et blanc sur une page A4."],
+      ],
+    },
+    {
       version: '2.9', date: '2026-11-06', titre: 'Sauvegarde hebdomadaire et retouches',
       changements: [
         ['amelioration', "Accueil : tout le bandeau « Impressions de la nuit » est un bouton qui lance « Imprimer tout » (clic n'importe où dessus) ; l'ancien bouton « Imprimer tout » est retiré."],

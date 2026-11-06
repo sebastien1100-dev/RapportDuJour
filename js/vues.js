@@ -452,7 +452,7 @@
     <svg viewBox="0 0 300 172" aria-hidden="true">
       <defs>
         <mask id="croissant"><circle cx="262" cy="30" r="13" fill="#fff"/><circle cx="269" cy="25" r="11" fill="#000"/></mask>
-        <linearGradient id="mur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8ef"/><stop offset="1" stop-color="#f3e2cf"/></linearGradient>
+        <linearGradient id="mur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf1e4"/><stop offset="1" stop-color="#fbf1e4"/></linearGradient>
       </defs>
       <circle cx="262" cy="30" r="13" fill="#fff4dc" mask="url(#croissant)"/>
       <g fill="#fff">
