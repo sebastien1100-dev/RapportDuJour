@@ -567,13 +567,13 @@
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
       </div>
 
-      <div class="acc-imprimer">
-        <div>
+      <button type="button" class="acc-imprimer" data-action="imprimer-tout">
+        <span class="ai-texte">
           <b>Impressions de la nuit</b>
           <span>Rapport ×1 · feuille de chambre ×${ctx.cfg.nbExemplairesFdc} · cuisson PDJ ×1</span>
-        </div>
-        <button class="btn primaire" data-action="imprimer-tout">Imprimer tout</button>
-      </div>
+        </span>
+        <span class="btn primaire">Imprimer tout</span>
+      </button>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
         <button class="btn" data-action="sauvegarder">Télécharger une sauvegarde</button></div>` : ''}
