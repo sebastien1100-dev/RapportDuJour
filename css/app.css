@@ -708,14 +708,14 @@ body.depot .voile-depot { display: grid; }
 .s-hs { background: repeating-linear-gradient(-45deg, #e5e7eb 0 1.2mm, #fff 1.2mm 2.4mm); border-color: #6b7280; color: #374151; }
 .pl-local {
   align-items: center; justify-content: center; text-align: center; gap: .5mm;
-  background: var(--marine); border-color: var(--marine); color: #fff;
+  background: #d1d5db; border-color: #9ca3af; color: #4b5563;
 }
 .pl-local b { font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; }
 .pl-local span { font-size: 6pt; opacity: .8; }
 .pl-local.petit { gap: .2mm; padding: .5mm .6mm; }
 .pl-local.petit b { font-size: 6pt; letter-spacing: 0; line-height: 1.15; }
 .pl-local.petit span { font-size: 5.2pt; }
-.nb .pl-local { background: #fff; border: .5mm double #000; color: #000; }
+.nb .pl-local { background: #c8c8c8; border: .3mm solid #000; color: #000; }
 /* chambres communicantes : porte marquée sur le côté commun + repère ⇄ */
 .pl-comm { font-style: normal; font-weight: 700; font-size: 6pt; line-height: 1; padding: .3mm .7mm; border-radius: .6mm; background: var(--accent); color: #fff; white-space: nowrap; }
 .nb .pl-comm { background: #fff; color: #000; border: .25mm solid #000; }

@@ -10,6 +10,7 @@
       version: '2.8', date: '2026-11-06', titre: 'Plan de chambre vierge',
       changements: [
         ['amelioration', "Plan de chambre vierge : le type de chambre (PMR, 1K, 1Q, 2S) apparaît dans les cases dont le type est renseigné dans les Réglages, avec une légende des types en bas de la feuille."],
+        ['amelioration', "Plan de chambre : l'appartement de fonction et le bureau de direction sont grisés (à l'écran et à l'impression)."],
       ],
     },
     {
