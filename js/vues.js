@@ -489,15 +489,16 @@
 
   // feuilles possibles pour « Imprimer tout » (Réglages → Impressions de la nuit)
   const FEUILLES_NUIT = [
-    ['rapport', 'Rapport du jour', '1 page'],
-    ['fdc', 'Feuille de chambre', 'une page par exemplaire'],
-    ['pdj', 'Cuisson PDJ', '1 page'],
-    ['plan', 'Plan de chambre', '1 page paysage'],
+    ['rapport', 'Rapport du jour'],
+    ['fdc', 'Feuille de chambre'],
+    ['pdj', 'Cuisson PDJ'],
+    ['plan', 'Plan de chambre'],
+    ['recap', 'Historique'],
   ];
   /** « Rapport ×1 · feuille de chambre ×5 · … » selon les feuilles cochées ('' si aucune). */
   function texteImpressionNuit(cfg) {
-    const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1 };
-    const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre' };
+    const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1, recap: 1 };
+    const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre', recap: 'historique' };
     return FEUILLES_NUIT.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
   }
 
@@ -846,11 +847,10 @@
         <h3>Impressions de la nuit</h3>
         <p class="aide">Feuilles imprimées par le bandeau « Impressions de la nuit » de l'accueil, dans cet ordre.</p>
         <div class="rg-feuilles">
-          ${FEUILLES_NUIT.map(([k, lib, detail]) => `
+          ${FEUILLES_NUIT.map(([k, lib]) => `
             <div class="rg-feuille f-${k}${r.impressionNuit[k] ? ' coche' : ''}">
-              <label><input type="checkbox" data-reglage="impression-${k}"${r.impressionNuit[k] ? ' checked' : ''}>
-                <span><b>${esc(lib)}</b><small>${esc(detail)}</small></span></label>
-              ${k === 'fdc' ? `<label class="rg-ex">Exemplaires <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}"></label>` : ''}
+              <label><input type="checkbox" data-reglage="impression-${k}"${r.impressionNuit[k] ? ' checked' : ''}>${esc(lib)}</label>
+              ${k === 'fdc' ? `<label class="rg-ex">× <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}" aria-label="Exemplaires de la feuille de chambre"></label>` : ''}
             </div>`).join('')}
         </div>
       </section>

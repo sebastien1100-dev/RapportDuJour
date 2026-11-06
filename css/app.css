@@ -699,21 +699,17 @@ body.depot .voile-depot { display: grid; }
 /* réglages : feuilles des impressions de la nuit, en tuiles à cocher */
 .reglages .carte.rg-carte.rg-impressions { margin: 0 0 14px; }
 .rg-impressions .aide { margin: 0 0 12px; }
-.rg-feuilles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-@media (max-width: 960px) { .rg-feuilles { grid-template-columns: 1fr 1fr; } }
-.rg-feuille { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--fond); border: 2px solid transparent; transition: background .15s, border-color .15s; }
-.rg-feuille.coche { border-color: var(--accent); }
+.rg-feuilles { display: flex; flex-wrap: wrap; gap: 8px; }
+.rg-feuille { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--fond); transition: background .15s; }
 .rg-feuille.f-rapport.coche { background: var(--rose); }
 .rg-feuille.f-fdc.coche { background: var(--ciel); }
 .rg-feuille.f-pdj.coche { background: var(--beurre); }
 .rg-feuille.f-plan.coche { background: var(--menthe); }
-.reglages .carte.rg-carte .rg-feuille label { display: flex; flex-direction: row; align-items: flex-start; gap: 10px; margin: 0; cursor: pointer; color: var(--texte); }
-.rg-carte .rg-feuille input[type=checkbox] { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--accent); cursor: pointer; }
-.rg-feuille label span { display: flex; flex-direction: column; gap: 1px; }
-.rg-feuille b { color: var(--marine); font-size: 14px; }
-.rg-feuille small { color: var(--marine); opacity: .65; font-size: 12px; }
-.reglages .carte.rg-carte .rg-feuille label.rg-ex { align-items: center; gap: 8px; font-size: 13px; color: var(--marine); cursor: default; padding-left: 28px; }
-.rg-carte .rg-feuille .rg-ex input { width: 70px; padding: 4px 8px; background: rgba(255,255,255,.8); }
+.rg-feuille.f-recap.coche { background: var(--lilas); }
+.reglages .carte.rg-carte .rg-feuille label { display: flex; flex-direction: row; align-items: center; gap: 7px; margin: 0; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--marine); }
+.rg-carte .rg-feuille input[type=checkbox] { width: 16px; height: 16px; margin: 0; flex: none; accent-color: var(--accent); cursor: pointer; }
+.reglages .carte.rg-carte .rg-feuille label.rg-ex { gap: 4px; font-weight: 500; cursor: default; }
+.rg-carte .rg-feuille .rg-ex input { width: 52px; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,.85); font-size: 14px; }
 
 /* boîte de dialogue et aperçu */
 #dialogue { border-radius: 20px; }

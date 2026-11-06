@@ -18,7 +18,7 @@
     if (r.nbExemplairesFdc > 0) cfg.nbExemplairesFdc = r.nbExemplairesFdc;
     cfg.types = RDJ.typesChambres(cfg.typesChambresDefaut, r.typesChambres);
     // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
-    cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, ...(r.impressionNuit || {}) };
+    cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, recap: false, ...(r.impressionNuit || {}) };
     return cfg;
   }
 
@@ -526,6 +526,7 @@
         ...(choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : []),
         ...(choix.pdj ? [RDJ.vues.feuillePdj(ctx)] : []),
         ...(choix.plan ? [RDJ.vues.feuillePlan(ctx)] : []),
+        ...(choix.recap ? [RDJ.vues.feuilleRecap(ctx)] : []),
       ];
       if (!feuilles.length) return notice('Aucune feuille cochée pour les impressions de la nuit (onglet Réglages).', 'alerte');
       imprimer(feuilles);
