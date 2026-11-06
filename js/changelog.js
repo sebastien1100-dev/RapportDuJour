@@ -11,6 +11,7 @@
       changements: [
         ['amelioration', "Cuisson PDJ : le « Complément pour 8h » est retiré, de l'écran de saisie comme de la feuille imprimée. Il reste le nombre de petits déjeuners et le type de clientèle."],
         ['amelioration', "Cuisson PDJ (feuille) : l'encadré « Matin du » en haut à droite est retiré ; la date reste dans « Pour la journée du »."],
+        ['amelioration', "Cuisson PDJ : temps et température ajoutés pour les pains au chocolat (12 min, 180 °C) et le pavé rustique (17 min, 180 °C)."],
       ],
     },
     {

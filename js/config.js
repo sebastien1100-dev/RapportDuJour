@@ -89,10 +89,10 @@
     coefLoisir: 1.25,
     produitsPdj: [
       { id: 'croissant', nom: 'Croissants', groupe: 'cuisson', cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 1 },
-      { id: 'painchoc', nom: 'Pains au chocolat', groupe: 'cuisson', cuisson: '', temp: '', base: 75, coefBusiness: 0.9, facteur: 0.75 },
+      { id: 'painchoc', nom: 'Pains au chocolat', groupe: 'cuisson', cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 0.75 },
       { id: 'baguette', nom: 'Baguette signature', groupe: 'cuisson', cuisson: '10 min', temp: '220 °C', base: 30, coefBusiness: 0.4, facteur: 0.75 },
       { id: 'muesli', nom: 'Pain muesli', groupe: 'cuisson', cuisson: '17 min', temp: '180 °C', base: 4, coefBusiness: 0.75, facteur: 0.75 },
-      { id: 'rustique', nom: 'Pavé rustique', groupe: 'cuisson', cuisson: '', temp: '', base: 4, coefBusiness: 0.75, facteur: 0.75 },
+      { id: 'rustique', nom: 'Pavé rustique', groupe: 'cuisson', cuisson: '17 min', temp: '180 °C', base: 4, coefBusiness: 0.75, facteur: 0.75 },
       { id: 'cake', nom: 'Cake', groupe: 'autre', miseEnPlace: "À décongeler 24h à l'avance", reco: 'Ajuster avec les mises en place de la veille', base: 4, coefBusiness: 0.75, facteur: 0.75 },
       { id: 'brioche', nom: 'Brioche pur beurre', groupe: 'autre', miseEnPlace: '', base: 4, coefBusiness: 0.75, facteur: 0.75 },
       { id: 'jambon', nom: 'Jambon', groupe: 'autre', miseEnPlace: 'En nombre de plats (1 plat = 10 demi-tranches)', base: 1, coefBusiness: 0.75, facteur: 1 },
