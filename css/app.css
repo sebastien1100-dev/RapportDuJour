@@ -277,7 +277,8 @@ button, input, select { font: inherit; }
 .rg-carte > label { margin-bottom: 10px; }
 .rg-carte input { width: 100%; }
 .rg-ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.rg-ligne label small { font-size: 11px; color: var(--doux); margin-left: 4px; }
+.rg-ligne label small { font-size: 11px; color: var(--doux); margin-top: 2px; }
+.rg-ligne label { margin-bottom: 0; }
 .rg-carte p { margin: 0 0 10px; line-height: 1.5; }
 .rg-etat b { color: var(--marine); }
 .rg-carte > label.rg-case {

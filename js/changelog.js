@@ -7,8 +7,9 @@
 
   RDJ.CHANGELOG = [
     {
-      version: '2.9', date: '2026-11-06', titre: 'Sauvegarde hebdomadaire',
+      version: '2.9', date: '2026-11-06', titre: 'Réglages : sauvegarde hebdomadaire',
       changements: [
+        ['amelioration', "Réglages → Hôtel : champs alignés, petite précision sous chaque nombre, et rappel « js/config.js » retiré."],
         ['nouveau', "Réglages → Sauvegarde : case « Sauvegarde hebdomadaire automatique » (décochée par défaut). Cochée, l'application télécharge une sauvegarde à l'ouverture si la dernière date de 7 jours ou plus."],
       ],
     },

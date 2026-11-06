@@ -834,10 +834,9 @@
           <h3>Hôtel</h3>
           <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
           <div class="rg-ligne">
-            <label>Chambres de l'hôtel <small>pour le taux d'occupation</small><input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"></label>
-            <label>Exemplaires de la feuille de chambre<input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}"></label>
+            <label>Chambres de l'hôtel<input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"><small>pour le taux d'occupation</small></label>
+            <label>Exemplaires de la feuille de chambre<input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}"><small>à chaque impression</small></label>
           </div>
-          <p class="aide">Le plan des chambres et les produits de la cuisson PDJ se modifient dans <code>js/config.js</code>.</p>
         </section>
 
         <section class="carte rg-carte">
