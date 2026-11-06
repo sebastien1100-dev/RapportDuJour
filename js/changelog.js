@@ -7,8 +7,10 @@
 
   RDJ.CHANGELOG = [
     {
-      version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée',
+      version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée, impressions de la nuit au choix',
       changements: [
+        ['nouveau', "Réglages → Impressions de la nuit : on coche les feuilles à imprimer d'un clic depuis l'accueil (Rapport du jour, Feuille de chambre, Cuisson PDJ, Plan de chambre). Le nombre d'exemplaires de la feuille de chambre se règle à cet endroit."],
+        ['amelioration', "Accueil : le bandeau « Impressions de la nuit » indique les feuilles choisies (par exemple « Rapport ×1 · feuille de chambre ×5 · cuisson PDJ ×1 »)."],
         ['amelioration', "Cuisson PDJ : le « Complément pour 8h » est retiré, de l'écran de saisie comme de la feuille imprimée. Il reste le nombre de petits déjeuners et le type de clientèle."],
         ['amelioration', "Cuisson PDJ (feuille) : l'encadré « Matin du » en haut à droite est retiré ; la date reste dans « Pour la journée du »."],
         ['amelioration', "Cuisson PDJ : temps et température ajoutés pour les pains au chocolat (12 min, 180 °C) et le pavé rustique (17 min, 180 °C)."],

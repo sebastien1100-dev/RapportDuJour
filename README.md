@@ -9,7 +9,8 @@ Rien à installer, aucune connexion Internet ni macro nécessaire. Fonctionne su
 1. Double-cliquer sur **`index.html`** (ou faire un raccourci vers ce fichier sur le bureau).
 2. **Importer le rapport du jour** : choisir l'export du logiciel hôtelier (.xlsx ou .csv), ou le glisser dans la fenêtre.
 3. Le rapport, la feuille de chambre, la cuisson PDJ et l'historique se mettent à jour et sont enregistrés automatiquement.
-4. Imprimer depuis chaque onglet, ou **Imprimer tout** depuis l'accueil (rapport ×1, feuille de chambre ×5, cuisson PDJ ×1).
+4. Imprimer depuis chaque onglet, ou toutes les feuilles de la nuit d'un clic sur le bandeau **Impressions de la nuit** de l'accueil
+   (par défaut rapport ×1, feuille de chambre ×5, cuisson PDJ ×1 ; feuilles et exemplaires au choix dans Réglages).
    Pour un PDF, choisir l'imprimante « Enregistrer au format PDF ».
 
 Corrections à la main, comme dans Excel :

@@ -487,6 +487,20 @@
 
   /* ================= ÉCRANS ================= */
 
+  // feuilles possibles pour « Imprimer tout » (Réglages → Impressions de la nuit)
+  const FEUILLES_NUIT = [
+    ['rapport', 'Rapport du jour', '1 page'],
+    ['fdc', 'Feuille de chambre', 'une page par exemplaire'],
+    ['pdj', 'Cuisson PDJ', '1 page'],
+    ['plan', 'Plan de chambre', '1 page paysage'],
+  ];
+  /** « Rapport ×1 · feuille de chambre ×5 · … » selon les feuilles cochées ('' si aucune). */
+  function texteImpressionNuit(cfg) {
+    const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1 };
+    const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre' };
+    return FEUILLES_NUIT.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
+  }
+
   V.ecranAccueil = function (ctx) {
     const c = ctx.chiffres;
     const imp = ctx.etat.import;
@@ -564,7 +578,7 @@
       <button type="button" class="acc-imprimer" data-action="imprimer-tout">
         <span class="ai-texte">
           <b>Impressions de la nuit</b>
-          <span>Rapport ×1 · feuille de chambre ×${ctx.cfg.nbExemplairesFdc} · cuisson PDJ ×1</span>
+          <span>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie : voir Réglages')}</span>
         </span>
       </button>
 
@@ -812,7 +826,6 @@
           <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
           <div class="rg-ligne">
             <label>Chambres de l'hôtel<input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"><small>pour le taux d'occupation</small></label>
-            <label>Exemplaires de la feuille de chambre<input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}"><small>à chaque impression</small></label>
           </div>
         </section>
 
@@ -828,6 +841,19 @@
             <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.</small></span></label>
         </section>
       </div>
+
+      <section class="carte rg-carte rg-impressions">
+        <h3>Impressions de la nuit</h3>
+        <p class="aide">Feuilles imprimées par le bandeau « Impressions de la nuit » de l'accueil, dans cet ordre.</p>
+        <div class="rg-feuilles">
+          ${FEUILLES_NUIT.map(([k, lib, detail]) => `
+            <div class="rg-feuille f-${k}${r.impressionNuit[k] ? ' coche' : ''}">
+              <label><input type="checkbox" data-reglage="impression-${k}"${r.impressionNuit[k] ? ' checked' : ''}>
+                <span><b>${esc(lib)}</b><small>${esc(detail)}</small></span></label>
+              ${k === 'fdc' ? `<label class="rg-ex">Exemplaires <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}"></label>` : ''}
+            </div>`).join('')}
+        </div>
+      </section>
 
       ${typesChambresReglages(ctx)}
 

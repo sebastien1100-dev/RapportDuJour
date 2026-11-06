@@ -17,6 +17,8 @@
     if (r.nbChambres > 0) cfg.nbChambres = r.nbChambres;
     if (r.nbExemplairesFdc > 0) cfg.nbExemplairesFdc = r.nbExemplairesFdc;
     cfg.types = RDJ.typesChambres(cfg.typesChambresDefaut, r.typesChambres);
+    // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
+    cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, ...(r.impressionNuit || {}) };
     return cfg;
   }
 
@@ -518,7 +520,15 @@
 
     'imprimer-tout': () => {
       const ctx = contexte();
-      imprimer([RDJ.vues.feuilleRapport(ctx), ...repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc), RDJ.vues.feuillePdj(ctx)]);
+      const choix = ctx.cfg.impressionNuit;
+      const feuilles = [
+        ...(choix.rapport ? [RDJ.vues.feuilleRapport(ctx)] : []),
+        ...(choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : []),
+        ...(choix.pdj ? [RDJ.vues.feuillePdj(ctx)] : []),
+        ...(choix.plan ? [RDJ.vues.feuillePlan(ctx)] : []),
+      ];
+      if (!feuilles.length) return notice('Aucune feuille cochée pour les impressions de la nuit (onglet Réglages).', 'alerte');
+      imprimer(feuilles);
     },
     'apercu-rapport': () => apercu('Rapport du jour', RDJ.vues.feuilleRapport(contexte()), 1),
     'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc); },
@@ -675,6 +685,7 @@
       const k = t.dataset.reglage;
       if (k === 'hotel') etat.reglages.hotel = t.value.trim() || undefined;
       else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
+      else if (k.startsWith('impression-')) etat.reglages.impressionNuit = { ...(etat.reglages.impressionNuit || {}), [k.slice(11)]: t.checked };
       else { const n = parseInt(t.value, 10); etat.reglages[k] = n > 0 ? n : undefined; }
     } else if (t.id === 'fichier-import') {
       const f = t.files[0];
