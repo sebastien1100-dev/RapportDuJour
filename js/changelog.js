@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '2.9', date: '2026-11-06', titre: 'Sauvegarde hebdomadaire',
+      changements: [
+        ['nouveau', "Réglages → Sauvegarde : case « Sauvegarde hebdomadaire automatique » (décochée par défaut). Cochée, l'application télécharge une sauvegarde à l'ouverture si la dernière date de 7 jours ou plus."],
+      ],
+    },
+    {
       version: '2.8', date: '2026-11-06', titre: 'Plan de chambre vierge',
       changements: [
         ['amelioration', "Plan de chambre vierge : le type de chambre (PMR, 1K, 1Q, 2S) apparaît dans les cases dont le type est renseigné dans les Réglages, avec une légende des types en bas de la feuille."],

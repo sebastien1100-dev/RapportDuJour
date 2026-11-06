@@ -280,6 +280,14 @@ button, input, select { font: inherit; }
 .rg-ligne label small { font-size: 11px; color: var(--doux); margin-left: 4px; }
 .rg-carte p { margin: 0 0 10px; line-height: 1.5; }
 .rg-etat b { color: var(--marine); }
+.rg-carte > label.rg-case {
+  display: flex; flex-direction: row; align-items: flex-start; gap: 10px; margin: 14px 0 0; padding: 10px 12px;
+  border: 1px solid var(--bord, #e5e7eb); border-radius: 10px; background: #f8fafb; cursor: pointer;
+}
+.rg-carte .rg-case input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--accent); cursor: pointer; }
+.rg-case span { display: flex; flex-direction: column; gap: 2px; }
+.rg-case b { color: var(--marine); font-size: 13px; }
+.rg-case small { color: var(--doux); font-size: 12px; line-height: 1.4; }
 .rg-carte.danger { border-top-color: var(--rouge); margin-top: 14px; }
 .rg-carte.danger h3 { color: var(--rouge); }
 .reglages .types-ch { margin-bottom: 0; border-top: 4px solid #7b4fc9; }

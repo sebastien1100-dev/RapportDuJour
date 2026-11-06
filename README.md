@@ -32,6 +32,8 @@ Dans le navigateur, sur ce poste (stockage local). Conséquences :
 - **Réglages → Télécharger une sauvegarde** crée un fichier `.json` à garder (clé USB, dossier partagé).
   **Restaurer une sauvegarde** permet de reprendre sur un autre poste. L'accueil rappelle de le faire
   si la dernière sauvegarde date de plus de 7 jours.
+- **Sauvegarde hebdomadaire automatique** (case à cocher dans Réglages, décochée par défaut) : à l'ouverture,
+  une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.
 
 ## Différences avec le classeur Excel
 

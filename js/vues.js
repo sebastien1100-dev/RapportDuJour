@@ -848,6 +848,8 @@
             <button class="btn primaire" data-action="sauvegarder">Télécharger une sauvegarde (.json)</button>
             <button class="btn" data-action="restaurer">Restaurer une sauvegarde…</button>
           </div>
+          <label class="rg-case"><input type="checkbox" data-reglage="sauvegardeHebdo"${ctx.etat.reglages.sauvegardeHebdo ? ' checked' : ''}>
+            <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.</small></span></label>
         </section>
       </div>
 

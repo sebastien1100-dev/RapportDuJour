@@ -681,6 +681,7 @@
     } else if (t.dataset.reglage) {
       const k = t.dataset.reglage;
       if (k === 'hotel') etat.reglages.hotel = t.value.trim() || undefined;
+      else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
       else { const n = parseInt(t.value, 10); etat.reglages[k] = n > 0 ? n : undefined; }
     } else if (t.id === 'fichier-import') {
       const f = t.files[0];
@@ -759,5 +760,19 @@
   window.addEventListener('storage', () => { etat = RDJ.store.charger(); afficher(); });
 
   afficher();
+
+  // Sauvegarde hebdomadaire (Réglages, désactivée par défaut) : à l'ouverture, si la dernière date de 7 jours ou plus
+  function sauvegardeHebdo() {
+    if (!etat.reglages.sauvegardeHebdo || !RDJ.store.disponible) return;
+    if (!etat.recap.length && !etat.import) return;
+    const sauv = etat.derniereSauvegarde;
+    if (sauv && RDJ.ecartJours(RDJ.aujourdhui(), sauv.slice(0, 10)) < 7) return;
+    etat.derniereSauvegarde = RDJ.maintenantLocal();
+    RDJ.store.exporter(etat);
+    enregistrer();
+    afficher();
+    notice('Sauvegarde hebdomadaire téléchargée (dossier Téléchargements).', 'ok');
+  }
+  sauvegardeHebdo();
   if (!RDJ.store.disponible) notice('Le stockage du navigateur est désactivé : les données ne seront pas conservées.', 'erreur');
 })();
