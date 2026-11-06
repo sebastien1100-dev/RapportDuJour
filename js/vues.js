@@ -260,6 +260,8 @@
     const tuiles = [['Départs du jour', compte('depart'), 'depart'], ['Recouches', compte('recouche'), 'recouche'],
       ['Libres', compte('libre'), 'libre'], ['Sales', compte('sale'), 'sale'], ['Hors service', compte('hs'), 'hs']]
       .map(([l, v, k]) => `<div class="pl-tuile"><i class="pl-ech s-${k}"></i><span>${esc(l)}</span><b>${v}</b></div>`).join('');
+    const legendeTypes = ctx.cfg.typesChambre
+      .map((t) => `<span><i class="pl-type t-${esc(t.code)}">${esc(t.code)}</i>${esc(t.code === 'PMR' ? 'Adaptée PMR' : t.nom)}</span>`).join('');
 
     if (vierge) {
       return `
@@ -272,6 +274,10 @@
         <div class="pl-date-vierge">Date : <i></i></div>
       </header>
       <div class="pl-etages">${etages.map(etage).join('')}</div>
+      <footer class="r-legende">
+        <b>Types de chambre :</b>
+        <span class="leg-types">${legendeTypes}</span>
+      </footer>
     </div>`;
     }
 
@@ -291,7 +297,7 @@
         <span><i class="pl-np">€</i>Non payée</span>
         <span><i class="pl-grp">GRP</i>Client d'un groupe</span>
         <span><i class="pl-porte leg">${PORTE_SVG}</i>Porte communicante</span>
-        <span class="leg-types">${ctx.cfg.typesChambre.map((t) => `<span><i class="pl-type t-${esc(t.code)}">${esc(t.code)}</i>${esc(t.code === 'PMR' ? 'Adaptée PMR' : t.nom)}</span>`).join('')}</span>
+        <span class="leg-types">${legendeTypes}</span>
         <span><i class="pl-ech s-recouche aj"></i>Ajoutée à la main</span>
       </footer>
     </div>`;

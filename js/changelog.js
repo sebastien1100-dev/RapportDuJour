@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '2.8', date: '2026-11-06', titre: 'Plan de chambre vierge',
+      changements: [
+        ['amelioration', "Plan de chambre vierge : le type de chambre (PMR, 1K, 1Q, 2S) apparaît dans les cases dont le type est renseigné dans les Réglages, avec une légende des types en bas de la feuille."],
+      ],
+    },
+    {
       version: '2.7', date: '2026-11-05', titre: 'Deux rapports à importer',
       changements: [
         ['nouveau', "Le bouton d'import devient un menu « Importer ▾ » avec deux choix : « Rapport clients présents » (l'export habituel) et « Rapport des soldes » (montant dû des chambres)."],
