@@ -367,11 +367,7 @@
     const q = (p) => RDJ.quantitePdj(p, ctx.pdjNombre, ctx.pdjType, cfg.coefLoisir);
     const cuisson = cfg.produitsPdj.filter((p) => p.groupe === 'cuisson');
     const autres = cfg.produitsPdj.filter((p) => p.groupe !== 'cuisson');
-    const comp = (p) => {
-      const v = ctx.pdjComplements[p.id];
-      return v === undefined || v === null || v === '' ? '' : esc(v);
-    };
-    // cuisson « 12 min » + « 180 °C » réunis dans une pastille ; case vide à remplir si pas de complément
+    // cuisson « 12 min » + « 180 °C » réunis dans une pastille
     const fourneau = (p) => [p.cuisson, p.temp].filter(Boolean).map((t) => `<span>${esc(t)}</span>`).join('') || '<em>—</em>';
     return `
     <div class="feuille portrait pdj">
@@ -391,12 +387,11 @@
 
       <h2 class="p-section"><i>1</i>Produits en cuisson</h2>
       <table class="p-table p-cuisson">
-        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th>Pour 6h30</th><th>Complément pour 8h</th></tr></thead>
+        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th>Pour 6h30</th></tr></thead>
         <tbody>${cuisson.map((p) => `<tr>
           <td class="g">${esc(p.nom)}</td>
           <td class="four">${fourneau(p)}</td>
           <td class="q"><b>${q(p)}</b></td>
-          <td class="q comp">${comp(p) ? `<b>${comp(p)}</b>` : '<i class="a-ecrire"></i>'}</td>
         </tr>`).join('')}</tbody>
       </table>
 
@@ -649,7 +644,6 @@
     </section>`;
 
   V.ecranPdj = (ctx) => {
-    const cuisson = ctx.cfg.produitsPdj.filter((p) => p.groupe === 'cuisson');
     return `
     <section class="ecran">
       ${teteEcran('pdj', 'Cuisson PDJ', 'Matin du ' + esc(titreJour(ctx.mep)),
@@ -673,21 +667,6 @@
           <div class="cs-segments" role="radiogroup" aria-label="Type de clientèle">
             ${[['business', 'Business', 'semaine, travail'], ['loisir', 'Loisir', 'week-end, vacances'], ['mixte', 'Mixte', 'entre les deux']].map(([v, l, d]) => `
               <label class="${v === ctx.pdjType ? 'actif' : ''}"><input type="radio" name="pdj-type" value="${v}" ${v === ctx.pdjType ? 'checked' : ''}><b>${l}</b><small>${d}</small></label>`).join('')}
-          </div>
-        </section>
-
-        <section class="cs-carte cs-complements">
-          <h3>Complément pour 8h <small>à cuire en plus pour la deuxième fournée</small></h3>
-          <div class="cs-produits">
-            ${cuisson.map((p) => `
-              <div class="cs-produit">
-                <span>${esc(p.nom)}</span>
-                <div class="cs-compteur petit">
-                  <button class="cs-pas" data-pas="-1" data-pour='[data-complement="${p.id}"]' aria-label="Un de moins">−</button>
-                  <input type="number" min="0" step="1" placeholder="0" data-complement="${p.id}" value="${esc(ctx.pdjComplements[p.id] ?? '')}" aria-label="${esc(p.nom)}">
-                  <button class="cs-pas" data-pas="1" data-pour='[data-complement="${p.id}"]' aria-label="Un de plus">+</button>
-                </div>
-              </div>`).join('')}
           </div>
         </section>
       </div>

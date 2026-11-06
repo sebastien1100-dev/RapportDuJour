@@ -47,7 +47,6 @@
       pdjManuel,
       pdjNombre: pdjManuel ? etat.pdj.nombre : chiffres.pdj,
       pdjType: etat.pdj.type || 'business',
-      pdjComplements: etat.pdj.nuit === nuit ? etat.pdj.complements || {} : {},
     };
   }
 
@@ -670,12 +669,6 @@
       etat.pdj.nombre = n >= 0 ? n : null;
     } else if (t.id === 'pdj-type' || t.name === 'pdj-type') {
       etat.pdj.type = t.value;
-    } else if (t.dataset.complement) {
-      const ctx = contexte();
-      if (etat.pdj.nuit !== ctx.nuit) { etat.pdj.nuit = ctx.nuit; etat.pdj.complements = {}; }
-      const n = parseInt(t.value, 10);
-      if (n >= 0) etat.pdj.complements[t.dataset.complement] = n;
-      else delete etat.pdj.complements[t.dataset.complement];
     } else if (t.dataset.typeChambre) {
       etat.reglages.typesChambres = { ...(etat.reglages.typesChambres || {}), [t.dataset.typeChambre]: t.value };
     } else if (t.dataset.reglage) {

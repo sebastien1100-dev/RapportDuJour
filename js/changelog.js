@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée',
+      changements: [
+        ['amelioration', "Cuisson PDJ : le « Complément pour 8h » est retiré, de l'écran de saisie comme de la feuille imprimée. Il reste le nombre de petits déjeuners et le type de clientèle."],
+      ],
+    },
+    {
       version: '3.0', date: '2026-11-07', titre: 'Nouveau design : flat et pastel',
       changements: [
         ['amelioration', "Tout l'écran passe en design « flat » : couleurs à plat, sans dégradé, sans ombre ni liseré, coins plus arrondis, fond crème clair."],
