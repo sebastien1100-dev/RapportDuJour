@@ -411,24 +411,51 @@
 
   /* ================= FEUILLE : RÉCAP ================= */
 
+  /** Même présentation que la Cuisson PDJ : en-tête, chiffres encadrés, section numérotée, tableau arrondi.
+      Une seule page A4 : les 31 dernières nuits, la plus récente en haut (tout l'historique : export .csv). */
   V.feuilleRecap = function (ctx) {
-    const lignes = ctx.etat.recap;
+    const MAX = 31;
+    const toutes = ctx.etat.recap;
+    const n = toutes.length;
+    const lignes = toutes.slice(-MAX).reverse();
     const sources = RDJ.colonnesSourcesRecap(ctx.cfg.sourcesReservation, lignes);
-    const nbCol = 8 + sources.length;
-    const cellSrc = (l) => sources.map((s) => `<td class="srcv">${l.sources ? (l.sources[s.code] || 0) : '—'}</td>`).join('');
+    const moy = (f) => (lignes.length ? lignes.reduce((s, l) => s + (f(l) || 0), 0) / lignes.length : 0);
+    const arrondi = (x) => Math.round(x).toLocaleString('fr-FR');
+    const periode = lignes.length
+      ? (lignes.length > 1 ? 'du ' + RDJ.dateFr(lignes[lignes.length - 1].date) + ' au ' + RDJ.dateFr(lignes[0].date) : 'le ' + RDJ.dateFr(lignes[0].date))
+      : '—';
+    const nbCol = 7 + sources.length;
+    const cellSrc = (l) => sources.map((s) => `<td class="src">${l.sources ? (l.sources[s.code] || 0) : '—'}</td>`).join('');
     return `
     <div class="feuille portrait recap">
-      <h1>HISTORIQUE DES NUITS</h1>
-      <div class="sous">${esc(ctx.cfg.hotel)}  ·  une ligne par nuit importée  ·  « — » : source non enregistrée pour cette nuit</div>
-      <table class="t-recap">
-        <thead>
-          <tr><th rowspan="2">Nuit du</th><th rowspan="2">Jour</th><th rowspan="2">Chambres occupées</th><th rowspan="2">Clients</th><th rowspan="2">Départ</th><th rowspan="2">Recouches</th><th rowspan="2">Petits déj. (couverts)</th><th rowspan="2">Taux d'occupation</th>
-            <th colspan="${sources.length}" class="grp-src">Chambres par source</th></tr>
-          <tr>${sources.map((s) => `<th class="srch">${esc(s.nom)}</th>`).join('')}</tr>
-        </thead>
-        <tbody>${lignes.length ? lignes.map((l) => `<tr><td>${esc(RDJ.dateFr(l.date))}</td><td>${esc(l.jour)}</td><td>${l.chambres}</td><td>${l.clients}</td><td>${l.departs}</td><td>${l.recouches}</td><td>${l.pdj}</td><td>${pct(l.taux)}</td>${cellSrc(l)}</tr>`).join('')
-          : `<tr><td colspan="${nbCol}" class="vide">Aucune journée enregistrée.</td></tr>`}</tbody>
+      <header class="p-tete">
+        <div>
+          <h1>HISTORIQUE DES NUITS</h1>
+          <div class="sous">${esc(ctx.cfg.hotel)}</div>
+        </div>
+      </header>
+
+      <div class="p-entree">
+        <div class="p-chiffre"><span>Nuits sur cette feuille</span><b>${lignes.length}</b><small>${n > MAX ? 'sur ' + n + ' enregistrées' : 'nuits'}</small></div>
+        <div><span>Taux d'occupation moyen</span><b>${pct(moy((l) => l.taux))}</b></div>
+        <div><span>Période</span><b class="petit">${esc(periode)}</b></div>
+      </div>
+
+      <h2 class="p-section"><i>1</i>Nuit par nuit <small>la plus récente en haut</small></h2>
+      <table class="p-table h-nuits">
+        <thead><tr><th class="g">Nuit du</th><th>Chambres</th><th>Clients</th><th>Départs</th><th>Recouches</th><th>PDJ</th><th>Occupation</th>
+          ${sources.map((s) => `<th class="src">${esc(s.code.slice(0, 5))}</th>`).join('')}</tr></thead>
+        <tbody>${lignes.length ? lignes.map((l) => `<tr>
+          <td class="g">${esc(maj(l.jour.slice(0, 3)))}. ${esc(RDJ.dateFr(l.date))}</td>
+          <td>${l.chambres}</td><td>${l.clients}</td><td>${l.departs}</td><td>${l.recouches}</td><td>${l.pdj}</td>
+          <td class="taux"><b>${pct(l.taux)}</b></td>${cellSrc(l)}
+        </tr>`).join('') : `<tr><td colspan="${nbCol}" class="vide">Aucune nuit enregistrée.</td></tr>`}</tbody>
+        ${lignes.length > 1 ? `<tfoot><tr><td class="g">Moyenne</td><td>${arrondi(moy((l) => l.chambres))}</td><td>${arrondi(moy((l) => l.clients))}</td>
+          <td>${arrondi(moy((l) => l.departs))}</td><td>${arrondi(moy((l) => l.recouches))}</td><td>${arrondi(moy((l) => l.pdj))}</td>
+          <td class="taux"><b>${pct(moy((l) => l.taux))}</b></td>${sources.map(() => '<td></td>').join('')}</tr></tfoot>` : ''}
       </table>
+      <p class="p-pied">Une ligne par nuit importée. Chambres par source de réservation : ${sources.map((s) => esc(s.code.slice(0, 5)) + ' = ' + esc(s.nom)).join(', ')} (« — » : non enregistrée cette nuit-là).
+        ${n > MAX ? 'Les nuits plus anciennes sont dans l\'export pour Excel (.csv).' : ''}</p>
     </div>`;
   };
 

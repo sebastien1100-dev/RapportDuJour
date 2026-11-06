@@ -10,6 +10,7 @@
       version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée, impressions de la nuit au choix',
       changements: [
         ['nouveau', "Réglages → Impressions de la nuit : on coche les feuilles à imprimer d'un clic depuis l'accueil (Rapport du jour, Feuille de chambre, Cuisson PDJ, Plan de chambre, Historique), en petites pastilles. Le nombre d'exemplaires de la feuille de chambre se règle à côté de sa pastille."],
+        ['amelioration', "Historique (feuille imprimée) : même présentation que la Cuisson PDJ (en-tête, trois chiffres encadrés : nuits, taux d'occupation moyen, période ; section numérotée ; tableau arrondi). La nuit la plus récente en haut, ligne « Moyenne » en bas, sources en abrégé avec leur légende. Tient sur une page A4 : les 31 dernières nuits (tout l'historique reste dans l'export .csv)."],
         ['amelioration', "Accueil : le bandeau « Impressions de la nuit » indique les feuilles choisies (par exemple « Rapport ×1 · feuille de chambre ×5 · cuisson PDJ ×1 »)."],
         ['amelioration', "Cuisson PDJ : le « Complément pour 8h » est retiré, de l'écran de saisie comme de la feuille imprimée. Il reste le nombre de petits déjeuners et le type de clientèle."],
         ['amelioration', "Cuisson PDJ (feuille) : l'encadré « Matin du » en haut à droite est retiré ; la date reste dans « Pour la journée du »."],

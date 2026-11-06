@@ -1035,18 +1035,20 @@ body.depot .voile-depot { display: grid; }
 .nb .p-note h3 { color: #000; }
 
 /* Récap */
-.t-recap { width: 100%; border-collapse: collapse; margin-top: 5mm; font-size: 9.5pt; }
-.t-recap th { background: var(--marine); color: #fff; padding: 1.5mm; font-size: 8.5pt; }
-.t-recap td { border: .3mm solid #999; padding: 1.2mm; text-align: center; }
-.t-recap tbody tr:nth-child(even) td { background: #f5f6f8; }
-.t-recap td.vide { color: #777; padding: 6mm; }
-.t-recap thead { display: table-header-group; }
-.t-recap { font-size: 8.5pt; }
-.t-recap th { font-size: 7.5pt; }
-.t-recap th.grp-src { border-bottom: .3mm solid #fff; }
-.t-recap th.srch { font-size: 7pt; }
-.t-recap td.srcv { background: #f7fbfa; }
-.nb .t-recap td.srcv { background: #fff; }
+/* Historique (feuille) : même style que la Cuisson PDJ, tableau plus serré pour 31 nuits sur une page */
+.recap .p-entree b.petit { font-size: 12pt; }
+.p-section small { font-size: 8pt; text-transform: none; letter-spacing: 0; color: #555; font-weight: 400; margin-left: 1mm; }
+.p-table.h-nuits { font-size: 9pt; margin-bottom: 3mm; }
+.p-table.h-nuits th { padding: 1.6mm 1.2mm; font-size: 7.5pt; }
+.p-table.h-nuits td { padding: .9mm 1.5mm; }
+.p-table.h-nuits td.g { font-size: 9pt; white-space: nowrap; }
+.p-table.h-nuits td.taux b { color: var(--marine); }
+.p-table.h-nuits .src { font-size: 8pt; color: #444; padding-left: .8mm; padding-right: .8mm; }
+.p-table.h-nuits th.src { color: #fff; font-size: 7pt; }
+.p-table.h-nuits td.vide { padding: 8mm; color: #777; }
+.p-table.h-nuits tfoot td { border-top: .5mm solid var(--marine); background: var(--marine-clair); font-weight: 700; }
+.nb .p-table.h-nuits tfoot td { border-top-color: #000; background: #fff; }
+.nb .p-table.h-nuits .src, .nb .p-section small { color: #000; }
 
 /* ====== Impression ====== */
 #impression { display: none; }
@@ -1071,10 +1073,10 @@ body.depot .voile-depot { display: grid; }
 .nb .feuille { --accent: #000; --marine: #000; --marine-clair: #fff; color: #000; }
 .nb .feuille .sous, .nb .r-import, .nb .p-pied, .nb .f-titre div { color: #000; }
 .nb .r-tuile, .nb .p-entree div, .nb .p-note { background: #fff; border: .3mm solid #000; }
-.nb .r-table th, .nb .p-table th, .nb .t-recap th {
+.nb .r-table th, .nb .p-table th {
   background: #fff; color: #000; border: .25mm solid #000; border-bottom-width: .6mm; font-weight: 700;
 }
-.nb .r-table td, .nb .p-table td, .nb .t-recap td, .nb .r-legende .ech { border-color: #555; }
+.nb .r-table td, .nb .p-table td, .nb .r-legende .ech { border-color: #555; }
 /* Rapport : un seul gris (départ) et du noir plein (non payée) pour qu'on ne les confonde pas */
 .nb .r-table tr.dep td, .nb .r-legende .ech.dep { background: #d0d0d0; }
 .nb .r-table tr td.np, .nb .r-legende .ech.np { background: #000; color: #fff; }
@@ -1103,7 +1105,6 @@ body.depot .voile-depot { display: grid; }
 .nb .r-encaisser h3 small, .nb .r-encaisser .aucune { color: #000; }
 .nb .r-tete, .nb .p-tete { border-bottom-color: #000; }
 .nb .f-grille td.corrige { background: none; }
-.nb .t-recap tbody tr:nth-child(even) td { background: #f2f2f2; }
 
 @media (max-width: 720px) {
   #vue { padding: 12px; }
