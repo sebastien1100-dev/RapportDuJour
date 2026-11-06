@@ -376,7 +376,6 @@
           <h1>CUISSON PDJ</h1>
           <div class="sous">${esc(cfg.hotel)}</div>
         </div>
-        <div class="p-date"><span>Matin du</span><b>${esc(maj(titreJour(ctx.mep)))}</b></div>
       </header>
 
       <div class="p-entree">

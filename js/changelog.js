@@ -10,6 +10,7 @@
       version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée',
       changements: [
         ['amelioration', "Cuisson PDJ : le « Complément pour 8h » est retiré, de l'écran de saisie comme de la feuille imprimée. Il reste le nombre de petits déjeuners et le type de clientèle."],
+        ['amelioration', "Cuisson PDJ (feuille) : l'encadré « Matin du » en haut à droite est retiré ; la date reste dans « Pour la journée du »."],
       ],
     },
     {
