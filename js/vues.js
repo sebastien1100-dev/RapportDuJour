@@ -800,7 +800,7 @@
     const sans = etages.flatMap((e) => RDJ.chambresEtage(e)).filter((n) => !t[n]).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
     // repliée par défaut : on modifie rarement les types ; ouverte, une ligne par étage
     return `
-      <details class="carte types-ch"${sans.length ? '' : ''}>
+      <details class="carte types-ch"${V.typesOuvert ? ' open' : ''}>
         <summary>
           <b>Types de chambre</b>
           <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans">sans type ${sans.length} : ${esc(sans.join(', '))}</span>` : ''}</span>

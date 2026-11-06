@@ -756,6 +756,11 @@
   });
   document.addEventListener('scroll', () => { bulle.hidden = true; caseSurvolee = null; }, true);
 
+  // Réglages : la carte « Types de chambre » reste ouverte après une modification (on la referme à la main)
+  document.addEventListener('toggle', (ev) => {
+    if (ev.target.classList && ev.target.classList.contains('types-ch')) RDJ.vues.typesOuvert = ev.target.open;
+  }, true);
+
   // Synchronisation si l'application est ouverte dans deux onglets
   window.addEventListener('storage', () => { etat = RDJ.store.charger(); afficher(); });
 
