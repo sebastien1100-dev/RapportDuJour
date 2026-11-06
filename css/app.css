@@ -246,9 +246,7 @@ button, input, select { font: inherit; }
 .acc-imprimer:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
 .acc-imprimer .ai-texte { display: flex; flex-direction: column; gap: 2px; }
 .acc-imprimer b { font-size: 15px; }
-.acc-imprimer .ai-texte span { font-size: 13px; color: #d9f2ee; }
-.acc-imprimer .btn.primaire { background: #fff; border-color: #fff; color: var(--accent); pointer-events: none; }
-@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
+.acc-imprimer .ai-texte span { font-size: 13px; color: #d9f2ee; }@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-imports, .acc-chiffres { grid-template-columns: 1fr; } }
 
 /* En-tête commun des onglets (titre + nuit + aide à gauche, boutons à droite) */

@@ -572,7 +572,6 @@
           <b>Impressions de la nuit</b>
           <span>Rapport ×1 · feuille de chambre ×${ctx.cfg.nbExemplairesFdc} · cuisson PDJ ×1</span>
         </span>
-        <span class="btn primaire">Imprimer tout</span>
       </button>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
