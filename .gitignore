@@ -12,6 +12,9 @@ tests/fixtures/*.csv
 RapportDuJour_sauvegarde_*.json
 *.json
 
+# Paquets de l'application à déployer (refaits à la demande)
+*.zip
+
 # Fichiers temporaires
 *.tmp
 Thumbs.db
