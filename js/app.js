@@ -84,7 +84,8 @@
   /* ---------- Taille des feuilles à l'écran ----------
      Les feuilles ont la taille d'un A4 (en mm). À l'écran on les agrandit ou réduit selon la fenêtre
      (portable, Full HD, ultra-large) ; l'impression n'est pas concernée.
-     ajuster : page paysage entière visible (largeur et hauteur), page portrait à la largeur (max 150 %)
+     ajuster : page paysage entière visible (largeur et hauteur) mais au moins 2/3 de la largeur de la fenêtre,
+               page portrait à la largeur (max 150 %)
      largeur : toute la largeur de la fenêtre · 100 : taille réelle */
   const MODES_AFFICHAGE = [['ajuster', 'Ajuster à la fenêtre'], ['largeur', 'Toute la largeur'], ['100', 'Taille réelle (100 %)']];
   function modeAffichage() {
@@ -113,7 +114,9 @@
       const haut = p.getBoundingClientRect().top + window.scrollY;
       const hauteur = Math.max(300, window.innerHeight - haut - 24 - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / f.offsetHeight;
       const paysage = f.classList.contains('paysage');
-      let z = mode === 'largeur' ? largeur : paysage ? Math.min(largeur, hauteur) : Math.min(largeur, 1.5);
+      // page paysage : au moins les deux tiers de la fenêtre en largeur, quitte à défiler un peu
+      const deuxTiers = (window.innerWidth * 2 / 3) / f.offsetWidth;
+      let z = mode === 'largeur' ? largeur : paysage ? Math.min(largeur, Math.max(hauteur, deuxTiers)) : Math.min(largeur, 1.5);
       z = Math.max(0.5, Math.min(z, 3));
       f.style.zoom = z.toFixed(3);
     });

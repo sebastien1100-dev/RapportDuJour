@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.4', date: '2026-11-09', titre: 'Feuilles plus grandes à l\'écran',
+      changements: [
+        ['amelioration', "Rapport, Femme de chambre et Plan de chambre : en « Ajuster à la fenêtre », la feuille prend au moins les deux tiers de la largeur de l'écran (sur un écran Full HD, elle était à peine plus large que la moitié). Si elle dépasse en hauteur, on fait défiler la page."],
+      ],
+    },
+    {
       version: '3.3', date: '2026-11-08', titre: 'Plan de chambre fidèle au plan de la réception',
       changements: [
         ['correction', "Plan de chambre : chambres placées comme sur le plan affiché à la réception. 2e étage : 258 à 265 puis 266 à 271 côté rue, 216 à 223 puis 224 à 229 côté parking. 1er étage : 107 à 115 de gauche à droite côté parking. RDC : 006 côté rue avant l'appartement, 005 côté parking, appartement de fonction sur les deux rangées, TGBT après la 049 et local RDC à côté de la 001."],
