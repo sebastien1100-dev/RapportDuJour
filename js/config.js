@@ -51,7 +51,15 @@
       { code: '1Q', nom: '1 lit queen size' },
       { code: '2S', nom: '2 lits simples' },
     ],
-    typesChambresDefaut: { '001': 'PMR', '002': 'PMR', '003': 'PMR' },
+    // relevé sur l'écran « Statut chambre » (catégories BSTD-1Q, BSTD-2S, PSUP-1K) ; 001 à 003 adaptées PMR
+    typesChambresDefaut: Object.fromEntries(Object.entries({
+      PMR: '001 002 003',
+      '1K': '258 259 260 261 262 263 264 265 378 379 380 381 382 383 384 385',
+      '2S': '005 006 045 047 049 111 153 217 229 267 334 340 342 376',
+      '1Q': '004 046 048 107 108 109 110 112 114 115 150 151 152 154 155 156 157 '
+        + '216 218 219 220 221 222 223 224 225 226 227 228 266 268 269 270 271 '
+        + '330 333 335 336 337 338 339 341 343 372 373 374 375 377',
+    }).flatMap(([type, nos]) => nos.split(' ').map((no) => [no, type]))),
 
     /* Plan de chambre : disposition réelle des étages, de gauche à droite.
        Une aile = un couloir avec une rangée en haut et une en bas (+ libellé de chaque côté).

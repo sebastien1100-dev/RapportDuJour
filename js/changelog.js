@@ -11,6 +11,7 @@
       changements: [
         ['correction', "Plan de chambre : chambres placées comme sur le plan affiché à la réception. 2e étage : 258 à 265 puis 266 à 271 côté rue, 216 à 223 puis 224 à 229 côté parking. 1er étage : 107 à 115 de gauche à droite côté parking. RDC : 006 côté rue avant l'appartement, 005 côté parking, appartement de fonction sur les deux rangées, TGBT après la 049 et local RDC à côté de la 001."],
         ['nouveau', "Plan de chambre : à droite de l'escalier, « Accueil / Restaurant » au RDC et, au 1er étage, « Local technique » puis « Combles », dessinés sur toute la hauteur de l'étage."],
+        ['nouveau', "Types de chambre remplis pour les 81 chambres, d'après l'écran « Statut chambre » : 1K (258 à 265, 378 à 385), 2S (14 chambres), 1Q pour les autres, PMR pour 001 à 003. Un type changé dans Réglages reste prioritaire."],
         ['amelioration', "Plan de chambre : côté parking renommé « Côté McDonald's / parking »."],
       ],
     },
