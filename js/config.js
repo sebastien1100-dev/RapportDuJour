@@ -69,21 +69,21 @@
     // local technique (non dessiné ici), puis l'aile droite
     dispositionEtages: {
       0: [
-        { hautLib: 'Côté bâtiment / rue', haut: ['006', { local: 'Appart. de fonction', largeur: 1, petit: true }, '045', '046', '047', '048', '049', { local: 'TGBT', largeur: 1, petit: true }, CAGE],
+        { hautLib: 'Côté rue', haut: ['006', { local: 'Appart. de fonction', largeur: 1, petit: true }, '045', '046', '047', '048', '049', { local: 'TGBT', largeur: 1, petit: true }, CAGE],
           basLib: "Côté McDonald's / parking", bas: ['005', { local: 'Appart. de fonction', largeur: 2, petit: true }, '004', '003', '002', '001', { local: 'Local RDC', largeur: 1, petit: true }, CAGE],
           droite: [{ local: 'Accueil / Restaurant', largeur: 6 }] },
       ],
       1: [
-        { hautLib: 'Côté bâtiment / rue', haut: [...serie(150, 157).reverse(), CAGE],
+        { hautLib: 'Côté rue', haut: [...serie(150, 157).reverse(), CAGE],
           basLib: "Côté McDonald's / parking", bas: [...serie(107, 112), '114', '115', CAGE],
           droite: [{ local: 'Local technique', largeur: 2 }, { local: 'Combles', largeur: 4 }] },
       ],
       2: [
-        { hautLib: 'Côté bâtiment / rue', haut: [...serie(258, 265), CAGE, ...serie(266, 271)],
+        { hautLib: 'Côté rue', haut: [...serie(258, 265), CAGE, ...serie(266, 271)],
           basLib: "Côté McDonald's / parking", bas: [...serie(216, 223), CAGE, ...serie(224, 229)] },
       ],
       3: [
-        { hautLib: 'Côté bâtiment / rue', haut: [...serie(378, 385).reverse(), CAGE, ...serie(372, 377).reverse()],
+        { hautLib: 'Côté rue', haut: [...serie(378, 385).reverse(), CAGE, ...serie(372, 377).reverse()],
           basLib: "Côté McDonald's / parking", bas: [...serie(336, 343).reverse(), CAGE, '335', '334', '333', { local: 'Bureau de direction', detail: '331 · 332', largeur: 2 }, '330'] },
       ],
     },
