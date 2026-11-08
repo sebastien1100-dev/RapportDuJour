@@ -559,7 +559,7 @@
 
     return `
     <section class="ecran accueil">
-      <header class="hero ${niveauTaux(c.taux)}">
+      <header class="hero ${imp ? niveauTaux(c.taux) : 'attente'}">
         <div class="hero-texte">
           <div class="hero-hotel">${esc(ctx.cfg.hotel)}</div>
           <h1 class="hero-date">${esc(maj(RDJ.dateLongue(demain)))}</h1>
@@ -578,7 +578,7 @@
             <circle cx="60" cy="60" r="52" class="anneau-val" stroke-dasharray="${(taux * CIRC).toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(-90 60 60)"></circle>
           </svg>
           <div class="anneau-texte"><b>${pct(c.taux)}</b><span>${c.chambres} / ${ctx.cfg.nbChambres} ch.</span></div>
-          <div class="anneau-lib">Occupation ${{ haut: 'forte', moyen: 'moyenne', bas: 'faible' }[niveauTaux(c.taux)]}</div>
+          <div class="anneau-lib">${imp ? 'Occupation ' + { haut: 'forte', moyen: 'moyenne', bas: 'faible' }[niveauTaux(c.taux)] : 'En attente'}</div>
         </div>
       </header>
 
@@ -608,6 +608,7 @@
           <b>Impressions de la nuit</b>
           <span>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie : voir Réglages')}</span>
         </span>
+        <span class="ai-bouton">Tout imprimer</span>
       </button>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
@@ -751,7 +752,7 @@
     <section class="ecran historique">
       ${teteEcran('historique', 'Historique', n ? n + ' nuit' + (n > 1 ? 's' : '') + ' enregistrée' + (n > 1 ? 's' : '') : 'Aucune nuit enregistrée',
         'Une ligne par nuit, ajoutée ou mise à jour à chaque import.', `
-        <button class="btn primaire" data-action="apercu-recap">Imprimer l'historique</button>
+        <button class="btn primaire" data-action="apercu-recap" ${n ? '' : 'disabled'}>Imprimer l'historique</button>
         <button class="btn" data-action="recap-csv" ${n ? '' : 'disabled'}>Exporter pour Excel (.csv)</button>`)}
 
       ${n ? `
@@ -823,7 +824,7 @@
       <details class="carte types-ch"${V.typesOuvert ? ' open' : ''}>
         <summary>
           <b>Types de chambre</b>
-          <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans">sans type ${sans.length} : ${esc(sans.join(', '))}</span>` : ''}</span>
+          <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans" title="${esc(sans.join(', '))}">${sans.length} chambre${sans.length > 1 ? 's' : ''} sans type</span>` : ''}</span>
           <span class="tc-ouvrir">Modifier</span>
         </summary>
         <div class="tc-etages">

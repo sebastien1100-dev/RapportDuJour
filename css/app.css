@@ -715,6 +715,76 @@ body.depot .voile-depot { display: grid; }
 #dialogue { border-radius: 20px; }
 .apercu-barre { box-shadow: none; }
 
+/* ====== Retouches de l'audit (v3.2) : sens des couleurs, largeurs, états des boutons ====== */
+:root {
+  --perle: #e6ebf3;   --perle-fonce: #3d4a63;   /* neutre bleuté : change log, bandeau des impressions */
+  --sauge-net: #dfe7da;                         /* sauge plus marqué, lisible sur le fond crème */
+  --largeur: 1180px;
+}
+@media (min-width: 1800px) { :root { --largeur: 1400px; } }
+@media (min-width: 2600px) { :root { --largeur: 1680px; } }
+
+/* le rose est réservé aux alertes : le Rapport passe en pêche, le Change log en perle */
+.et-rapport { background: var(--peche); }        .et-rapport .et-sous { color: var(--peche-fonce); }
+.acc-groupe.g-rapport { background: var(--peche); } .acc-groupe.g-rapport .acc-groupe-titre { color: var(--peche-fonce); }
+.rg-feuille.f-rapport.coche { background: var(--peche); }
+.et-changelog { background: var(--perle); }      .et-changelog .et-sous { color: var(--perle-fonce); }
+.cl-repere span { background: var(--perle); color: var(--perle-fonce); }
+.et-reglages { background: var(--sauge-net); }
+
+/* onglets à feuille : en-tête et messages à la même largeur que les autres onglets, seule la feuille s'élargit */
+.ecran:has(.papier) > :not(.papier) { max-width: var(--largeur); margin-left: auto; margin-right: auto; }
+.ecran:has(.papier) > .ecran-tete { margin-bottom: 16px; }
+
+/* accueil : anneau neutre tant que rien n'est importé */
+.hero.attente { --anneau: #c9d3e0; }
+/* accueil : « Petits déjeuners » sur une ligne */
+.acc-chiffres { grid-template-columns: 2fr 2fr 1.3fr 2fr; }
+.acc-groupe-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 720px) { .acc-chiffres { grid-template-columns: 1fr; } }
+
+/* accueil : bandeau des impressions en pastel, avec un vrai bouton */
+.acc-imprimer { background: var(--perle); color: var(--marine); }
+.acc-imprimer:hover { background: #dbe2ee; }
+.acc-imprimer .ai-texte span { color: var(--perle-fonce); }
+.acc-imprimer .ai-bouton {
+  flex: none; padding: 9px 16px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
+  transition: background .15s;
+}
+.acc-imprimer:hover .ai-bouton { background: var(--accent-fonce); }
+.acc-imprimer:focus-visible { outline-color: #7fe3cf; }
+
+/* réglages : chambres sans type en pastille, au lieu d'une liste rouge */
+.types-ch .tc-sans {
+  display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px;
+  background: var(--rose); color: var(--rose-fonce); font-weight: 600; font-size: 12px;
+}
+
+/* boutons désactivés : contour pointillé, texte lisible */
+.btn:disabled, .btn:disabled:hover, .ecran-tete .btn:disabled {
+  opacity: 1; background: transparent; color: #8a93a3; border: 1.5px dashed #c9cfda; padding: 7.5px 14.5px; cursor: not-allowed;
+}
+
+/* réponse immédiate à l'appui, anneau visible au clavier */
+.btn, #onglets button, .acc-groupe, .acc-imprimer, .pastille.bouton, .cs-pas, .cs-segments label { transition: background .15s, transform .1s ease-out, filter .15s; }
+.btn:active:not(:disabled), #onglets button:active, .acc-imprimer:active, .pastille.bouton:active, .cs-pas:active { transform: scale(.97); }
+.acc-groupe:active { transform: scale(.98); }
+:focus-visible { outline: 3px solid #7fe3cf; outline-offset: 2px; }
+.btn:focus:not(:focus-visible), #onglets button:focus:not(:focus-visible) { outline: none; }
+
+/* barre du haut translucide : le contenu défile dessous */
+.barre { background: rgba(255,255,255,.78); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); }
+
+/* préférences du système */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .acc-groupe:hover, .btn:active, .acc-groupe:active { transform: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .barre { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
 /* ====== Feuilles imprimables (mm) ====== */
 .feuille {
   background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 9pt;

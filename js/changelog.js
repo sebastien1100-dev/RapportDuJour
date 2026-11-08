@@ -7,6 +7,18 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.2', date: '2026-11-08', titre: 'Retouches du design : couleurs plus claires à lire, boutons plus vivants',
+      changements: [
+        ['amelioration', "Le rose est réservé aux alertes : l'onglet Rapport (et la carte Paiements de l'accueil) passe en pêche, le Change log en bleu perle, les Réglages en sauge plus marqué."],
+        ['amelioration', "Accueil : tant que rien n'est importé, l'anneau reste neutre et affiche « En attente » au lieu de « Occupation faible »."],
+        ['amelioration', "Accueil : le bandeau « Impressions de la nuit » passe en pastel avec un bouton « Tout imprimer » bien visible ; « Petits déjeuners » tient sur une ligne."],
+        ['amelioration', "Réglages : les chambres sans type sont résumées dans une pastille (« 78 chambres sans type », liste au survol)."],
+        ['amelioration', "Rapport, Femme de chambre, Plan et Cuisson PDJ : l'en-tête a la même largeur que dans les autres onglets ; seule la feuille s'élargit."],
+        ['amelioration', "Boutons : ils s'enfoncent légèrement au clic, un anneau vert clair montre le bouton choisi au clavier, les boutons indisponibles ont un contour pointillé lisible. « Imprimer l'historique » est indisponible tant qu'aucune nuit n'est enregistrée."],
+        ['amelioration', "Barre du haut translucide : la page défile dessous. Les animations s'arrêtent si l'ordinateur demande de réduire les animations."],
+      ],
+    },
+    {
       version: '3.1', date: '2026-11-07', titre: 'Cuisson PDJ allégée, impressions de la nuit au choix',
       changements: [
         ['nouveau', "Réglages → Impressions de la nuit : on coche les feuilles à imprimer d'un clic depuis l'accueil (Rapport du jour, Feuille de chambre, Cuisson PDJ, Plan de chambre, Historique), en petites pastilles. Le nombre d'exemplaires de la feuille de chambre se règle à côté de sa pastille."],
