@@ -962,6 +962,10 @@ body.depot .voile-depot { display: grid; }
   background: #d1d5db; border-color: #9ca3af; color: #4b5563;
 }
 .pl-local b { font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; }
+/* locaux sur toute la hauteur de l'étage, à droite de la cage (accueil, combles…) */
+.pl-zone { display: grid; grid-template-columns: repeat(var(--cols), 17.8mm); gap: .8mm; padding: .8mm; border: .3mm solid #9aa7b5; border-radius: 1mm; background: #fff; }
+.pl-zone .pl-local { height: auto; }
+.nb .pl-zone { border-color: #000; }
 .pl-local span { font-size: 6pt; opacity: .8; }
 .pl-local.petit { gap: .2mm; padding: .5mm .6mm; }
 .pl-local.petit b { font-size: 6pt; letter-spacing: 0; line-height: 1.15; }

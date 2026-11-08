@@ -7,6 +7,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.3', date: '2026-11-08', titre: 'Plan de chambre fidèle au plan de la réception',
+      changements: [
+        ['correction', "Plan de chambre : chambres placées comme sur le plan affiché à la réception. 2e étage : 258 à 265 puis 266 à 271 côté rue, 216 à 223 puis 224 à 229 côté parking. 1er étage : 107 à 115 de gauche à droite côté parking. RDC : 006 côté rue avant l'appartement, 005 côté parking, appartement de fonction sur les deux rangées, TGBT après la 049 et local RDC à côté de la 001."],
+        ['nouveau', "Plan de chambre : à droite de l'escalier, « Accueil / Restaurant » au RDC et, au 1er étage, « Local technique » puis « Combles », dessinés sur toute la hauteur de l'étage."],
+        ['amelioration', "Plan de chambre : côtés renommés « Côté bâtiment / rue » et « Côté McDonald's / parking »."],
+      ],
+    },
+    {
       version: '3.2', date: '2026-11-08', titre: 'Retouches du design : couleurs plus claires à lire, boutons plus vivants',
       changements: [
         ['amelioration', "Le rose est réservé aux alertes : l'onglet Rapport (et la carte Paiements de l'accueil) passe en pêche, le Change log en bleu perle, les Réglages en sauge plus marqué."],

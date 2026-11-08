@@ -59,28 +59,32 @@
        Un local qui n'est pas une chambre : { local: 'Nom', detail: 'texte', largeur: nb de cases }.
        couloirsExterieurs : chambres dos à dos, chaque rangée ouvre sur une coursive extérieure.
        CAGE : emplacement de la cage d'escalier et de l'ascenseur, à la même place sur tous les
-       étages (après colonnesAvantCage cases depuis la gauche). */
+       étages (après colonnesAvantCage cases depuis la gauche).
+       droite : locaux dessinés sur toute la hauteur de l'étage, à droite de la cage. */
     couloirsExterieurs: true,
     colonnesAvantCage: 8,
     // paires de chambres reliées par une porte intérieure
     chambresCommunicantes: [['003', '004']],
+    // relevé sur le plan affiché à la réception : escalier de secours à gauche, 8 cases, cage,
+    // local technique (non dessiné ici), puis l'aile droite
     dispositionEtages: {
       0: [
-        { hautLib: 'Côté rue', haut: ['045', '046', '047', '048', '049', CAGE],
-          basLib: 'Côté Mac Donald', bas: ['006', { local: 'Appart. de fonction', largeur: 1, petit: true }, '005', '004', '003', '002', '001', CAGE] },
+        { hautLib: 'Côté bâtiment / rue', haut: ['006', { local: 'Appart. de fonction', largeur: 1, petit: true }, '045', '046', '047', '048', '049', { local: 'TGBT', largeur: 1, petit: true }, CAGE],
+          basLib: "Côté McDonald's / parking", bas: ['005', { local: 'Appart. de fonction', largeur: 2, petit: true }, '004', '003', '002', '001', { local: 'Local RDC', largeur: 1, petit: true }, CAGE],
+          droite: [{ local: 'Accueil / Restaurant', largeur: 6 }] },
       ],
       1: [
-        { hautLib: 'Côté rue', haut: ['157', '156', '155', '154', '153', '152', '151', '150', CAGE],
-          basLib: 'Côté Mac Donald', bas: ['115', '114', '112', '111', '110', '109', '108', '107', CAGE] },
+        { hautLib: 'Côté bâtiment / rue', haut: [...serie(150, 157).reverse(), CAGE],
+          basLib: "Côté McDonald's / parking", bas: [...serie(107, 112), '114', '115', CAGE],
+          droite: [{ local: 'Local technique', largeur: 2 }, { local: 'Combles', largeur: 4 }] },
       ],
-      // 2e et 3e : ordre de gauche à droite décroissant, cage au milieu (croquis)
       2: [
-        { hautLib: 'Côté rue', haut: [...serie(264, 271).reverse(), CAGE, ...serie(258, 263).reverse()],
-          basLib: 'Côté Mac Donald', bas: [...serie(222, 229).reverse(), CAGE, ...serie(216, 221).reverse()] },
+        { hautLib: 'Côté bâtiment / rue', haut: [...serie(258, 265), CAGE, ...serie(266, 271)],
+          basLib: "Côté McDonald's / parking", bas: [...serie(216, 223), CAGE, ...serie(224, 229)] },
       ],
       3: [
-        { hautLib: 'Côté rue', haut: [...serie(378, 385).reverse(), CAGE, ...serie(372, 377).reverse()],
-          basLib: 'Côté Mac Donald', bas: [...serie(336, 343).reverse(), CAGE, '335', '334', '333', { local: 'Bureau de direction', detail: '331 · 332', largeur: 2 }, '330'] },
+        { hautLib: 'Côté bâtiment / rue', haut: [...serie(378, 385).reverse(), CAGE, ...serie(372, 377).reverse()],
+          basLib: "Côté McDonald's / parking", bas: [...serie(336, 343).reverse(), CAGE, '335', '334', '333', { local: 'Bureau de direction', detail: '331 · 332', largeur: 2 }, '330'] },
       ],
     },
 

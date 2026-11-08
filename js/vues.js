@@ -227,8 +227,11 @@
         if (!hautD && !basD) return `<div class="pl-bloc">${section(a.haut, a.bas, true, cols)}</div>`;
         // cage d'escalier : même colonne sur tous les étages (colonnesAvantCage cases à gauche)
         const colsG = Math.max(ctx.cfg.colonnesAvantCage || 0, RDJ.largeurRang(hautG), RDJ.largeurRang(basG), 1);
-        const droite = [...(hautD || []), ...(basD || [])].length
-          ? section(hautD || [], basD || [], true, Math.max(RDJ.largeurRang(hautD || []), RDJ.largeurRang(basD || []), 1)) : '';
+        // locaux sur toute la hauteur (accueil, combles…) ou aile de chambres
+        const zone = a.droite && a.droite.length
+          ? `<div class="pl-zone" style="--cols:${RDJ.largeurRang(a.droite)}">${a.droite.map(caseLocal).join('')}</div>` : '';
+        const droite = zone || ([...(hautD || []), ...(basD || [])].length
+          ? section(hautD || [], basD || [], true, Math.max(RDJ.largeurRang(hautD || []), RDJ.largeurRang(basD || []), 1)) : '');
         return `<div class="pl-bloc pl-avec-cage">
           ${section(hautG, basG, true, colsG)}
           <div class="pl-cage" title="Cage d'escalier et ascenseur"><span>Escalier<br>Ascenseur</span></div>

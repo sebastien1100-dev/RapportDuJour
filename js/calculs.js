@@ -466,7 +466,9 @@
     return auto.map((e) => {
       const d = dispo[e.etage];
       if (!d || !d.length) return e;
-      const ailes = d.map((a) => ({ haut: norm(a.haut), bas: norm(a.bas), hautLib: a.hautLib || '', basLib: a.basLib || '' }));
+      // droite : locaux sur toute la hauteur de l'aile, après la cage (accueil, combles…)
+      const ailes = d.map((a) => ({ haut: norm(a.haut), bas: norm(a.bas), hautLib: a.hautLib || '', basLib: a.basLib || '',
+        droite: norm(a.droite).filter((c) => typeof c === 'object' && !c.cage) }));
       // chambres du plan oubliées dans la disposition : ajoutées dans une aile à part, pour n'en perdre aucune
       const vues = new Set(ailes.flatMap((a) => [...a.haut, ...a.bas]));
       const oubliees = e.ailes.flatMap((a) => [...a.haut, ...a.bas]).filter((n) => !vues.has(n));
