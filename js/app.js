@@ -764,6 +764,11 @@
   // Réglages : la carte « Types de chambre » reste ouverte après une modification (on la referme à la main)
   document.addEventListener('toggle', (ev) => {
     if (ev.target.classList && ev.target.classList.contains('types-ch')) RDJ.vues.typesOuvert = ev.target.open;
+    // accueil : mode d'emploi replié / déplié, retenu sur ce poste
+    if (ev.target.classList && ev.target.classList.contains('me-bloc')) {
+      RDJ.vues.modeEmploiReduit = !ev.target.open;
+      try { localStorage.setItem('rdj.modeEmploi', ev.target.open ? 'ouvert' : 'reduit'); } catch (e) { /* sans importance */ }
+    }
   }, true);
 
   // Synchronisation si l'application est ouverte dans deux onglets

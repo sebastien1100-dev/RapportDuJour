@@ -617,8 +617,8 @@
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
         <button class="btn" data-action="sauvegarder">Télécharger une sauvegarde</button></div>` : ''}
 
-      <section class="me-bloc">
-        <h3>Mode d'emploi</h3>
+      <details class="me-bloc"${V.modeEmploiReduit ? '' : ' open'}>
+        <summary><h3>Mode d'emploi</h3><span class="me-bascule"></span></summary>
         <div class="me-grille">
           <div class="me-colonne">
             <h4>Chaque nuit</h4>
@@ -639,9 +639,17 @@
             <p class="me-sauv"><b>Sauvegarde</b> Les données restent dans ce navigateur, sur ce poste : téléchargez régulièrement une sauvegarde (onglet Réglages).</p>
           </div>
         </div>
-      </section>
+      </details>
+
+      <footer class="acc-pied">
+        <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
+        <span class="acc-pied-hotel"><b>${esc(ctx.cfg.hotel)}</b><small>Rapport du jour · version ${esc(RDJ.VERSION || '')}</small></span>
+        <span class="acc-pied-nuit">Nuit du ${esc(RDJ.dateFr(ctx.nuit))} au ${esc(RDJ.dateFr(demain))}</span>
+      </footer>
     </section>`;
   };
+  // mode d'emploi de l'accueil replié ou non (retenu sur ce poste, voir app.js)
+  try { V.modeEmploiReduit = localStorage.getItem('rdj.modeEmploi') === 'reduit'; } catch (e) { V.modeEmploiReduit = false; }
 
   const papier = (html) => `<div class="papier">${html}</div>`;
 

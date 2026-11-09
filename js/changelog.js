@@ -7,6 +7,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page',
+      changements: [
+        ['amelioration', "Accueil : le mode d'emploi se réduit ou s'affiche d'un clic sur son titre (« Réduire ▴ » / « Afficher ▾ »). Le choix est retenu sur ce poste."],
+        ['nouveau', "Accueil : pied de page vert Campanile qui rappelle l'en-tête : logo, nom de l'hôtel, version de l'application et nuit en cours."],
+      ],
+    },
+    {
       version: '3.3', date: '2026-11-08', titre: 'Plan de chambre fidèle au plan de la réception',
       changements: [
         ['correction', "Plan de chambre : chambres placées comme sur le plan affiché à la réception. 2e étage : 258 à 265 puis 266 à 271 côté rue, 216 à 223 puis 224 à 229 côté parking. 1er étage : 107 à 115 de gauche à droite côté parking. RDC : 006 côté rue avant l'appartement, 005 côté parking, appartement de fonction sur les deux rangées, TGBT après la 049 et local RDC à côté de la 001."],
