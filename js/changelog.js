@@ -10,7 +10,7 @@
       version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page',
       changements: [
         ['amelioration', "Accueil : le mode d'emploi se réduit ou s'affiche d'un clic sur son titre (« Réduire ▴ » / « Afficher ▾ »). Le choix est retenu sur ce poste."],
-        ['nouveau', "Accueil : pied de page vert Campanile qui rappelle l'en-tête : logo, nom de l'hôtel, version de l'application et nuit en cours."],
+        ['nouveau', "Accueil : grand pied de page vert Campanile qui rappelle l'en-tête, avec le logo et la version de l'application."],
       ],
     },
     {

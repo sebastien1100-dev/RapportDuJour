@@ -643,8 +643,7 @@
 
       <footer class="acc-pied">
         <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
-        <span class="acc-pied-hotel"><b>${esc(ctx.cfg.hotel)}</b><small>Rapport du jour · version ${esc(RDJ.VERSION || '')}</small></span>
-        <span class="acc-pied-nuit">Nuit du ${esc(RDJ.dateFr(ctx.nuit))} au ${esc(RDJ.dateFr(demain))}</span>
+        <span class="acc-pied-hotel"><b>Rapport du jour</b><small>version ${esc(RDJ.VERSION || '')}</small></span>
       </footer>
     </section>`;
   };

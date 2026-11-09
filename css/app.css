@@ -723,15 +723,14 @@ body.depot .voile-depot { display: grid; }
 
 /* accueil : pied de page qui rappelle l'en-tête (vert Campanile à plat, logo, hôtel, nuit) */
 .acc-pied {
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; padding: 14px 22px;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 16px; padding: 28px 34px; min-height: 120px;
   border-radius: 22px; background: var(--accent); color: #fff;
 }
-.acc-pied-logo { display: flex; align-items: center; height: 34px; padding: 3px 10px; border-radius: 10px; background: #fff; flex: none; }
-.acc-pied-logo img { height: 26px; width: auto; display: block; }
-.acc-pied-hotel { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-.acc-pied-hotel b { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
-.acc-pied-hotel small { font-size: 12px; opacity: .8; }
-.acc-pied-nuit { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.16); }
+.acc-pied-logo { display: flex; align-items: center; height: 58px; padding: 6px 16px; border-radius: 14px; background: #fff; flex: none; }
+.acc-pied-logo img { height: 44px; width: auto; display: block; }
+.acc-pied-hotel { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.acc-pied-hotel b { font-size: 20px; font-weight: 700; }
+.acc-pied-hotel small { font-size: 13px; opacity: .8; }
 
 /* boîte de dialogue et aperçu */
 #dialogue { border-radius: 20px; }
