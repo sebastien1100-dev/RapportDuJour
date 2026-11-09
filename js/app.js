@@ -255,7 +255,7 @@
     }
     const s = RDJ.lireSoldes(lignes);
     if (!s.lignes) {
-      notice("Ce fichier ne ressemble pas au rapport des soldes.\nIl faut une colonne de montant (Solde, Montant dû, Reste à payer, Balance…) et une colonne Chambre ou Réservation.", 'erreur');
+      notice("Ce fichier ne ressemble pas au rapport des départs.\nIl faut une colonne de montant (Solde, Montant dû, Reste à payer, Balance…) et une colonne Chambre ou Réservation.", 'erreur');
       return false;
     }
     return enregistrerSoldes(fichier, s);
@@ -269,7 +269,7 @@
     const ctx = contexte();
     const avecMontant = ctx.chiffres.aEncaisser.filter((e) => e.montant !== null).length;
     aller('rapport');
-    notice(s.lignes + ' ligne(s) de solde importée(s) (' + fichier.name + ').\n' +
+    notice('Rapport des départs importé : ' + s.lignes + ' ligne(s) de montant dû (' + fichier.name + ').\n' +
       (ctx.raw.length
         ? avecMontant + ' / ' + ctx.chiffres.aEncaisser.length + ' départ(s) non payé(s) ont maintenant leur montant dû' +
           (ctx.chiffres.totalDu !== null ? ' · total dû ' + RDJ.formatMontant(ctx.chiffres.totalDu) : '') + '.'

@@ -55,7 +55,7 @@ Dans le navigateur, sur ce poste (stockage local). Conséquences :
 reconnue dans `js/config.js` (`sourcesReservation`). Une nouvelle source s'y ajoute en une ligne ;
 en attendant, elle apparaît dans « Autre » avec son nom d'origine.
 
-**Rapport des soldes** (menu *Importer ▾*) : second export avec une colonne de montant (*Solde*, *Montant dû*,
+**Rapport des départs** (menu *Importer ▾*, anciennement « rapport des soldes ») : second export avec une colonne de montant (*Solde*, *Montant dû*,
 *Reste à payer*, *Balance*…) et une colonne *Chambre* ou *Réservation*. Les montants sont reportés sur les
 départs non payés de la nuit en cours.
 

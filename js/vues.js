@@ -109,7 +109,7 @@
           <h1>RAPPORT DU ${esc(titreJour(demain).toUpperCase())}</h1>
           <div class="sous">Nuit du ${esc(RDJ.dateFr(nuit))} au ${esc(RDJ.dateFr(demain))}  ·  ${esc(ctx.cfg.hotel)}</div>
         </div>
-        <div class="r-import">${ctx.etat.import ? 'Import : ' + esc(ctx.etat.import.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.etat.import.importeLe.slice(0, 10)) + ' à ' + ctx.etat.import.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Soldes : ' + esc(ctx.soldes.fichier) : ''}</div>
+        <div class="r-import">${ctx.etat.import ? 'Import : ' + esc(ctx.etat.import.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.etat.import.importeLe.slice(0, 10)) + ' à ' + ctx.etat.import.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Départs : ' + esc(ctx.soldes.fichier) : ''}</div>
       </header>
       <div class="r-tuiles">${tuiles}</div>
       <div class="r-sources"><b>Sources :</b>${c.parSource.filter((s) => s.chambres).map((s) =>
@@ -627,7 +627,7 @@
           aide: 'Chambres, clients, départs, PDJ, paiement',
         })}
         ${carteImport({
-          action: 'importer-soldes', titre: 'Rapport des soldes', obligatoire: false,
+          action: 'importer-soldes', titre: 'Rapport des départs', obligatoire: false,
           fait: ctx.soldes ? `${esc(ctx.soldes.fichier)} · ${esc(RDJ.dateFr(ctx.soldes.importeLe.slice(0, 10)))} à ${esc(ctx.soldes.importeLe.slice(11, 16))}` : '',
           aide: 'Montant dû des chambres en départ',
         })}
@@ -664,7 +664,7 @@
             <h4>Chaque nuit</h4>
             <ol class="me-etapes">
               <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
-              <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des soldes : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
+              <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
               <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou « Imprimer tout ». Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>
