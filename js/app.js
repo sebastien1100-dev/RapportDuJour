@@ -17,6 +17,13 @@
     if (r.nbChambres > 0) cfg.nbChambres = r.nbChambres;
     if (r.nbExemplairesFdc > 0) cfg.nbExemplairesFdc = r.nbExemplairesFdc;
     cfg.types = RDJ.typesChambres(cfg.typesChambresDefaut, r.typesChambres);
+    // cuisson PDJ : pièces par plaque, parts des deux premières fournées (réserve = reste)
+    if (r.piecesParPlaque > 0) cfg.piecesParPlaque = r.piecesParPlaque;
+    const parts = cfg.fournees.map((f) => f.part);
+    if (Number.isFinite(r.fournee1)) parts[0] = r.fournee1;
+    if (Number.isFinite(r.fournee2)) parts[1] = r.fournee2;
+    parts[2] = Math.max(0, 100 - parts[0] - parts[1]);
+    cfg.fournees = cfg.fournees.map((f, i) => ({ ...f, part: parts[i] }));
     // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
     cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, recap: false, ...(r.impressionNuit || {}) };
     // horaires clés (pied de page de l'accueil) : valeur saisie dans Réglages, sinon valeur de départ ; '' = masqué
@@ -690,6 +697,17 @@
       else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
       else if (k.startsWith('horaire-')) etat.reglages.horaires = { ...(etat.reglages.horaires || {}), [k.slice(8)]: t.value.trim() };
       else if (k.startsWith('impression-')) etat.reglages.impressionNuit = { ...(etat.reglages.impressionNuit || {}), [k.slice(11)]: t.checked };
+      else if (k === 'fournee1' || k === 'fournee2') {
+        // pourcentages : 0 permis ; les deux fournées ensemble ne dépassent pas 100 %
+        const n = parseInt(t.value, 10);
+        let v = n >= 0 ? Math.min(n, 100) : undefined;
+        if (v !== undefined) {
+          const autre = k === 'fournee1' ? 'fournee2' : 'fournee1';
+          const pAutre = Number.isFinite(etat.reglages[autre]) ? etat.reglages[autre] : RDJ.CONFIG_DEFAUT.fournees[autre === 'fournee1' ? 0 : 1].part;
+          v = Math.min(v, 100 - pAutre);
+        }
+        etat.reglages[k] = v;
+      }
       else { const n = parseInt(t.value, 10); etat.reglages[k] = n > 0 ? n : undefined; }
     } else if (t.id === 'fichier-import') {
       const f = t.files[0];

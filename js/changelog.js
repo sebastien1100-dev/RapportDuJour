@@ -7,6 +7,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.5', date: '2026-11-09', titre: 'Cuisson PDJ : plaques et fournées',
+      changements: [
+        ['nouveau', "Cuisson PDJ : croissants et pains au chocolat arrondis à la plaque entière (12 pièces au départ). La feuille indique le total en pièces et en plaques."],
+        ['nouveau', "Cuisson PDJ : les pièces de viennoiseries sont réparties en fournées : 60 % à 6h30, 30 % à 7h30 et une réserve de 10 % à cuire seulement si le buffet baisse (par exemple 38 croissants : 23, 12 et 3). Sous chaque fournée, le nombre de plaques (« 1 plaque + 4 »). Les pains sont cuits en une seule fois, à 6h30."],
+        ['nouveau', "Réglages → Cuisson PDJ : pièces par plaque, part des fournées de 6h30 et de 7h30 (la réserve est le reste)."],
+      ],
+    },
+    {
       version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page, retouches',
       changements: [
         ['amelioration', "Cuisson PDJ : les cartes « Petits déjeuners » et « Type de clientèle » occupent toute la largeur de la page, alignées sur l'en-tête et la feuille."],

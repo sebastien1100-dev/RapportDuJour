@@ -1127,7 +1127,19 @@ body.depot .voile-depot { display: grid; }
 .p-table td.q b { display: inline-block; min-width: 14mm; font-size: 17pt; color: var(--marine); }
 .p-cuisson .four span { display: inline-block; margin: 0 .6mm; padding: .5mm 2mm; border: .3mm solid #b9ddd8; border-radius: 3mm; font-size: 9pt; background: #fff; white-space: nowrap; }
 .p-cuisson .four em { color: #999; font-style: normal; }
-.p-autres td.mep { text-align: left; font-size: 9.5pt; }
+/* cuisson en fournées : total + une colonne par fournée, réserve en pointillés */
+.p-cuisson .q { width: auto; white-space: nowrap; }
+.p-cuisson td.q b { min-width: 0; font-size: 15pt; }
+.p-cuisson td.q small { display: block; font-size: 7.5pt; color: #555; line-height: 1.1; }
+.p-cuisson td.q em { color: #999; font-style: normal; }
+.p-cuisson td.tot { background: var(--marine-clair) !important; border-right: .3mm solid #9aa7b5; }
+.p-cuisson td.res { border-left: .3mm dashed #9aa7b5; }
+.p-cuisson td.res b { font-size: 12pt; color: #555; }
+.p-cuisson th.res { font-style: italic; }
+.p-fournees { margin: -3.5mm 0 5mm; font-size: 8.5pt; color: #333; }
+.nb .p-cuisson td.tot { background: #fff !important; border-right-color: #000; }
+.nb .p-cuisson td.res { border-left-color: #000; }
+.nb .p-cuisson td.q small, .nb .p-cuisson td.res b, .nb .p-fournees { color: #000; }.p-autres td.mep { text-align: left; font-size: 9.5pt; }
 .p-autres td.mep small { display: block; margin-top: .6mm; font-size: 8.5pt; font-style: italic; color: #555; }
 .p-note { border: .3mm solid #e0a84a; border-left: 2mm solid #e0a84a; background: #fffaf0; border-radius: 2mm; padding: 3mm 5mm; }
 .p-note h3 { margin: 0 0 1mm; font-size: 10pt; text-transform: uppercase; letter-spacing: .05em; color: #8a5a10; }

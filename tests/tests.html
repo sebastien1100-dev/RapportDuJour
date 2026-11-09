@@ -47,6 +47,14 @@
     egal('PDJ croissants business 55', RDJ.quantitePdj(croissant, 55, 'business'), 38);
     egal('PDJ croissants loisir 55', RDJ.quantitePdj(croissant, 55, 'loisir'), 52);
     egal('PDJ croissants mixte 100 (pas d\'arrondi parasite)', RDJ.quantitePdj(croissant, 100, 'mixte'), 75);
+    egal('plaques 44 pièces / 12', RDJ.plaques(44, 12), 4);
+    egal('plaques 48 pièces / 12', RDJ.plaques(48, 12), 4);
+    egal('plaques 0', RDJ.plaques(0, 12), 0);
+    egal('fournées 4 plaques 60/30/10', RDJ.fournees(4, [60, 30, 10]), [3, 1, 0]);
+    egal('fournées 10 plaques 60/30/10', RDJ.fournees(10, [60, 30, 10]), [6, 3, 1]);
+    egal('fournées 0 plaque', RDJ.fournees(0, [60, 30, 10]), [0, 0, 0]);
+    egal('fournées 7 plaques 100/0/0', RDJ.fournees(7, [100, 0, 0]), [7, 0, 0]);
+    egal('fournées 38 pièces 60/30/10 : chaque fournée a sa part', RDJ.fournees(38, [60, 30, 10]), [23, 12, 3]);
     egal('cycle FDC', ['', 'B', 'R', 'BR', 'HS', 'X'].map(RDJ.etatSuivant), ['B', 'R', 'BR', 'HS', '', 'B']);
     egal('correction = import -> supprimée', RDJ.correctionApres('B', 'B'), null);
     egal('correction vide sur chambre importée -> X', RDJ.correctionApres('', 'R'), 'X');

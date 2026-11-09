@@ -404,6 +404,24 @@
     return Math.max(0, Math.ceil(q - 1e-9));
   };
 
+  /** Plaques entières nécessaires pour une quantité. */
+  RDJ.plaques = (quantite, parPlaque) => (parPlaque > 0 ? Math.ceil(quantite / parPlaque - 1e-9) : 0);
+
+  /** Répartit des pièces entre les fournées (parts en %). Arrondi au supérieur sur le cumul :
+      les premières fournées sont servies d'abord, la dernière reçoit le reste. */
+  RDJ.fournees = function (plaques, parts) {
+    const total = parts.reduce((s, p) => s + p, 0) || 1;
+    const res = [];
+    let cumul = 0, donne = 0;
+    parts.forEach((p, i) => {
+      cumul += p;
+      const jusque = i === parts.length - 1 ? plaques : Math.min(plaques, Math.ceil((plaques * cumul) / total - 1e-9));
+      res.push(jusque - donne);
+      donne = jusque;
+    });
+    return res;
+  };
+
   /* ---------- Feuille femme de chambre ---------- */
   // Corrections du jour : { chambre: 'B' | 'R' | 'BR' | 'HS' | 'X' }  (BR = blanc recouche, X = chambre de l'import retirée)
 

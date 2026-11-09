@@ -55,6 +55,8 @@ Demain (DÉPART / Recouche), PDJ (Oui), Payé (Oui / NON). Gris foncé = non pay
 
 **Prépa PDJ** — date : import entre 20 h et 23 h 59 ⇒ lendemain ; après minuit ⇒ jour même.
 `quantité = ARRONDI.SUP(PDJ/100 × base × coefType × facteur)` ; coefType : loisir 1,25 · mixte 1 · business propre au produit.
+Ajout web v3.5 : croissants et pains au chocolat : arrondis à la plaque entière (12 pièces), puis pièces réparties en fournées
+6h30 60 % · 7h30 30 % · réserve 10 % (arrondi supérieur sur le cumul). Réglables dans Réglages → Cuisson PDJ.
 
 | Produit | Base/100 | coef business | facteur | Infos |
 |---|---|---|---|---|

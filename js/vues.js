@@ -376,6 +376,20 @@
     const autres = cfg.produitsPdj.filter((p) => p.groupe !== 'cuisson');
     // cuisson « 12 min » + « 180 °C » réunis dans une pastille
     const fourneau = (p) => [p.cuisson, p.temp].filter(Boolean).map((t) => `<span>${esc(t)}</span>`).join('') || '<em>—</em>';
+    const parPlaque = cfg.piecesParPlaque;
+    const pl = (n) => n + (n > 1 ? ' plaques' : ' plaque');
+    const cellule = (n, detail) => (n > 0 ? `<b>${n}</b>${detail ? `<small>${detail}</small>` : ''}` : '<em>—</em>');
+    // pièces d'une fournée en plaques : « 1 plaque + 4 », ou « 1 plaque » si elle n'est pas pleine
+    const enPlaques = (n) => {
+      const pleines = Math.floor(n / parPlaque), reste = n % parPlaque;
+      return pleines === 0 ? pl(1) : pl(pleines) + (reste ? ' + ' + reste : '');
+    };
+    // viennoiseries : total arrondi à la plaque entière, pièces réparties en fournées ; autres produits : tout pour la 1re fournée
+    const lignesCuisson = cuisson.map((p) => {
+      if (!p.viennoiserie) return { p, total: cellule(q(p)), parts: cfg.fournees.map((f, i) => (i === 0 ? cellule(q(p)) : '<em>—</em>')) };
+      const nb = RDJ.plaques(q(p), parPlaque);
+      return { p, total: cellule(nb * parPlaque, pl(nb)), parts: RDJ.fournees(nb * parPlaque, cfg.fournees.map((f) => f.part)).map((n) => cellule(n, enPlaques(n))) };
+    });
     return `
     <div class="feuille portrait pdj">
       <header class="p-tete">
@@ -393,17 +407,21 @@
 
       <h2 class="p-section"><i>1</i>Produits en cuisson</h2>
       <table class="p-table p-cuisson">
-        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th>Pour 6h30</th></tr></thead>
-        <tbody>${cuisson.map((p) => `<tr>
-          <td class="g">${esc(p.nom)}</td>
-          <td class="four">${fourneau(p)}</td>
-          <td class="q"><b>${q(p)}</b></td>
+        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th class="tot">Total</th>
+          ${cfg.fournees.map((f, i) => `<th class="${i === cfg.fournees.length - 1 ? 'res' : ''}">${esc(f.heure)}</th>`).join('')}</tr></thead>
+        <tbody>${lignesCuisson.map((l) => `<tr>
+          <td class="g">${esc(l.p.nom)}</td>
+          <td class="four">${fourneau(l.p)}</td>
+          <td class="q tot">${l.total}</td>
+          ${l.parts.map((c, i) => `<td class="q fo${i === l.parts.length - 1 ? ' res' : ''}">${c}</td>`).join('')}
         </tr>`).join('')}</tbody>
       </table>
+      <p class="p-fournees">Viennoiseries : total arrondi à la plaque de ${parPlaque}, puis ${cfg.fournees.slice(0, -1).map((f) => `${f.part} % à ${esc(f.heure)}`).join(', ')} ;
+        <b>réserve (${cfg.fournees[cfg.fournees.length - 1].part} %) à cuire seulement si le buffet baisse.</b></p>
 
       <h2 class="p-section"><i>2</i>Autres produits</h2>
       <table class="p-table p-autres">
-        <thead><tr><th class="g">Produit</th><th>Pour 6h30</th><th class="g">Mise en place</th></tr></thead>
+        <thead><tr><th class="g">Produit</th><th>Pour ${esc(cfg.fournees[0].heure)}</th><th class="g">Mise en place</th></tr></thead>
         <tbody>${autres.map((p) => `<tr>
           <td class="g">${esc(p.nom)}</td>
           <td class="q"><b>${q(p)}</b></td>
@@ -412,7 +430,7 @@
       </table>
 
       <div class="p-note"><h3>Mise en place de la brioche</h3><p>${esc(cfg.noteBrioche)}</p></div>
-      <p class="p-pied">Quantités = base pour 100 PDJ × nombre de PDJ, ajustées selon le type de clientèle (loisir +25 %, business réduit), arrondies au supérieur.</p>
+      <p class="p-pied">Quantités = base pour 100 PDJ × nombre de PDJ, ajustées selon le type de clientèle (loisir +25 %, business réduit), arrondies au supérieur ; viennoiseries arrondies à la plaque entière.</p>
     </div>`;
   };
 
@@ -894,6 +912,16 @@
         <p class="aide">Affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
         <div class="rg-horaires-grille">
           ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
+        </div>
+      </section>
+
+      <section class="carte rg-carte rg-horaires rg-cuisson">
+        <h3>Cuisson PDJ</h3>
+        <p class="aide">Croissants et pains au chocolat : quantité arrondie à la plaque entière, puis répartie en fournées. La réserve (le reste) n'est cuite que si le buffet baisse.</p>
+        <div class="rg-horaires-grille">
+          <label>Pièces par plaque<input type="number" min="1" max="60" data-reglage="piecesParPlaque" value="${r.piecesParPlaque}"></label>
+          <label>Fournée de ${esc(r.fournees[0].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee1" value="${r.fournees[0].part}"></label>
+          <label>Fournée de ${esc(r.fournees[1].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee2" value="${r.fournees[1].part}"><small>réserve : ${r.fournees[2].part} %</small></label>
         </div>
       </section>
 
