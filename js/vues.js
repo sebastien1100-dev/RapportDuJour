@@ -907,7 +907,7 @@
 
       <div class="rg-grille">
         <section class="carte rg-carte">
-          <h3>Hôtel</h3>
+          <h3>En-tête</h3>
           <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
           <div class="rg-ligne">
             <label>Chambres de l'hôtel<input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"><small>pour le taux d'occupation</small></label>
@@ -928,8 +928,8 @@
       </div>
 
       <section class="carte rg-carte rg-horaires">
-        <h3>Horaires clés</h3>
-        <p class="aide">Affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
+        <h3>Pied de page</h3>
+        <p class="aide">Horaires clés affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
         <div class="rg-horaires-grille">
           ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
         </div>
