@@ -11,6 +11,7 @@
     reglages: {},                     // surcharge de CONFIG_DEFAUT : hotel, nbChambres, nbExemplairesFdc
     import: null,                     // rapport clients présents : { fichier, importeLe, reservations[] }
     soldes: null,                     // rapport des soldes : { fichier, importeLe, nuit, chambres: {no: montant}, resas: {n°: montant} }
+    maintenance: null,                // rapport de maintenance : { fichier, importeLe, nuit, chambres: {no: { motif, fin }} }
     dateRapportManuelle: null,        // "AAAA-MM-JJ" ou null (automatique)
     modifs: { nuit: null, liste: [], ajouts: [] },  // modifications du rapport et chambres ajoutées (nuit en cours)
     fdc: { nuit: null, corrections: {}, nv: {} },   // feuille femme de chambre (nuit en cours)

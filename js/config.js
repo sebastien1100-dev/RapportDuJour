@@ -21,6 +21,15 @@
     nbChambres: 81,
     nbExemplairesFdc: 5,
 
+    /* Horaires clés, affichés en pied de page de l'accueil et modifiables dans Réglages.
+       Valeurs de départ à vérifier ; un horaire vide n'est pas affiché. */
+    horaires: [
+      { id: 'pdj', nom: 'Petit déjeuner', defaut: '6h30 – 10h00' },
+      { id: 'arrivees', nom: 'Arrivées', defaut: 'à partir de 15h00' },
+      { id: 'departs', nom: 'Départs', defaut: 'avant 12h00' },
+      { id: 'restaurant', nom: 'Restaurant', defaut: '19h00 – 22h00' },
+    ],
+
     /* Feuille femme de chambre : 6 colonnes, chambres de haut en bas.
        noir = case grisée en noir (chambre inexistante ou à ne pas remplir). */
     planFdc: [
@@ -99,9 +108,18 @@
     /* Cuisson PDJ. quantité = arrondi supérieur(PDJ / 100 × base × coef × facteur)
        coef : loisir 1,25 · mixte 1 · business = coefBusiness du produit. */
     coefLoisir: 1.25,
+    /* Viennoiseries (viennoiserie: true) : quantité arrondie à la plaque entière, puis plaques réparties
+       en fournées (parts en %, la dernière = réserve à cuire seulement si le buffet baisse).
+       piecesParPlaque et les deux premières parts se règlent dans Réglages. */
+    piecesParPlaque: 12,
+    fournees: [
+      { heure: '6h30', part: 60 },
+      { heure: '7h30', part: 30 },
+      { heure: 'Réserve', part: 10 },
+    ],
     produitsPdj: [
-      { id: 'croissant', nom: 'Croissants', groupe: 'cuisson', cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 1 },
-      { id: 'painchoc', nom: 'Pains au chocolat', groupe: 'cuisson', cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 0.75 },
+      { id: 'croissant', nom: 'Croissants', groupe: 'cuisson', viennoiserie: true, cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 1 },
+      { id: 'painchoc', nom: 'Pains au chocolat', groupe: 'cuisson', viennoiserie: true, cuisson: '12 min', temp: '180 °C', base: 75, coefBusiness: 0.9, facteur: 0.75 },
       { id: 'baguette', nom: 'Baguette signature', groupe: 'cuisson', cuisson: '10 min', temp: '220 °C', base: 30, coefBusiness: 0.4, facteur: 0.75 },
       { id: 'muesli', nom: 'Pain muesli', groupe: 'cuisson', cuisson: '17 min', temp: '180 °C', base: 4, coefBusiness: 0.75, facteur: 0.75 },
       { id: 'rustique', nom: 'Pavé rustique', groupe: 'cuisson', cuisson: '17 min', temp: '180 °C', base: 4, coefBusiness: 0.75, facteur: 0.75 },

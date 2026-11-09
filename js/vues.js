@@ -39,8 +39,9 @@
   V.feuilleRapport = function (ctx) {
     const { nuit, chiffres: c, grille } = ctx;
     const demain = RDJ.jours(nuit, 1);
-    // hauteur des lignes de la grille : la page doit tenir sur une feuille A4 paysage,
-    // l'encadré « À encaisser » (3 chambres par ligne) et la liste des autres prennent sur la grille
+    // hauteur minimale des lignes de la grille : la page doit tenir sur une feuille A4 paysage,
+    // l'encadré « À encaisser » (3 chambres par ligne) et la liste des autres prennent sur la grille.
+    // Avec peu de chambres, la grille s'étire ensuite pour occuper toute la hauteur restante (CSS .r-grille).
     const rangsEnc = Math.max(1, Math.ceil(c.aEncaisser.length / 3), c.groupes.length);
     const hEnc = 8 + rangsEnc * 5.4 + (c.nonPayeesRestent.length ? 5 : 0);
     const hLigne = Math.min(6.4, (108 - Math.max(0, hEnc - 16)) / Math.max(grille.parBloc, 1)); // 4 mm pris par la ligne « Sources »
@@ -74,7 +75,10 @@
             <td class="c clic${mod('PDJ')}" data-modif="pdj" data-ch="${esc(l.chambre)}">${l.pdj ? 'Oui' : ''}</td>
             <td class="c clic${l.paye ? '' : l.groupe ? ' npg' : ' np'}${mod('PAYE')}" data-modif="paye" data-ch="${esc(l.chambre)}">${l.paye ? 'Oui' : l.groupe ? 'GRP' : 'NON'}</td>
           </tr>`;
-        }).join('')}</tbody>
+        }).join('')}${
+          // colonnes plus courtes complétées par des lignes vides : les lignes restent alignées d'une colonne à l'autre
+          // et au moins 12 lignes par colonne, pour que les lignes ne deviennent pas immenses avec très peu de chambres
+          '<tr class="vide"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'.repeat(Math.max(0, Math.max(grille.parBloc, 12) - lignes.length))}</tbody>
       </table>`;
 
     const modifs = texteModifs(ctx.modifs, ctx.ajouts);
@@ -105,7 +109,7 @@
           <h1>RAPPORT DU ${esc(titreJour(demain).toUpperCase())}</h1>
           <div class="sous">Nuit du ${esc(RDJ.dateFr(nuit))} au ${esc(RDJ.dateFr(demain))}  ·  ${esc(ctx.cfg.hotel)}</div>
         </div>
-        <div class="r-import">${ctx.etat.import ? 'Import : ' + esc(ctx.etat.import.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.etat.import.importeLe.slice(0, 10)) + ' à ' + ctx.etat.import.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Soldes : ' + esc(ctx.soldes.fichier) : ''}</div>
+        <div class="r-import">${ctx.etat.import ? 'Import : ' + esc(ctx.etat.import.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.etat.import.importeLe.slice(0, 10)) + ' à ' + ctx.etat.import.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Départs : ' + esc(ctx.soldes.fichier) : ''}</div>
       </header>
       <div class="r-tuiles">${tuiles}</div>
       <div class="r-sources"><b>Sources :</b>${c.parSource.filter((s) => s.chambres).map((s) =>
@@ -169,13 +173,14 @@
       ${ligne('Départ', s.depart ? RDJ.dateFr(s.depart) : '')}${ligne('Petit déj.', s.statut === 'depart' || s.statut === 'recouche' ? (s.pdj ? 'Oui' : 'Non') : '')}
       ${ligne('Groupe', s.groupe ? 'Oui' : '')}
       ${ligne('Paiement', (s.statut === 'depart' || s.statut === 'recouche') && !s.groupe ? (s.nonPaye ? 'NON PAYÉE' : 'Payée') : '', s.nonPaye ? 'non-paye' : '')}
+      ${s.bloquee ? `<p class="non-paye">Bloquée (rapport de maintenance)${s.motif ? ' : ' + esc(s.motif) : ''}</p>` : ''}
       ${comm ? `<p>Communicante avec la ${esc(comm.avec)}</p>` : ''}
       ${s.manuel ? '<p>Ajoutée à la main</p>' : ''}${s.corrige && !s.sansClient ? '<p>Corrigée sur la feuille de chambre</p>' : ''}
       ${s.sansClient ? '<p class="astuce">Double-clic : libre → sale → hors service</p>' : ''}`;
     const cls = [s.manuel ? 'aj' : '', comm && comm.cote ? 'comm-' + comm.cote : '', s.sansClient ? 'clic' : ''].filter(Boolean).join(' ');
     return `<div class="pl-ch s-${s.statut}${cls ? ' ' + cls : ''}" data-bulle="${esc(bulle)}"${s.sansClient ? ` data-plan="${esc(no)}"` : ''}>
       <div class="pl-haut"><b>${esc(no)}</b>${comm && !comm.cote ? `<i class="pl-comm">⇄ ${esc(comm.avec)}</i>` : ''}${badgeType}</div>
-      <span class="pl-nom">${s.statut === 'hs' ? 'HORS SERVICE' : s.statut === 'sale' ? 'SALE · à faire' : s.statut === 'libre' ? 'libre' : esc(s.nom)}</span>
+      <span class="pl-nom">${s.statut === 'hs' ? 'HS' : s.statut === 'sale' ? 'SALE · à faire' : s.statut === 'libre' ? 'libre' : esc(s.nom)}</span>
       <span class="pl-info"><span>${esc(infos.join(' · '))}</span>${s.groupe ? '<i class="pl-grp">GRP</i>' : s.nonPaye ? '<i class="pl-np">€</i>' : ''}</span>
     </div>`;
   }
@@ -318,6 +323,15 @@
     return lignes.length ? '<div class="f-corr-titre">CORRECTIONS DU JOUR</div>' + lignes.join('') : '';
   }
 
+  /** Chambres bloquées par le rapport de maintenance, en HS sur la feuille (sans correction à la main). */
+  function texteBloquees(ctx) {
+    const nos = Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige)
+      .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    if (!nos.length) return '';
+    const detail = nos.map((k) => esc(k) + (ctx.etatsFdc[k].motif ? ' (' + esc(ctx.etatsFdc[k].motif) + ')' : '')).join(', ');
+    return `<div class="f-corr-titre">CHAMBRES BLOQUÉES (MAINTENANCE)</div><div><b>HORS SERVICE :</b> ${detail}</div>`;
+  }
+
   /** opts.vierge : feuille sans date ni saisie, à remplir à la main. */
   V.feuilleFdc = function (ctx, opts) {
     const vierge = !!(opts && opts.vierge);
@@ -341,7 +355,7 @@
         const e = ctx.etatsFdc[k] || { etat: '', corrige: false };
         const nv = !vierge && ctx.fdc.nv[k];
         corps += `<td class="no${sep}">${esc(no)}</td>` +
-          `<td class="etat clic${!vierge && e.corrige ? ' corrige' : ''}" data-fdc="etat" data-ch="${esc(k)}">${vierge ? '' : esc(e.etat)}</td>` +
+          `<td class="etat clic${!vierge && e.corrige ? ' corrige' : ''}${!vierge && e.etat === 'HS' ? ' hs' : ''}" data-fdc="etat" data-ch="${esc(k)}">${vierge ? '' : esc(e.etat)}</td>` +
           `<td class="nv clic" data-fdc="nv" data-ch="${esc(k)}">${nv ? 'NV' : ''}</td>`;
       });
       corps += '</tr>';
@@ -359,7 +373,7 @@
         </table>`}
       </header>
       <table class="f-grille"><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
-      <div class="f-corr">${vierge ? '' : texteCorrections(ctx.fdc.corrections)}</div>
+      <div class="f-corr">${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
     </div>`;
   };
 
@@ -372,6 +386,20 @@
     const autres = cfg.produitsPdj.filter((p) => p.groupe !== 'cuisson');
     // cuisson « 12 min » + « 180 °C » réunis dans une pastille
     const fourneau = (p) => [p.cuisson, p.temp].filter(Boolean).map((t) => `<span>${esc(t)}</span>`).join('') || '<em>—</em>';
+    const parPlaque = cfg.piecesParPlaque;
+    const pl = (n) => n + (n > 1 ? ' plaques' : ' plaque');
+    const cellule = (n, detail) => (n > 0 ? `<b>${n}</b>${detail ? `<small>${detail}</small>` : ''}` : '<em>—</em>');
+    // pièces d'une fournée en plaques : « 1 plaque + 4 », ou « 1 plaque » si elle n'est pas pleine
+    const enPlaques = (n) => {
+      const pleines = Math.floor(n / parPlaque), reste = n % parPlaque;
+      return pleines === 0 ? pl(1) : pl(pleines) + (reste ? ' + ' + reste : '');
+    };
+    // viennoiseries : total arrondi à la plaque entière, pièces réparties en fournées ; autres produits : tout pour la 1re fournée
+    const lignesCuisson = cuisson.map((p) => {
+      if (!p.viennoiserie) return { p, total: cellule(q(p)), parts: cfg.fournees.map((f, i) => (i === 0 ? cellule(q(p)) : '<em>—</em>')) };
+      const nb = RDJ.plaques(q(p), parPlaque);
+      return { p, total: cellule(nb * parPlaque, pl(nb)), parts: RDJ.fournees(nb * parPlaque, cfg.fournees.map((f) => f.part)).map((n) => cellule(n, enPlaques(n))) };
+    });
     return `
     <div class="feuille portrait pdj">
       <header class="p-tete">
@@ -389,17 +417,21 @@
 
       <h2 class="p-section"><i>1</i>Produits en cuisson</h2>
       <table class="p-table p-cuisson">
-        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th>Pour 6h30</th></tr></thead>
-        <tbody>${cuisson.map((p) => `<tr>
-          <td class="g">${esc(p.nom)}</td>
-          <td class="four">${fourneau(p)}</td>
-          <td class="q"><b>${q(p)}</b></td>
+        <thead><tr><th class="g">Produit</th><th>Cuisson · T°C</th><th class="tot">Total</th>
+          ${cfg.fournees.map((f, i) => `<th class="${i === cfg.fournees.length - 1 ? 'res' : ''}">${esc(f.heure)}</th>`).join('')}</tr></thead>
+        <tbody>${lignesCuisson.map((l) => `<tr>
+          <td class="g">${esc(l.p.nom)}</td>
+          <td class="four">${fourneau(l.p)}</td>
+          <td class="q tot">${l.total}</td>
+          ${l.parts.map((c, i) => `<td class="q fo${i === l.parts.length - 1 ? ' res' : ''}">${c}</td>`).join('')}
         </tr>`).join('')}</tbody>
       </table>
+      <p class="p-fournees">Viennoiseries : total arrondi à la plaque de ${parPlaque}, puis ${cfg.fournees.slice(0, -1).map((f) => `${f.part} % à ${esc(f.heure)}`).join(', ')} ;
+        <b>réserve (${cfg.fournees[cfg.fournees.length - 1].part} %) à cuire seulement si le buffet baisse.</b></p>
 
       <h2 class="p-section"><i>2</i>Autres produits</h2>
       <table class="p-table p-autres">
-        <thead><tr><th class="g">Produit</th><th>Pour 6h30</th><th class="g">Mise en place</th></tr></thead>
+        <thead><tr><th class="g">Produit</th><th>Pour ${esc(cfg.fournees[0].heure)}</th><th class="g">Mise en place</th></tr></thead>
         <tbody>${autres.map((p) => `<tr>
           <td class="g">${esc(p.nom)}</td>
           <td class="q"><b>${q(p)}</b></td>
@@ -408,7 +440,7 @@
       </table>
 
       <div class="p-note"><h3>Mise en place de la brioche</h3><p>${esc(cfg.noteBrioche)}</p></div>
-      <p class="p-pied">Quantités = base pour 100 PDJ × nombre de PDJ, ajustées selon le type de clientèle (loisir +25 %, business réduit), arrondies au supérieur.</p>
+      <p class="p-pied">Quantités = base pour 100 PDJ × nombre de PDJ, ajustées selon le type de clientèle (loisir +25 %, business réduit), arrondies au supérieur ; viennoiseries arrondies à la plaque entière.</p>
     </div>`;
   };
 
@@ -517,6 +549,7 @@
 
   /* ================= ÉCRANS ================= */
 
+  const ICONE_IMPRIMANTE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>';
   // feuilles possibles pour « Imprimer tout » (Réglages → Impressions de la nuit)
   const FEUILLES_NUIT = [
     ['rapport', 'Rapport du jour'],
@@ -526,10 +559,13 @@
     ['recap', 'Historique'],
   ];
   /** « Rapport ×1 · feuille de chambre ×5 · … » selon les feuilles cochées ('' si aucune). */
-  function texteImpressionNuit(cfg) {
+  function texteImpressionNuit(cfg, sansQuantites) {
     const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1, recap: 1 };
     const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre', recap: 'historique' };
-    return FEUILLES_NUIT.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
+    // recto verso : les feuilles de chambre passent en dernier, chacune seule sur sa feuille (voir app.js)
+    const ordre = cfg.rectoVerso ? [...FEUILLES_NUIT.filter(([k]) => k !== 'fdc'), ...FEUILLES_NUIT.filter(([k]) => k === 'fdc')] : FEUILLES_NUIT;
+    const texte = ordre.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + (sansQuantites ? '' : ' ×' + nb[k])).join(' · ');
+    return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
   V.ecranAccueil = function (ctx) {
@@ -546,7 +582,7 @@
 
     const carteImport = (o) => `
       <section class="acc-import${o.fait ? ' fait' : ''}${o.obligatoire ? '' : ' option'}">
-        <i class="acc-pastille" aria-hidden="true">${o.fait ? '✓' : o.obligatoire ? '1' : '2'}</i>
+        <i class="acc-pastille" aria-hidden="true">${o.fait ? '✓' : o.numero || (o.obligatoire ? '1' : '2')}</i>
         <div class="acc-import-texte">
           <b>${esc(o.titre)}${o.obligatoire ? '' : ' <small>facultatif</small>'}</b>
           <span>${o.fait ? 'Importé : ' + o.fait : esc(o.aide)}</span>
@@ -592,9 +628,14 @@
           aide: 'Chambres, clients, départs, PDJ, paiement',
         })}
         ${carteImport({
-          action: 'importer-soldes', titre: 'Rapport des soldes', obligatoire: false,
+          action: 'importer-soldes', titre: 'Rapport des départs', obligatoire: false,
           fait: ctx.soldes ? `${esc(ctx.soldes.fichier)} · ${esc(RDJ.dateFr(ctx.soldes.importeLe.slice(0, 10)))} à ${esc(ctx.soldes.importeLe.slice(11, 16))}` : '',
           aide: 'Montant dû des chambres en départ',
+        })}
+        ${carteImport({
+          action: 'importer-maintenance', titre: 'Rapport de maintenance', obligatoire: false, numero: 3,
+          fait: ctx.maintenance ? `${esc(ctx.maintenance.fichier)} · ${Object.keys(ctx.maintenance.chambres).length} chambre(s) bloquée(s)` : '',
+          aide: 'Chambres bloquées : hors service sur le plan',
         })}
         <p class="acc-depot">Vous pouvez aussi déposer les fichiers n'importe où dans la fenêtre : ils sont reconnus tout seuls.</p>
       </div>
@@ -606,27 +647,28 @@
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
       </div>
 
-      <button type="button" class="acc-imprimer" data-action="imprimer-tout">
-        <span class="ai-texte">
-          <b>Impressions de la nuit</b>
-          <span>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie : voir Réglages')}</span>
-        </span>
-        <span class="ai-bouton">Tout imprimer</span>
-      </button>
+      <section class="acc-impr" aria-label="Impressions de la nuit">
+        <div class="acc-impr-pastilles">
+          <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg, true) || 'Aucune feuille choisie : voir Réglages')}">
+            ${ICONE_IMPRIMANTE}<b>Tout imprimer</b><small>${esc(texteImpressionNuit(ctx.cfg, true) || 'aucune feuille choisie')}</small>
+          </button>
+          ${FEUILLES_NUIT.map(([k, lib]) => `<button type="button" class="impr-feuille f-${k}" data-action="apercu-${k}" title="Aperçu puis impression : ${esc(lib)}">${esc(lib)}${k === 'fdc' ? ' ×' + ctx.cfg.nbExemplairesFdc : ''}</button>`).join('')}
+        </div>
+      </section>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
         <button class="btn" data-action="sauvegarder">Télécharger une sauvegarde</button></div>` : ''}
 
-      <section class="me-bloc">
-        <h3>Mode d'emploi</h3>
+      <details class="me-bloc"${V.modeEmploiReduit ? '' : ' open'}>
+        <summary><h3>Mode d'emploi</h3><span class="me-bascule"></span></summary>
         <div class="me-grille">
           <div class="me-colonne">
             <h4>Chaque nuit</h4>
             <ol class="me-etapes">
               <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
-              <li><i>2</i><div><b>Importer le rapport des soldes</b><span>Facultatif : le montant dû s'affiche alors dans l'encadré « À encaisser » du rapport.</span></div></li>
+              <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
-              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou « Imprimer tout ». Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
+              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles d'impression de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>
           </div>
           <div class="me-colonne">
@@ -639,9 +681,20 @@
             <p class="me-sauv"><b>Sauvegarde</b> Les données restent dans ce navigateur, sur ce poste : téléchargez régulièrement une sauvegarde (onglet Réglages).</p>
           </div>
         </div>
-      </section>
+      </details>
+
+      <footer class="acc-pied">
+        <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
+        <ul class="acc-horaires" aria-label="Horaires clés">
+          ${ctx.cfg.horaires.filter((h) => ctx.cfg.horairesValeurs[h.id]).map((h) => `
+            <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
+        </ul>
+        <span class="acc-pied-version">version ${esc(RDJ.VERSION || '')}</span>
+      </footer>
     </section>`;
   };
+  // mode d'emploi de l'accueil replié ou non (retenu sur ce poste, voir app.js)
+  try { V.modeEmploiReduit = localStorage.getItem('rdj.modeEmploi') === 'reduit'; } catch (e) { V.modeEmploiReduit = false; }
 
   const papier = (html) => `<div class="papier">${html}</div>`;
 
@@ -826,9 +879,10 @@
     return `
       <details class="carte types-ch"${V.typesOuvert ? ' open' : ''}>
         <summary>
-          <b>Types de chambre</b>
+          <b>Chambres</b>
+          <label class="tc-nombre" title="Sert au calcul du taux d'occupation"><input type="number" min="1" data-reglage="nbChambres" value="${ctx.cfg.nbChambres}" aria-label="Nombre de chambres de l'hôtel"> chambres <small>(taux d'occupation)</small></label>
           <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans" title="${esc(sans.join(', '))}">${sans.length} chambre${sans.length > 1 ? 's' : ''} sans type</span>` : ''}</span>
-          <span class="tc-ouvrir">Modifier</span>
+          <span class="tc-ouvrir">Modifier les types</span>
         </summary>
         <div class="tc-etages">
           ${etages.map((e) => `
@@ -849,16 +903,13 @@
     const sauv = ctx.etat.derniereSauvegarde;
     return `
     <section class="ecran reglages">
-      ${teteEcran('reglages', 'Réglages', 'Version web ' + esc(RDJ.VERSION || '') + ' · reprise du classeur Excel v7.1',
+      ${teteEcran('reglages', 'Réglages', 'Version ' + esc(RDJ.VERSION || ''),
         'Les changements sont enregistrés tout de suite.', '')}
 
       <div class="rg-grille">
         <section class="carte rg-carte">
-          <h3>Hôtel</h3>
+          <h3>En-tête</h3>
           <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
-          <div class="rg-ligne">
-            <label>Chambres de l'hôtel<input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"><small>pour le taux d'occupation</small></label>
-          </div>
         </section>
 
         <section class="carte rg-carte">
@@ -874,6 +925,24 @@
         </section>
       </div>
 
+      <section class="carte rg-carte rg-horaires">
+        <h3>Pied de page</h3>
+        <p class="aide">Horaires clés affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
+        <div class="rg-horaires-grille">
+          ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
+        </div>
+      </section>
+
+      <section class="carte rg-carte rg-horaires rg-cuisson">
+        <h3>Cuisson PDJ</h3>
+        <p class="aide">Croissants et pains au chocolat : quantité arrondie à la plaque entière, puis répartie en fournées. La réserve (le reste) n'est cuite que si le buffet baisse.</p>
+        <div class="rg-horaires-grille">
+          <label>Pièces par plaque<input type="number" min="1" max="60" data-reglage="piecesParPlaque" value="${r.piecesParPlaque}"></label>
+          <label>Fournée de ${esc(r.fournees[0].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee1" value="${r.fournees[0].part}"></label>
+          <label>Fournée de ${esc(r.fournees[1].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee2" value="${r.fournees[1].part}"><small>réserve : ${r.fournees[2].part} %</small></label>
+        </div>
+      </section>
+
       <section class="carte rg-carte rg-impressions">
         <h3>Impressions de la nuit</h3>
         <p class="aide">Feuilles imprimées par le bandeau « Impressions de la nuit » de l'accueil, dans cet ordre.</p>
@@ -884,6 +953,8 @@
               ${k === 'fdc' ? `<label class="rg-ex">× <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}" aria-label="Exemplaires de la feuille de chambre"></label>` : ''}
             </div>`).join('')}
         </div>
+        <label class="rg-case"><input type="checkbox" data-reglage="rectoVerso"${r.rectoVerso ? ' checked' : ''}>
+          <span><b>L'imprimante imprime en recto verso</b><small>Chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière). Le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et peuvent partager une feuille (rapport au recto, cuisson au verso).</small></span></label>
       </section>
 
       ${typesChambresReglages(ctx)}

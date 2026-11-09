@@ -208,7 +208,8 @@ button, input, select { font: inherit; }
 .tuile.alerte b { color: var(--rouge); }
 .actions-accueil { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
 /* Accueil : cartes d'import, chiffres par groupe, impression — même style que le bandeau (vert / marine) */
-.acc-imports { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 6px; }
+.acc-imports { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 6px; }
+@media (max-width: 1250px) { .acc-imports { grid-template-columns: 1fr 1fr; } }
 .acc-import {
   display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface);
   border: 1px solid var(--bord); border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.05);
@@ -244,18 +245,7 @@ button, input, select { font: inherit; }
 .acc-valeur.alerte b { color: var(--rouge); }
 .acc-valeur.ok b { color: var(--accent); }
 
-.acc-imprimer {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; padding: 14px 18px;
-  border-radius: 14px; color: #fff; background: linear-gradient(120deg, #157f77 0%, #1c2a48 100%);
-  width: 100%; border: 0; font: inherit; text-align: left; cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-.acc-imprimer:hover { filter: brightness(1.08); box-shadow: 0 6px 18px rgba(28,42,72,.25); transform: translateY(-1px); }
-.acc-imprimer:active { transform: translateY(0); box-shadow: none; }
-.acc-imprimer:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
-.acc-imprimer .ai-texte { display: flex; flex-direction: column; gap: 2px; }
-.acc-imprimer b { font-size: 15px; }
-.acc-imprimer .ai-texte span { font-size: 13px; color: #d9f2ee; }@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-imports, .acc-chiffres { grid-template-columns: 1fr; } }
 
 /* En-tête commun des onglets (titre + nuit + aide à gauche, boutons à droite) */
@@ -484,7 +474,7 @@ body.apercu-ouvert { overflow: hidden; }
 body.depot .voile-depot { display: grid; }
 
 /* Cuisson PDJ : panneau de saisie */
-.cuisson-saisie { display: grid; grid-template-columns: minmax(240px, 320px) minmax(360px, 560px); gap: 14px; margin-bottom: 16px; align-items: stretch; }
+.cuisson-saisie { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(360px, 2fr); gap: 14px; margin-bottom: 16px; align-items: stretch; }
 @media (max-width: 720px) { .cuisson-saisie { grid-template-columns: 1fr; } }
 .cs-carte {
   background: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: 14px 16px;
@@ -529,6 +519,10 @@ body.depot .voile-depot { display: grid; }
 .types-ch summary > b { font-size: 15px; color: var(--marine); }
 .types-ch .tc-compte { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: #444; }
 .types-ch .tc-sans { color: var(--rouge); }
+/* nombre de chambres de l'hôtel (taux d'occupation), dans la même carte que les types */
+.types-ch .tc-nombre { display: inline-flex; flex-direction: row; align-items: center; max-width: none; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: var(--marine); cursor: default; }
+.types-ch .tc-nombre input { width: 64px; padding: 4px 8px; font-size: 14px; font-weight: 700; }
+.types-ch .tc-nombre small { font-weight: 400; color: var(--doux); }
 .types-ch .tc-ouvrir { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); }
 .types-ch .tc-ouvrir::after { content: " ▾"; }
 .types-ch[open] .tc-ouvrir { font-size: 0; }
@@ -607,9 +601,6 @@ body.depot .voile-depot { display: grid; }
 .acc-valeur small { color: var(--marine); opacity: .7; }
 .acc-valeur.ok b { color: var(--menthe-fonce); }
 
-.acc-imprimer { background: var(--marine); border-radius: 18px; transition: background .15s; }
-.acc-imprimer:hover { background: #26385e; filter: none; box-shadow: none; transform: none; }
-.acc-imprimer .ai-texte span { color: #c9d3e6; }
 
 /* en-tête des onglets : fond pastel propre à chaque onglet */
 .ecran-tete { border: 0; border-radius: 18px; box-shadow: none; padding: 16px 20px; background: var(--sauge); }
@@ -711,6 +702,36 @@ body.depot .voile-depot { display: grid; }
 .reglages .carte.rg-carte .rg-feuille label.rg-ex { gap: 4px; font-weight: 500; cursor: default; }
 .rg-carte .rg-feuille .rg-ex input { width: 52px; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,.85); font-size: 14px; }
 
+/* accueil : mode d'emploi repliable */
+.me-bloc > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+.me-bloc > summary::-webkit-details-marker { display: none; }
+.me-bloc > summary h3 { margin: 0; }
+.me-bloc[open] > summary { margin-bottom: 14px; }
+.me-bascule { font-size: 13px; font-weight: 600; color: var(--accent); padding: 4px 10px; border-radius: 999px; transition: background .15s; }
+.me-bascule::after { content: "Afficher ▾"; }
+.me-bloc[open] .me-bascule::after { content: "Réduire ▴"; }
+.me-bloc > summary:hover .me-bascule { background: var(--menthe); }
+
+/* accueil : pied de page qui rappelle l'en-tête (vert Campanile à plat, logo, hôtel, nuit) */
+.acc-pied {
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 16px; padding: 28px 34px; min-height: 120px;
+  border-radius: 22px; background: var(--accent); color: #fff;
+}
+.acc-pied-logo { display: flex; align-items: center; height: 58px; padding: 6px 16px; border-radius: 14px; background: #fff; flex: none; }
+.acc-pied-logo img { height: 44px; width: auto; display: block; }
+.acc-pied-version { margin-left: auto; font-size: 13px; opacity: .8; white-space: nowrap; align-self: flex-end; }
+.acc-horaires { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.acc-horaires li { display: flex; flex-direction: column; gap: 2px; min-width: 130px; padding: 10px 16px; border-radius: 16px; background: rgba(255,255,255,.14); }
+.acc-horaires span { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.acc-horaires b { font-size: 17px; font-weight: 700; white-space: nowrap; }
+
+/* réglages : horaires clés */
+.reglages .carte.rg-carte.rg-horaires { margin: 0 0 14px; }
+.rg-horaires .aide { margin: 0 0 12px; }
+.rg-horaires-grille { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 960px) { .rg-horaires-grille { grid-template-columns: 1fr 1fr; } }
+.reglages .carte.rg-carte .rg-horaires-grille label { margin: 0; }
+
 /* boîte de dialogue et aperçu */
 #dialogue { border-radius: 20px; }
 .apercu-barre { box-shadow: none; }
@@ -744,16 +765,25 @@ body.depot .voile-depot { display: grid; }
 @media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-chiffres { grid-template-columns: 1fr; } }
 
-/* accueil : bandeau des impressions en pastel, avec un vrai bouton */
-.acc-imprimer { background: var(--perle); color: var(--marine); }
-.acc-imprimer:hover { background: #dbe2ee; }
-.acc-imprimer .ai-texte span { color: var(--perle-fonce); }
-.acc-imprimer .ai-bouton {
-  flex: none; padding: 9px 16px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
-  transition: background .15s;
-}
-.acc-imprimer:hover .ai-bouton { background: var(--accent-fonce); }
-.acc-imprimer:focus-visible { outline-color: #7fe3cf; }
+/* accueil : impressions en pastilles — « Tout imprimer » en vert Campanile, puis une pastille par feuille
+   dans la couleur de son onglet (ouvre l'aperçu de cette feuille) */
+.acc-impr { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 16px; padding: 14px 18px; border-radius: 18px; background: var(--surface); }
+.acc-impr-pastilles { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
+.acc-impr button { font: inherit; border: 0; cursor: pointer; border-radius: 999px; transition: background .15s, filter .15s, transform .1s ease-out; }
+.acc-impr button:active { transform: scale(.97); }
+.impr-tout { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px 8px 12px; background: var(--accent); color: #fff; }
+.impr-tout:hover { background: var(--accent-fonce); }
+.impr-tout b { font-size: 14px; }
+.impr-tout small { font-size: 12px; opacity: .85; white-space: nowrap; }
+.impr-tout .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.impr-feuille { padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--marine); background: var(--fond); }
+.impr-feuille:hover { filter: saturate(1.3) brightness(.97); }
+.impr-feuille.f-rapport { background: var(--peche); color: var(--peche-fonce); }
+.impr-feuille.f-fdc { background: var(--ciel); color: var(--ciel-fonce); }
+.impr-feuille.f-pdj { background: var(--beurre); color: var(--beurre-fonce); }
+.impr-feuille.f-plan { background: var(--menthe); color: var(--menthe-fonce); }
+.impr-feuille.f-recap { background: var(--lilas); color: var(--lilas-fonce); }
+@media (max-width: 1500px) { .impr-tout small { display: none; } }  /* détail au survol (title) sur les écrans moins larges */
 
 /* réglages : chambres sans type en pastille, au lieu d'une liste rouge */
 .types-ch .tc-sans {
@@ -767,8 +797,8 @@ body.depot .voile-depot { display: grid; }
 }
 
 /* réponse immédiate à l'appui, anneau visible au clavier */
-.btn, #onglets button, .acc-groupe, .acc-imprimer, .pastille.bouton, .cs-pas, .cs-segments label { transition: background .15s, transform .1s ease-out, filter .15s; }
-.btn:active:not(:disabled), #onglets button:active, .acc-imprimer:active, .pastille.bouton:active, .cs-pas:active { transform: scale(.97); }
+.btn, #onglets button, .acc-groupe, .pastille.bouton, .cs-pas, .cs-segments label { transition: background .15s, transform .1s ease-out, filter .15s; }
+.btn:active:not(:disabled), #onglets button:active, .pastille.bouton:active, .cs-pas:active { transform: scale(.97); }
 .acc-groupe:active { transform: scale(.98); }
 :focus-visible { outline: 3px solid #7fe3cf; outline-offset: 2px; }
 .btn:focus:not(:focus-visible), #onglets button:focus:not(:focus-visible) { outline: none; }
@@ -833,8 +863,10 @@ body.depot .voile-depot { display: grid; }
 .r-enc-grp h3 { color: var(--marine); flex-wrap: wrap; row-gap: 0; }
 .r-enc-grp h3 small { flex-basis: 100%; }
 .r-enc-grp .grp { font-size: 8pt; line-height: 1.35; }
-.r-grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; align-items: start; }
-.r-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8pt; }
+/* la grille prend toute la hauteur libre de la page : les lignes s'agrandissent quand il y a peu de chambres */
+.r-grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; align-items: stretch; flex: 1 1 auto; min-height: 0; }
+.r-table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8pt; }
+.r-table thead tr { height: 4.5mm; }
 .r-table.petite { font-size: 7pt; }
 .r-table th { background: var(--marine); color: #fff; font-weight: 600; font-size: 7pt; padding: .8mm .5mm; }
 .r-table td { border: .2mm solid #b5b5b5; padding: 0 .8mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -894,9 +926,10 @@ body.depot .voile-depot { display: grid; }
 .pl-taux > i { display: inline-block; width: 22mm; height: 1.8mm; border-radius: 1mm; background: #e3e8ee; overflow: hidden; }
 .pl-taux > i > i { display: block; height: 100%; background: var(--anneau-taux); border-radius: 1mm; }
 /* mêmes couleurs que l'anneau de l'accueil (menthe / ambre / corail) */
-.pl-taux.haut { --anneau-taux: #7fe3cf; }
+/* remplissage de l'étage : échelle inversée par rapport à l'accueil — étage plein = corail, peu rempli = menthe */
+.pl-taux.haut { --anneau-taux: #ff9f8f; }
 .pl-taux.moyen { --anneau-taux: #ffd27a; }
-.pl-taux.bas { --anneau-taux: #ff9f8f; }
+.pl-taux.bas { --anneau-taux: #7fe3cf; }
 .pl-taux > i { box-shadow: inset 0 0 0 .2mm rgba(28,42,72,.15); }
 .nb .pl-taux { color: #000; }
 .nb .pl-taux > i { background: #fff; border: .25mm solid #000; }
@@ -928,7 +961,11 @@ body.depot .voile-depot { display: grid; }
 }
 .pl-cage span { font-size: 5.6pt; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; line-height: 1.3; background: rgba(255,255,255,.85); padding: .6mm .3mm; border-radius: .5mm; }
 .nb .pl-cage { border-color: #000; color: #000; background: repeating-linear-gradient(0deg, #fff 0 1.6mm, #999 1.6mm 1.9mm); }
-.pl-rang { display: grid; grid-template-columns: repeat(var(--cols), 17.8mm); gap: .8mm; min-height: 12.4mm; }
+/* cases de largeur souple : le plan occupe toute la largeur de la feuille ; chaque partie (avant / après la cage)
+   prend une place proportionnelle à son nombre de colonnes, la cage reste alignée d'un étage à l'autre */
+.pl-rang { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: .8mm; min-height: 12.4mm; }
+.pl-ailes > .pl-bloc { flex: 1 1 0; min-width: 0; }
+.pl-avec-cage > .pl-aile, .pl-avec-cage > .pl-zone { flex: var(--cols) 1 0; min-width: 0; }
 .pl-couloir { display: flex; align-items: center; justify-content: center; margin: .5mm 0; background: repeating-linear-gradient(90deg, #e3e8ee 0 3mm, #f2f5f8 3mm 6mm); border-radius: .6mm; }
 .pl-couloir span { font-size: 5.5pt; color: #555; letter-spacing: .08em; text-transform: uppercase; }
 .pl-ch { height: 12.4mm; border: .35mm solid; border-radius: 1mm; padding: .6mm 1mm; display: flex; flex-direction: column; overflow: hidden; }
@@ -956,14 +993,15 @@ body.depot .voile-depot { display: grid; }
 .s-sale .pl-nom { font-weight: 700; }
 .pl-ch.clic { cursor: pointer; user-select: none; }
 #infobulle p.astuce { color: #666; font-weight: 400; font-style: italic; }
-.s-hs { background: repeating-linear-gradient(-45deg, #e5e7eb 0 1.2mm, #fff 1.2mm 2.4mm); border-color: #6b7280; color: #374151; }
+/* hors service (chambre bloquée) : hachures rouges à l'écran, hachures grises à l'impression (voir .nb) */
+.s-hs { background: repeating-linear-gradient(-45deg, #f4a3a3 0 1.2mm, #fff5f5 1.2mm 2.4mm); border-color: #b42318; color: #8a1c14; }
 .pl-local {
   align-items: center; justify-content: center; text-align: center; gap: .5mm;
   background: #d1d5db; border-color: #9ca3af; color: #4b5563;
 }
 .pl-local b { font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; }
 /* locaux sur toute la hauteur de l'étage, à droite de la cage (accueil, combles…) */
-.pl-zone { display: grid; grid-template-columns: repeat(var(--cols), 17.8mm); gap: .8mm; padding: .8mm; border: .3mm solid #9aa7b5; border-radius: 1mm; background: #fff; }
+.pl-zone { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: .8mm; padding: .8mm; border: .3mm solid #9aa7b5; border-radius: 1mm; background: #fff; }
 .pl-zone .pl-local { height: auto; }
 .nb .pl-zone { border-color: #000; }
 .pl-local span { font-size: 6pt; opacity: .8; }
@@ -1053,7 +1091,10 @@ body.depot .voile-depot { display: grid; }
 .f-grille .sep { border-left: 1.2mm solid #000; }
 .f-grille td.noire { background: #000; }
 .f-grille td.nv { font-size: 9pt; }
-.f-grille td.corrige { background: #fff2b3; }
+/* case changée à la main : gris léger, à l'écran comme sur papier */
+.f-grille td.corrige { background: #e6e8eb; }
+/* chambre hors service : rouge pastel à l'écran (hachures grises à l'impression, voir .nb) */
+.f-grille td.hs { background: #fadcdc; color: #9b2c2c; }
 .f-grille td.clic:hover { outline: .5mm solid var(--accent); outline-offset: -.5mm; }
 .f-corr { margin-top: 3mm; border: .4mm solid #000; min-height: 18mm; padding: 1.5mm 3mm; font-size: 9pt; line-height: 1.45; }
 .f-corr-titre { font-weight: 700; text-decoration: underline; margin-bottom: .5mm; }
@@ -1089,7 +1130,19 @@ body.depot .voile-depot { display: grid; }
 .p-table td.q b { display: inline-block; min-width: 14mm; font-size: 17pt; color: var(--marine); }
 .p-cuisson .four span { display: inline-block; margin: 0 .6mm; padding: .5mm 2mm; border: .3mm solid #b9ddd8; border-radius: 3mm; font-size: 9pt; background: #fff; white-space: nowrap; }
 .p-cuisson .four em { color: #999; font-style: normal; }
-.p-autres td.mep { text-align: left; font-size: 9.5pt; }
+/* cuisson en fournées : total + une colonne par fournée, réserve en pointillés */
+.p-cuisson .q { width: auto; white-space: nowrap; }
+.p-cuisson td.q b { min-width: 0; font-size: 15pt; }
+.p-cuisson td.q small { display: block; font-size: 7.5pt; color: #555; line-height: 1.1; }
+.p-cuisson td.q em { color: #999; font-style: normal; }
+.p-cuisson td.tot { background: var(--marine-clair) !important; border-right: .3mm solid #9aa7b5; }
+.p-cuisson td.res { border-left: .3mm dashed #9aa7b5; }
+.p-cuisson td.res b { font-size: 12pt; color: #555; }
+.p-cuisson th.res { font-style: italic; }
+.p-fournees { margin: -3.5mm 0 5mm; font-size: 8.5pt; color: #333; }
+.nb .p-cuisson td.tot { background: #fff !important; border-right-color: #000; }
+.nb .p-cuisson td.res { border-left-color: #000; }
+.nb .p-cuisson td.q small, .nb .p-cuisson td.res b, .nb .p-fournees { color: #000; }.p-autres td.mep { text-align: left; font-size: 9.5pt; }
 .p-autres td.mep small { display: block; margin-top: .6mm; font-size: 8.5pt; font-style: italic; color: #555; }
 .p-note { border: .3mm solid #e0a84a; border-left: 2mm solid #e0a84a; background: #fffaf0; border-radius: 2mm; padding: 3mm 5mm; }
 .p-note h3 { margin: 0 0 1mm; font-size: 10pt; text-transform: uppercase; letter-spacing: .05em; color: #8a5a10; }
@@ -1137,6 +1190,7 @@ body.depot .voile-depot { display: grid; }
   .feuille.paysage { page: paysage; }
   .feuille.paysage { height: 209mm; }
   .feuille.portrait { height: auto; min-height: 0; }
+  .feuille.page-blanche { padding: 0; height: 1mm; }   /* verso laissé blanc (recto verso) */
   .feuille .clic:hover { outline: none; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
@@ -1178,7 +1232,8 @@ body.depot .voile-depot { display: grid; }
 .nb .r-enc-grp { border-color: #000; }
 .nb .r-encaisser h3 small, .nb .r-encaisser .aucune { color: #000; }
 .nb .r-tete, .nb .p-tete { border-bottom-color: #000; }
-.nb .f-grille td.corrige { background: none; }
+.nb .f-grille td.corrige { background: #dcdcdc; }  /* un peu plus soutenu que les cases vides de fin de colonne (#f2f2f2) */
+.nb .f-grille td.hs { background: repeating-linear-gradient(-45deg, #c8c8c8 0 .5mm, #fff .5mm 1.6mm); color: #000; }
 
 @media (max-width: 720px) {
   #vue { padding: 12px; }

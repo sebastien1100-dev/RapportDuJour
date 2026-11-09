@@ -7,9 +7,27 @@
 
   RDJ.CHANGELOG = [
     {
-      version: '3.4', date: '2026-11-09', titre: 'Feuilles plus grandes à l\'écran',
+      version: '3.8', date: '2026-11-09', titre: 'Feuilles plus grandes à l\'écran',
       changements: [
         ['amelioration', "Rapport, Femme de chambre et Plan de chambre : en « Ajuster à la fenêtre », la feuille prend au moins les deux tiers de la largeur de l'écran (sur un écran Full HD, elle était à peine plus large que la moitié). Si elle dépasse en hauteur, on fait défiler la page."],
+      ],
+    },
+    {
+      version: '3.7', date: '2026-11-09', titre: 'Rapport de maintenance : chambres bloquées',
+      changements: [
+        ['nouveau', "Menu « Importer ▾ » : troisième choix « Rapport de maintenance », facultatif. Les chambres bloquées qu'il contient passent hors service (HS) sur la feuille de chambre et le plan de chambre (hachuré rouge), pour la nuit en cours."],
+        ['nouveau', "Le motif du blocage s'affiche au survol de la chambre sur le plan, et en bas de la feuille de chambre imprimée (« Chambres bloquées (maintenance) »). Les chambres bloquées comptent dans le total HS."],
+        ['amelioration', "Le fichier est reconnu tout seul s'il est déposé dans la fenêtre (colonne Chambre avec un motif ou des dates). Une chambre dont le blocage est déjà terminé est ignorée ; une chambre bloquée mais occupée d'après le rapport clients présents garde son client et est signalée."],
+        ['amelioration', "Accueil : troisième carte d'import « Rapport de maintenance » ; le mode d'emploi mentionne les deux rapports facultatifs. Un double-clic sur la chambre (plan ou feuille) permet toujours de la remettre en service."],
+        ['amelioration', "Réglages : la carte « Hôtel » s'appelle « En-tête » (nom de l'hôtel affiché en haut de l'accueil et des feuilles) et « Horaires clés » s'appelle « Pied de page »."],
+        ['amelioration', "Réglages : « Types de chambre » devient « Chambres » et accueille le nombre de chambres de l'hôtel (pour le taux d'occupation), toujours visible même liste fermée ; le lien d'ouverture s'appelle « Modifier les types »."],
+        ['amelioration', "Réglages : l'en-tête indique simplement « Version 3.7 » (mention « reprise du classeur Excel v7.1 » retirée)."],
+        ['amelioration', "Plan de chambre : couleurs du taux de remplissage de chaque étage inversées : étage plein en corail, à moitié en ambre, peu rempli en menthe."],
+        ['amelioration', "Accueil : le bandeau « Impressions de la nuit » est remplacé par une ligne de pastilles. « Tout imprimer » (vert Campanile) imprime les feuilles choisies dans Réglages ; puis une pastille par feuille, dans la couleur de son onglet (Rapport du jour, Feuille de chambre ×5, Cuisson PDJ, Plan de chambre, Historique), qui ouvre l'aperçu de cette seule feuille."],
+        ['amelioration', "« Rapport des soldes » devient « Rapport des départs » partout : menu Importer, carte de l'accueil, mode d'emploi, messages et en-tête du rapport imprimé (« Départs : nom du fichier »)."],
+        ['amelioration', "Feuille de chambre : les cases HS sont en rouge pastel à l'écran (au lieu du gris) ; sur la feuille imprimée, en noir et blanc, elles sont hachurées."],
+      ],
+    }
       ],
     },
     {
@@ -19,6 +37,8 @@
         ['nouveau', "Plan de chambre : à droite de l'escalier, « Accueil / Restaurant » au RDC et, au 1er étage, « Local technique » puis « Combles », dessinés sur toute la hauteur de l'étage."],
         ['nouveau', "Types de chambre remplis pour les 81 chambres, d'après l'écran « Statut chambre » : 1K (258 à 265, 378 à 385), 2S (14 chambres), 1Q pour les autres, PMR pour 001 à 003. Un type changé dans Réglages reste prioritaire."],
         ['amelioration', "Plan de chambre : côté parking renommé « Côté McDonald's / parking »."],
+        ['correction', "Plan de chambre : le plan occupe toute la largeur de la feuille (plus de marge vide à droite) ; les cases s'élargissent et l'escalier reste aligné d'un étage à l'autre. Même chose pour le plan vierge."],
+        ['amelioration', "Plan de chambre : les chambres hors service (bloquées) sont en hachuré rouge à l'écran, dans le plan comme dans la légende et le compteur. À l'impression, elles restent hachurées en gris (noir et blanc)."],
       ],
     },
     {

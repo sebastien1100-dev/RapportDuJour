@@ -47,6 +47,14 @@
     egal('PDJ croissants business 55', RDJ.quantitePdj(croissant, 55, 'business'), 38);
     egal('PDJ croissants loisir 55', RDJ.quantitePdj(croissant, 55, 'loisir'), 52);
     egal('PDJ croissants mixte 100 (pas d\'arrondi parasite)', RDJ.quantitePdj(croissant, 100, 'mixte'), 75);
+    egal('plaques 44 pièces / 12', RDJ.plaques(44, 12), 4);
+    egal('plaques 48 pièces / 12', RDJ.plaques(48, 12), 4);
+    egal('plaques 0', RDJ.plaques(0, 12), 0);
+    egal('fournées 4 plaques 60/30/10', RDJ.fournees(4, [60, 30, 10]), [3, 1, 0]);
+    egal('fournées 10 plaques 60/30/10', RDJ.fournees(10, [60, 30, 10]), [6, 3, 1]);
+    egal('fournées 0 plaque', RDJ.fournees(0, [60, 30, 10]), [0, 0, 0]);
+    egal('fournées 7 plaques 100/0/0', RDJ.fournees(7, [100, 0, 0]), [7, 0, 0]);
+    egal('fournées 38 pièces 60/30/10 : chaque fournée a sa part', RDJ.fournees(38, [60, 30, 10]), [23, 12, 3]);
     egal('cycle FDC', ['', 'B', 'R', 'BR', 'HS', 'X'].map(RDJ.etatSuivant), ['B', 'R', 'BR', 'HS', '', 'B']);
     egal('correction = import -> supprimée', RDJ.correctionApres('B', 'B'), null);
     egal('correction vide sur chambre importée -> X', RDJ.correctionApres('', 'R'), 'X');
@@ -120,11 +128,15 @@
 
       // Types de chambre
       const tdef = RDJ.typesChambres(RDJ.CONFIG_DEFAUT.typesChambresDefaut, {});
-      egal('types : 001, 002, 003 PMR par défaut', tdef, { '001': 'PMR', '002': 'PMR', '003': 'PMR' });
-      egal('types : un réglage remplace le défaut, « — » efface', RDJ.typesChambres(RDJ.CONFIG_DEFAUT.typesChambresDefaut, { '003': '', '258': '1K' }), { '001': 'PMR', '002': 'PMR', '258': '1K' });
+      egal('types : les 81 chambres ont un type par défaut, 001-003 en PMR', [Object.keys(tdef).length, tdef['001'], tdef['002'], tdef['003']], [81, 'PMR', 'PMR', 'PMR']);
+      const tReg = { ...tdef, '258': '2S' };
+      delete tReg['003'];
+      egal('types : un réglage remplace le défaut, « — » efface', RDJ.typesChambres(RDJ.CONFIG_DEFAUT.typesChambresDefaut, { '003': '', '258': '2S' }), tReg);
       egal('type depuis la catégorie', ['BSTD----1Q', 'PSUP----1K', 'BSTD----2S', 'XYZ'].map((x) => RDJ.typeDepuisCategorie(x, RDJ.CONFIG_DEFAUT.typesChambre)), ['1Q', '1K', '2S', '']);
-      const compl = RDJ.completerTypes(tdef, res, RDJ.CONFIG_DEFAUT.typesChambre);
+      // complétion depuis l'import, à partir des seules PMR (comme avant que les 81 types soient renseignés)
+      const compl = RDJ.completerTypes({ '001': 'PMR', '002': 'PMR', '003': 'PMR' }, res, RDJ.CONFIG_DEFAUT.typesChambre);
       egal('compléter depuis l\'import : PMR gardés, 66 chambres complétées', [compl['001'], compl['258'], Object.keys(compl).length], [undefined, '1K', 66]);
+      egal('compléter depuis l\'import : rien à faire quand tout est typé', Object.keys(RDJ.completerTypes(tdef, res, RDJ.CONFIG_DEFAUT.typesChambre)).length, 0);
 
       // Chambres ajoutées à la main
       const libres = RDJ.chambresLibres(RDJ.CONFIG_DEFAUT.planFdc, res);
@@ -135,6 +147,21 @@
       egal('ajout : compté dans les chiffres', [cA.chambres, cA.clients, cA.departs, cA.pdj], [70, 85, 41, 57]);
       egal('ajout : à encaisser avec son montant', cA.aEncaisser.find((e) => e.chambre === libres[0]).montant, 75);
       egal('ajout : compté en B sur la feuille de chambre', RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, avec, nuit, {})[libres[0]].etat, 'B');
+
+      // Rapport de maintenance (chambres bloquées)
+      const lignesMaint = [['Rapport maintenance'], [], ['N° chambre', 'Motif', 'Début', 'Fin prévue'],
+        [libres[0], 'Fuite salle de bain', nuit, RDJ.jours(nuit, 2)], [libres[0], 'Clim', nuit, ''],
+        ['155', 'Ampoule', nuit, ''], [libres[1], 'Peinture', RDJ.jours(nuit, -5), RDJ.jours(nuit, -1)], ['', 'ligne vide', '', '']];
+      const mt = RDJ.lireMaintenance(lignesMaint, nuit, true);
+      egal('maintenance : chambres lues, motifs réunis, blocage terminé ignoré',
+        [Object.keys(mt.chambres).sort(), mt.chambres[libres[0]].motif, mt.terminees, mt.lignes],
+        [[libres[0], '155'].sort(), 'Fuite salle de bain ; Clim', [libres[1]], 4]);
+      egal('maintenance : un fichier sans motif ni date n\'est pas reconnu au glisser-déposer', RDJ.lireMaintenance([['Chambre'], ['112']], nuit, true).lignes, 0);
+      egal('maintenance : mais il l\'est par le menu Importer', RDJ.lireMaintenance([['Chambre'], [112]], nuit, false).chambres, { 112: { motif: '', fin: null } });
+      const efM = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, {}, mt.chambres);
+      egal('maintenance : chambre libre bloquée en HS, chambre occupée inchangée',
+        [efM[libres[0]].etat, efM[libres[0]].bloquee, efM[libres[0]].corrige, efM['155'].etat, efM['155'].bloquee], ['HS', true, false, 'B', true]);
+      egal('maintenance : une correction à la main l\'emporte', RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, { [libres[0]]: 'X' }, mt.chambres)[libres[0]].etat, '');
       egal('ajout : retiré si la chambre est dans l\'import', RDJ.nettoyerAjouts(res, [{ ...ajout, chambre: res[0].chambre }]).retires.length, 1);
       egal('ajout : l\'import n\'est pas modifié', res.length, 69);
 
@@ -145,13 +172,13 @@
       egal('plan auto : 81 chambres, 2 ailes par étage', [etg.reduce((s, e) => s + RDJ.chambresEtage(e).length, 0), etg.map((e) => e.ailes.length)], [81, [2, 2, 2, 2]]);
       const etgR = RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc, RDJ.CONFIG_DEFAUT.dispositionEtages);
       const rdc = etgR.find((e) => e.etage === 0);
-      egal('RDC selon le croquis : 1 couloir, 045→049 côté rue, 006→001 côté Mac Donald',
-        [rdc.ailes.length, rdc.ailes[0].haut.filter((c) => typeof c === 'string').join(' '), rdc.ailes[0].bas.filter((c) => typeof c === 'string').join(' ')], [1, '045 046 047 048 049', '006 005 004 003 002 001']);
+      egal('RDC (plan de la réception) : 1 couloir, 006 et 045→049 côté rue, 005→001 côté parking',
+        [rdc.ailes.length, rdc.ailes[0].haut.filter((c) => typeof c === 'string').join(' '), rdc.ailes[0].bas.filter((c) => typeof c === 'string').join(' ')], [1, '006 045 046 047 048 049', '005 004 003 002 001']);
       egal('disposition : toujours 81 chambres', etgR.reduce((s, e) => s + RDJ.chambresEtage(e).length, 0), 81);
       const a2 = etgR.find((e) => e.etage === 2).ailes[0];
-      egal('2e : cage entre 264 et 263 (rue) et entre 222 et 221 (Mac Donald)',
+      egal('2e : cage entre 265 et 266 (rue) et entre 223 et 224 (parking)',
         [RDJ.couperCage(a2.haut).map((p) => p[p.length - 1] && p[0] + '-' + p[p.length - 1]), RDJ.couperCage(a2.bas).map((p) => p[0] + '-' + p[p.length - 1])],
-        [['271-264', '263-258'], ['229-222', '221-216']]);
+        [['258-265', '266-271'], ['216-223', '224-229']]);
       egal('cage présente à tous les étages', etgR.map((e) => !!RDJ.couperCage(e.ailes[0].haut)[1]), [true, true, true, true]);
       egal('003 et 004 communicantes (dans les deux sens)', RDJ.communicantes(RDJ.CONFIG_DEFAUT.chambresCommunicantes), { '003': '004', '004': '003' });
       const bas3 = etgR.find((e) => e.etage === 3).ailes[0].bas;
@@ -159,7 +186,7 @@
       egal('disposition : chambre oubliée ajoutée à part', RDJ.planEtages(RDJ.CONFIG_DEFAUT.planFdc, { 0: [{ haut: ['045'], bas: ['001'] }] })
         .find((e) => e.etage === 0).ailes.length, 2);
       const er1 = etgR.find((e) => e.etage === 1).ailes;
-      egal('1er étage : 150-157 côté rue, 107-115 côté Mac Donald', [er1.length, er1[0].hautLib, RDJ.largeurRang(er1[0].haut), er1[0].basLib, RDJ.largeurRang(er1[0].bas)], [1, 'Côté rue', 8, 'Côté Mac Donald', 8]);
+      egal('1er étage : 150-157 côté rue, 107-115 côté parking', [er1.length, er1[0].hautLib, RDJ.largeurRang(er1[0].haut), er1[0].basLib, RDJ.largeurRang(er1[0].bas)], [1, 'Côté rue', 8, "Côté McDonald's / parking", 8]);
       const efdc = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, { [libres[0]]: 'HS' });
       const stp = Object.values(RDJ.statutsChambres(res, efdc, nuit));
       egal('plan : statuts = feuille de chambre', ['depart', 'recouche', 'libre', 'hs'].map((k) => stp.filter((s) => s.statut === k).length), [40, 29, 11, 1]);

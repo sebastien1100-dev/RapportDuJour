@@ -17,8 +17,18 @@
     if (r.nbChambres > 0) cfg.nbChambres = r.nbChambres;
     if (r.nbExemplairesFdc > 0) cfg.nbExemplairesFdc = r.nbExemplairesFdc;
     cfg.types = RDJ.typesChambres(cfg.typesChambresDefaut, r.typesChambres);
+    // cuisson PDJ : pièces par plaque, parts des deux premières fournées (réserve = reste)
+    if (r.piecesParPlaque > 0) cfg.piecesParPlaque = r.piecesParPlaque;
+    const parts = cfg.fournees.map((f) => f.part);
+    if (Number.isFinite(r.fournee1)) parts[0] = r.fournee1;
+    if (Number.isFinite(r.fournee2)) parts[1] = r.fournee2;
+    parts[2] = Math.max(0, 100 - parts[0] - parts[1]);
+    cfg.fournees = cfg.fournees.map((f, i) => ({ ...f, part: parts[i] }));
     // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
+    cfg.rectoVerso = !!r.rectoVerso;
     cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, recap: false, ...(r.impressionNuit || {}) };
+    // horaires clés (pied de page de l'accueil) : valeur saisie dans Réglages, sinon valeur de départ ; '' = masqué
+    cfg.horairesValeurs = Object.fromEntries(cfg.horaires.map((h) => [h.id, (r.horaires && h.id in r.horaires) ? r.horaires[h.id] : h.defaut]));
     return cfg;
   }
 
@@ -36,10 +46,12 @@
     const eff = RDJ.appliquerModifs(base, modifs, nuit);
     const chiffres = RDJ.chiffres(eff, nuit, cfg.nbChambres);
     const fdc = etat.fdc.nuit === nuit ? etat.fdc : { corrections: {}, nv: {} };
-    const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections);
+    // chambres bloquées du rapport de maintenance, s'il a été importé pour cette nuit
+    const maintenance = etat.maintenance && etat.maintenance.nuit === nuit ? etat.maintenance : null;
+    const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections, maintenance && maintenance.chambres);
     const pdjManuel = etat.pdj.nombre !== null && etat.pdj.nombre !== undefined;
     return {
-      etat, cfg, raw, nuit, modifs, soldes, ajouts, base, eff, chiffres, fdc, etatsFdc,
+      etat, cfg, raw, nuit, modifs, soldes, maintenance, ajouts, base, eff, chiffres, fdc, etatsFdc,
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
       grille: RDJ.grilleRapport(eff, nuit),
@@ -190,8 +202,11 @@
       return false;
     }
     const lu = RDJ.lireExport(lignes);
-    // pas le rapport clients présents mais un rapport des soldes (glisser-déposer) : on l'importe comme tel
+    // pas le rapport clients présents mais un rapport des soldes ou de maintenance (glisser-déposer) : on l'importe comme tel
     if (lu.manquants.length && RDJ.lireSoldes(lignes).lignes) return enregistrerSoldes(fichier, RDJ.lireSoldes(lignes));
+    if (lu.manquants.length && RDJ.lireMaintenance(lignes, contexte().nuit, true).lignes) {
+      return enregistrerMaintenance(fichier, RDJ.lireMaintenance(lignes, contexte().nuit, true));
+    }
     if (lu.manquants.length) {
       notice('Ce fichier ne ressemble pas au rapport du jour.\nColonnes introuvables : ' + lu.manquants.join(', '), 'erreur');
       return false;
@@ -243,7 +258,7 @@
     }
     const s = RDJ.lireSoldes(lignes);
     if (!s.lignes) {
-      notice("Ce fichier ne ressemble pas au rapport des soldes.\nIl faut une colonne de montant (Solde, Montant dû, Reste à payer, Balance…) et une colonne Chambre ou Réservation.", 'erreur');
+      notice("Ce fichier ne ressemble pas au rapport des départs.\nIl faut une colonne de montant (Solde, Montant dû, Reste à payer, Balance…) et une colonne Chambre ou Réservation.", 'erreur');
       return false;
     }
     return enregistrerSoldes(fichier, s);
@@ -257,12 +272,51 @@
     const ctx = contexte();
     const avecMontant = ctx.chiffres.aEncaisser.filter((e) => e.montant !== null).length;
     aller('rapport');
-    notice(s.lignes + ' ligne(s) de solde importée(s) (' + fichier.name + ').\n' +
+    notice('Rapport des départs importé : ' + s.lignes + ' ligne(s) de montant dû (' + fichier.name + ').\n' +
       (ctx.raw.length
         ? avecMontant + ' / ' + ctx.chiffres.aEncaisser.length + ' départ(s) non payé(s) ont maintenant leur montant dû' +
           (ctx.chiffres.totalDu !== null ? ' · total dû ' + RDJ.formatMontant(ctx.chiffres.totalDu) : '') + '.'
         : "Importez aussi le rapport clients présents pour voir les montants sur le rapport."),
       ctx.raw.length && avecMontant < ctx.chiffres.aEncaisser.length ? 'alerte' : 'ok');
+    return true;
+  }
+
+  /* ---------- Import du rapport de maintenance (chambres bloquées, facultatif) ----------
+     Les chambres bloquées passent en HS sur la feuille de chambre et le plan, pour la nuit en cours. */
+
+  async function importerMaintenance(fichier) {
+    let lignes;
+    try {
+      lignes = await RDJ.lireFichierTableur(fichier);
+    } catch (err) {
+      notice('Import impossible : ' + err.message, 'erreur');
+      return false;
+    }
+    const m = RDJ.lireMaintenance(lignes, contexte().nuit, false);
+    if (!m.lignes) {
+      notice("Ce fichier ne ressemble pas au rapport de maintenance.\nIl faut une colonne Chambre (avec, si possible, le motif et les dates du blocage).", 'erreur');
+      return false;
+    }
+    return enregistrerMaintenance(fichier, m);
+  }
+  RDJ.importerMaintenance = importerMaintenance; // utilisé par les tests
+
+  function enregistrerMaintenance(fichier, m) {
+    const nuit = contexte().nuit;
+    etat.maintenance = { fichier: fichier.name, importeLe: RDJ.maintenantLocal(), nuit, chambres: m.chambres };
+    enregistrer();
+    const ctx = contexte();
+    const nos = Object.keys(m.chambres).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    const horsPlan = nos.filter((k) => !(k in ctx.etatsFdc));
+    const occupees = nos.filter((k) => ctx.etatsFdc[k] && ctx.etatsFdc[k].base !== 'HS');
+    const hs = nos.filter((k) => ctx.etatsFdc[k] && ctx.etatsFdc[k].base === 'HS');
+    let bilan = 'Rapport de maintenance importé (' + fichier.name + ').\n' +
+      (hs.length ? hs.length + ' chambre(s) bloquée(s), hors service sur la feuille de chambre et le plan : ' + hs.join(', ') + '.' : 'Aucune chambre bloquée pour cette nuit.');
+    if (occupees.length) bilan += '\nBloquées mais occupées d\'après le rapport clients présents (laissées telles quelles) : ' + occupees.join(', ');
+    if (horsPlan.length) bilan += '\nChambres inconnues du plan : ' + horsPlan.join(', ');
+    if (m.terminees.length) bilan += '\nBlocage déjà terminé (ignorées) : ' + m.terminees.join(', ');
+    aller('plan');
+    notice(bilan, occupees.length || horsPlan.length ? 'alerte' : 'ok');
     return true;
   }
 
@@ -449,11 +503,25 @@
   window.addEventListener('afterprint', () => { $('#impression').innerHTML = ''; });
   const repeter = (html, n) => Array.from({ length: n }, () => html);
 
+  /* Recto verso (Réglages) : le navigateur ne choisit pas le recto verso, c'est l'imprimante.
+     Quand elle imprime des deux côtés, chaque feuille de chambre doit rester seule sur sa feuille :
+     elle commence sur un recto et son verso est une page blanche. Les autres feuilles se suivent. */
+  const PAGE_BLANCHE = '<div class="feuille portrait page-blanche"></div>';
+  function rectoSeul(feuilles, dejaImprimees) {
+    const res = [];
+    if ((dejaImprimees || 0) % 2 === 1) res.push(PAGE_BLANCHE); // commencer sur un recto
+    feuilles.forEach((f, i) => { res.push(f); if (i < feuilles.length - 1) res.push(PAGE_BLANCHE); }); // pas de page blanche tout à la fin
+    return res;
+  }
+  const rectoVerso = () => !!(etat.reglages && etat.reglages.rectoVerso);
+  /** Exemplaires de la feuille de chambre, avec un verso blanc si l'imprimante est en recto verso. */
+  const copiesFdc = (html, n) => (rectoVerso() ? rectoSeul(repeter(html, n)) : repeter(html, n));
+
   /* ---------- Aperçu avant impression ----------
      Montre la feuille telle qu'elle sortira (noir et blanc, A4), réduite pour tenir dans la fenêtre. */
   let apercuImprimer = null;
 
-  function apercu(titre, feuille, copies) {
+  function apercu(titre, feuille, copies, rectoSeulFdc) {
     const esc = RDJ.vues.esc;
     const paysage = feuille.includes('feuille paysage');
     const a = $('#apercu');
@@ -461,7 +529,7 @@
       <div class="apercu-barre">
         <div class="apercu-titre">
           <b>Aperçu avant impression · ${esc(titre)}</b>
-          <span>A4 ${paysage ? 'paysage' : 'portrait'} · noir et blanc · ${copies} exemplaire${copies > 1 ? 's' : ''}</span>
+          <span>A4 ${paysage ? 'paysage' : 'portrait'} · noir et blanc · ${copies} exemplaire${copies > 1 ? 's' : ''}${rectoSeulFdc && rectoVerso() ? ' · recto seul (verso blanc)' : ''}</span>
         </div>
         <div class="apercu-boutons">
           <button class="btn" data-action="apercu-fermer">Fermer</button>
@@ -469,7 +537,7 @@
         </div>
       </div>
       <div class="apercu-zone"><div class="apercu-page nb">${feuille}</div></div>`;
-    apercuImprimer = () => imprimer(repeter(feuille, copies));
+    apercuImprimer = () => imprimer(rectoSeulFdc ? copiesFdc(feuille, copies) : repeter(feuille, copies));
     a.hidden = false;
     document.body.classList.add('apercu-ouvert');
     ajusterApercu();
@@ -502,6 +570,7 @@
   const ACTIONS = {
     importer: () => { fermerMenuImport(); $('#fichier-import').click(); },
     'importer-soldes': () => { fermerMenuImport(); $('#fichier-soldes').click(); },
+    'importer-maintenance': () => { fermerMenuImport(); $('#fichier-maintenance').click(); },
     'menu-import': () => {
       const m = $('#menu-import');
       m.hidden = !m.hidden;
@@ -524,25 +593,30 @@
     'imprimer-tout': () => {
       const ctx = contexte();
       const choix = ctx.cfg.impressionNuit;
-      const feuilles = [
+      const fdc = choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : [];
+      const autres = [
         ...(choix.rapport ? [RDJ.vues.feuilleRapport(ctx)] : []),
-        ...(choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : []),
         ...(choix.pdj ? [RDJ.vues.feuillePdj(ctx)] : []),
         ...(choix.plan ? [RDJ.vues.feuillePlan(ctx)] : []),
         ...(choix.recap ? [RDJ.vues.feuilleRecap(ctx)] : []),
       ];
+      // recto verso : rapport, cuisson, plan et historique d'abord (ils partagent les feuilles),
+      // puis chaque feuille de chambre seule sur sa feuille
+      const feuilles = rectoVerso()
+        ? [...autres, ...rectoSeul(fdc, autres.length)]
+        : [...autres.slice(0, choix.rapport ? 1 : 0), ...fdc, ...autres.slice(choix.rapport ? 1 : 0)];
       if (!feuilles.length) return notice('Aucune feuille cochée pour les impressions de la nuit (onglet Réglages).', 'alerte');
       imprimer(feuilles);
     },
     'apercu-rapport': () => apercu('Rapport du jour', RDJ.vues.feuilleRapport(contexte()), 1),
-    'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc); },
+    'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc, true); },
     'apercu-pdj': () => apercu('Cuisson PDJ', RDJ.vues.feuillePdj(contexte()), 1),
     'apercu-recap': () => apercu('Historique', RDJ.vues.feuilleRecap(contexte()), 1),
     'apercu-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge :", saisie: '1', type: 'number', ok: 'Voir l\'aperçu' });
       const n = parseInt(rep, 10);
       if (!(n >= 1 && n <= 50)) return;
-      apercu('Feuille de chambre vierge', RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n);
+      apercu('Feuille de chambre vierge', RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n, true);
     },
     'apercu-plan': () => apercu('Plan de chambre', RDJ.vues.feuillePlan(contexte()), 1),
     'imprimer-plan': () => imprimer([RDJ.vues.feuillePlan(contexte())]),
@@ -557,12 +631,12 @@
     'apercu-imprimer': () => { const f = apercuImprimer; fermerApercu(); if (f) f(); },
 
     'imprimer-rapport': () => imprimer([RDJ.vues.feuilleRapport(contexte())]),
-    'imprimer-fdc': () => { const ctx = contexte(); imprimer(repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc)); },
+    'imprimer-fdc': () => { const ctx = contexte(); imprimer(copiesFdc(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc)); },
     'imprimer-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge à imprimer :", saisie: '1', type: 'number', ok: 'Imprimer' });
       const n = parseInt(rep, 10);
       if (!(n >= 1 && n <= 50)) return;
-      imprimer(repeter(RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n));
+      imprimer(copiesFdc(RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n));
     },
     'imprimer-pdj': () => imprimer([RDJ.vues.feuillePdj(contexte())]),
     'imprimer-recap': () => imprimer([RDJ.vues.feuilleRecap(contexte())]),
@@ -689,7 +763,20 @@
       const k = t.dataset.reglage;
       if (k === 'hotel') etat.reglages.hotel = t.value.trim() || undefined;
       else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
+      else if (k === 'rectoVerso') etat.reglages.rectoVerso = t.checked || undefined;
+      else if (k.startsWith('horaire-')) etat.reglages.horaires = { ...(etat.reglages.horaires || {}), [k.slice(8)]: t.value.trim() };
       else if (k.startsWith('impression-')) etat.reglages.impressionNuit = { ...(etat.reglages.impressionNuit || {}), [k.slice(11)]: t.checked };
+      else if (k === 'fournee1' || k === 'fournee2') {
+        // pourcentages : 0 permis ; les deux fournées ensemble ne dépassent pas 100 %
+        const n = parseInt(t.value, 10);
+        let v = n >= 0 ? Math.min(n, 100) : undefined;
+        if (v !== undefined) {
+          const autre = k === 'fournee1' ? 'fournee2' : 'fournee1';
+          const pAutre = Number.isFinite(etat.reglages[autre]) ? etat.reglages[autre] : RDJ.CONFIG_DEFAUT.fournees[autre === 'fournee1' ? 0 : 1].part;
+          v = Math.min(v, 100 - pAutre);
+        }
+        etat.reglages[k] = v;
+      }
       else { const n = parseInt(t.value, 10); etat.reglages[k] = n > 0 ? n : undefined; }
     } else if (t.id === 'fichier-import') {
       const f = t.files[0];
@@ -700,6 +787,11 @@
       const f = t.files[0];
       t.value = '';
       if (f) importerSoldes(f);
+      return;
+    } else if (t.id === 'fichier-maintenance') {
+      const f = t.files[0];
+      t.value = '';
+      if (f) importerMaintenance(f);
       return;
     } else if (t.id === 'fichier-restaurer') {
       const f = t.files[0];
@@ -767,6 +859,11 @@
   // Réglages : la carte « Types de chambre » reste ouverte après une modification (on la referme à la main)
   document.addEventListener('toggle', (ev) => {
     if (ev.target.classList && ev.target.classList.contains('types-ch')) RDJ.vues.typesOuvert = ev.target.open;
+    // accueil : mode d'emploi replié / déplié, retenu sur ce poste
+    if (ev.target.classList && ev.target.classList.contains('me-bloc')) {
+      RDJ.vues.modeEmploiReduit = !ev.target.open;
+      try { localStorage.setItem('rdj.modeEmploi', ev.target.open ? 'ouvert' : 'reduit'); } catch (e) { /* sans importance */ }
+    }
   }, true);
 
   // Synchronisation si l'application est ouverte dans deux onglets

@@ -170,6 +170,51 @@
     return { chambres: {}, resas: {}, lignes: 0, manquants: ['Montant dû (ou Solde)', 'Chambre ou Réservation'] };
   };
 
+  /* ---------- Rapport de maintenance (chambres bloquées) ----------
+     Troisième export, facultatif et au format encore inconnu : on cherche, dans les 15 premières lignes,
+     une ligne de titres avec une colonne chambre ; motif et dates de blocage sont lus s'ils existent.
+     strict : il faut aussi un motif ou une date (sert à reconnaître le fichier déposé dans la fenêtre). */
+  RDJ.COLONNES_MAINTENANCE = {
+    chambre: ['chambre', 'room', 'roomnumber', 'numerochambre', 'nchambre', 'ch', 'nchambres'],
+    motif: ['motif', 'raison', 'cause', 'commentaire', 'commentaires', 'description', 'probleme', 'panne', 'travaux',
+      'intervention', 'remarque', 'remarques', 'observation', 'observations', 'note', 'notes', 'reason', 'comment', 'libelle'],
+    // « Du » / « Au » ne sont pas reconnus : « Du » est aussi un titre de montant du rapport des soldes
+    debut: ['debut', 'datedebut', 'depuis', 'bloquele', 'datedeblocage', 'from', 'startdate', 'debutdublocage'],
+    fin: ['fin', 'datefin', 'jusquau', 'jusqua', 'retour', 'finprevue', 'to', 'enddate', 'findublocage', 'remiseenservice'],
+  };
+
+  /** Lignes du tableur -> { chambres: {no: { motif, fin }}, lignes, terminees: [no], manquants }.
+      Une chambre dont le blocage finit avant la nuit (fin < nuit) n'est pas retenue. */
+  RDJ.lireMaintenance = function (lignes, nuit, strict) {
+    const C = RDJ.COLONNES_MAINTENANCE;
+    for (let h = 0; h < Math.min(15, lignes.length); h++) {
+      const titres = (lignes[h] || []).map(RDJ.normTitre);
+      const col = (noms) => titres.findIndex((t) => t && noms.includes(t));
+      const iC = col(C.chambre), iM = col(C.motif), iD = col(C.debut), iF = col(C.fin);
+      if (iC < 0 || (strict && iM < 0 && iD < 0 && iF < 0)) continue;
+      const chambres = {};
+      const terminees = [];
+      let n = 0;
+      for (let i = h + 1; i < lignes.length; i++) {
+        const l = lignes[i] || [];
+        const ch = RDJ.normChambre(typeof l[iC] === 'number' ? String(l[iC]).padStart(3, '0') : l[iC]);
+        if (!ch) continue;
+        n++;
+        const fin = iF >= 0 ? RDJ.versISO(l[iF]) : null;
+        if (fin && nuit && fin < nuit) { terminees.push(ch); continue; }
+        const motif = iM >= 0 ? texte(l[iM]) : '';
+        // plusieurs lignes pour une même chambre : les motifs sont réunis
+        const avant = chambres[ch];
+        chambres[ch] = {
+          motif: avant && avant.motif && motif && avant.motif !== motif ? avant.motif + ' ; ' + motif : (avant && avant.motif) || motif,
+          fin: fin || (avant ? avant.fin : null),
+        };
+      }
+      return { chambres, lignes: n, terminees, manquants: [] };
+    }
+    return { chambres: {}, lignes: 0, terminees: [], manquants: ['Chambre'] };
+  };
+
   /** Ajoute le montant dû des soldes aux réservations (sans écraser un montant déjà présent dans l'export). */
   RDJ.appliquerSoldes = function (reservations, soldes) {
     if (!soldes) return reservations;
@@ -404,14 +449,33 @@
     return Math.max(0, Math.ceil(q - 1e-9));
   };
 
+  /** Plaques entières nécessaires pour une quantité. */
+  RDJ.plaques = (quantite, parPlaque) => (parPlaque > 0 ? Math.ceil(quantite / parPlaque - 1e-9) : 0);
+
+  /** Répartit des pièces entre les fournées (parts en %). Arrondi au supérieur sur le cumul :
+      les premières fournées sont servies d'abord, la dernière reçoit le reste. */
+  RDJ.fournees = function (plaques, parts) {
+    const total = parts.reduce((s, p) => s + p, 0) || 1;
+    const res = [];
+    let cumul = 0, donne = 0;
+    parts.forEach((p, i) => {
+      cumul += p;
+      const jusque = i === parts.length - 1 ? plaques : Math.min(plaques, Math.ceil((plaques * cumul) / total - 1e-9));
+      res.push(jusque - donne);
+      donne = jusque;
+    });
+    return res;
+  };
+
   /* ---------- Feuille femme de chambre ---------- */
   // Corrections du jour : { chambre: 'B' | 'R' | 'BR' | 'HS' | 'X' }  (BR = blanc recouche, X = chambre de l'import retirée)
 
   RDJ.CYCLE_FDC = { '': 'B', B: 'R', R: 'BR', BR: 'HS', HS: '' };
   RDJ.etatSuivant = (actuel) => (actuel in RDJ.CYCLE_FDC ? RDJ.CYCLE_FDC[actuel] : 'B');
 
-  /** État de chaque chambre du plan : { base (import), etat (affiché), corrige }. */
-  RDJ.etatsFdc = function (plan, reservations, nuit, corrections) {
+  /** État de chaque chambre du plan : { base (import), etat (affiché), corrige, bloquee, motif }.
+      bloquees (rapport de maintenance) : { no: { motif } } ; une chambre bloquée sans client part en HS. */
+  RDJ.etatsFdc = function (plan, reservations, nuit, corrections, bloquees) {
     const demain = RDJ.jours(nuit, 1);
     const parCh = new Map();
     for (const r of reservations) {
@@ -425,9 +489,11 @@
         if (typeof cell !== 'string' && cell.noir) continue;
         const k = RDJ.normChambre(no);
         const r = parCh.get(k);
-        const base = r && r.depart ? (r.depart <= demain ? 'B' : 'R') : '';
+        const bloc = (bloquees || {})[k];
+        // une chambre bloquée mais occupée garde l'état de son client (signalé à l'import)
+        const base = r && r.depart ? (r.depart <= demain ? 'B' : 'R') : bloc ? 'HS' : '';
         const corr = (corrections || {})[k];
-        etats[k] = { base, etat: corr ? (corr === 'X' ? '' : corr) : base, corrige: !!corr };
+        etats[k] = { base, etat: corr ? (corr === 'X' ? '' : corr) : base, corrige: !!corr, bloquee: !!bloc, motif: bloc ? bloc.motif || '' : '' };
       }
     }
     return etats;
@@ -562,6 +628,7 @@
       const r = statut === 'depart' || statut === 'recouche' ? resa : null;
       res[k] = {
         statut, corrige: etatsFdc[k].corrige, sansClient: !resa,
+        bloquee: !!etatsFdc[k].bloquee, motif: etatsFdc[k].motif || '',
         nom: r ? r.nomClient : '', pers: r ? r.nbClients : 0,
         arrivee: !!r && r.arrivee === nuit, depart: r ? r.depart : null,
         pdj: !!r && RDJ.avecPdj(r.mealPlan), nonPaye: !!r && !RDJ.estPaye(r), groupe: !!r && !!r.groupeId,
