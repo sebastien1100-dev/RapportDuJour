@@ -7,6 +7,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.9', date: '2026-11-10', titre: 'Rapport des départs en français ou en anglais',
+      changements: [
+        ['amelioration', "Rapport des départs : l'export du logiciel est reconnu dans les deux langues (« Montant dû » / « Amount Due », « Chambre » / « Room », « Réservation » / « Reservation ») ; le montant dû est rattaché à chaque départ par la chambre et le numéro de réservation."],
+        ['correction', "Montants : « 73.300000 », « 1,234.50 », « 1.234,50 » ou « 1 234,50 € » sont tous bien lus (un montant à partir de 1 000 € pouvait être mal lu)."],
+      ],
+    },
+    {
       version: '3.8', date: '2026-11-09', titre: 'Feuilles plus grandes à l\'écran',
       changements: [
         ['amelioration', "Rapport, Femme de chambre et Plan de chambre : en « Ajuster à la fenêtre », la feuille prend au moins les deux tiers de la largeur de l'écran (sur un écran Full HD, elle était à peine plus large que la moitié). Si elle dépasse en hauteur, on fait défiler la page."],

@@ -71,12 +71,15 @@
     { cle: 'montantDu', libelle: 'Montant dû', titres: ['montantdu', 'solde', 'soldedu', 'resteapayer', 'resteadu', 'balance', 'balancedue', 'amountdue'] },
   ];
 
-  /** "123,45 €", "1 234.5", 80 -> nombre ; vide ou illisible -> null. */
+  /** "123,45 €", "1 234.5", "73.300000", 80 -> nombre ; vide ou illisible -> null. */
   RDJ.lireMontant = function (v) {
     if (typeof v === 'number') return isFinite(v) ? v : null;
-    const s = String(v ?? '').replace(/[\s €]/g, '').replace(',', '.');
+    const s = String(v ?? '').replace(/[\s € ]/g, '');
     if (s === '') return null;
-    const n = parseFloat(s);
+    // le dernier « , » ou « . » est la virgule décimale, les autres séparent les milliers :
+    // « 73.300000 », « 1,234.50 », « 1.234,50 », « 1 234,50 € »
+    const dec = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+    const n = parseFloat(dec < 0 ? s : s.slice(0, dec).replace(/[.,]/g, '') + '.' + s.slice(dec + 1));
     return isFinite(n) ? n : null;
   };
   RDJ.formatMontant = (n) =>

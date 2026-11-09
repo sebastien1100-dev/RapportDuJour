@@ -60,6 +60,16 @@
     egal('correction vide sur chambre importée -> X', RDJ.correctionApres('', 'R'), 'X');
     egal('CSV point-virgule', RDJ._lireCsv('a;b\n"x;y";2\n'), [['a', 'b'], ['x;y', '2']]);
     egal('export sans colonnes obligatoires', RDJ.lireExport([['Nom', 'Chambre']]).manquants.length, 5);
+    egal('lireMontant : formats FR, EN et export « 73.300000 »',
+      ['73.300000', '0.000000', '1,234.50', '1.234,50', '1 234,50 €', '-12,5', 'abc'].map(RDJ.lireMontant),
+      [73.3, 0, 1234.5, 1234.5, 1234.5, -12.5, null]);
+    // rapport des départs, mêmes colonnes en français et en anglais (données fictives)
+    const departs = (titres) => [titres, ['115', 'BSTD----1Q', '', 'Client A', 'RO', '73.300000', 46335, '1', 46336, '5000000001', '1', 'DIRECT', '', '', ''],
+      ['223', 'BSTD----1Q', '', 'Client B', 'BB', '0.000000', 46335, '1', 46336, '5000000002', '1', 'DIRECT', '', '', '']];
+    const departsFr = RDJ.lireSoldes(departs(['Chambre', 'Catégorie de chambre', 'Récompenses & VIP', 'Nom client', 'Formule', 'Montant dû', 'Arrivée', 'Nuitées', 'Départ', 'Réservation', 'Total Clients', 'Client', 'Groupe', 'Groupe Id', 'Identifiant du dossier de réservation']));
+    const departsEn = RDJ.lireSoldes(departs(['Room', 'Room Type', 'Rewards & VIP', 'Guest Name', 'Meal Plan', 'Amount Due', 'Arrival', 'Nights Stay', 'Departure', 'Reservation', 'Total Guests', 'Client', 'Group', 'Group Id', 'Booking File Id']));
+    egal('rapport des départs FR : montant dû par chambre et par réservation', [departsFr.chambres, departsFr.resas['5000000001']], [{ 115: 73.3, 223: 0 }, 73.3]);
+    egal('rapport des départs EN : même lecture qu\'en français', departsEn, departsFr);
 
     /* ---- Export réel du 25/11/2025 ---- */
     try {
