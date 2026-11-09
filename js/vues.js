@@ -551,7 +551,10 @@
   function texteImpressionNuit(cfg) {
     const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1, recap: 1 };
     const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre', recap: 'historique' };
-    return FEUILLES_NUIT.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
+    // recto verso : les feuilles de chambre passent en dernier, chacune seule sur sa feuille (voir app.js)
+    const ordre = cfg.rectoVerso ? [...FEUILLES_NUIT.filter(([k]) => k !== 'fdc'), ...FEUILLES_NUIT.filter(([k]) => k === 'fdc')] : FEUILLES_NUIT;
+    const texte = ordre.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
+    return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
   V.ecranAccueil = function (ctx) {
@@ -935,6 +938,8 @@
               ${k === 'fdc' ? `<label class="rg-ex">× <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}" aria-label="Exemplaires de la feuille de chambre"></label>` : ''}
             </div>`).join('')}
         </div>
+        <label class="rg-case"><input type="checkbox" data-reglage="rectoVerso"${r.rectoVerso ? ' checked' : ''}>
+          <span><b>L'imprimante imprime en recto verso</b><small>Chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière). Le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et peuvent partager une feuille (rapport au recto, cuisson au verso).</small></span></label>
       </section>
 
       ${typesChambresReglages(ctx)}

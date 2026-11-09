@@ -1187,6 +1187,7 @@ body.depot .voile-depot { display: grid; }
   .feuille.paysage { page: paysage; }
   .feuille.paysage { height: 209mm; }
   .feuille.portrait { height: auto; min-height: 0; }
+  .feuille.page-blanche { padding: 0; height: 1mm; }   /* verso laissé blanc (recto verso) */
   .feuille .clic:hover { outline: none; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

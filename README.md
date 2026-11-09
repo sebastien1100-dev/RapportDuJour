@@ -11,6 +11,8 @@ Rien à installer, aucune connexion Internet ni macro nécessaire. Fonctionne su
 3. Le rapport, la feuille de chambre, la cuisson PDJ et l'historique se mettent à jour et sont enregistrés automatiquement.
 4. Imprimer depuis chaque onglet, ou toutes les feuilles de la nuit d'un clic sur le bandeau **Impressions de la nuit** de l'accueil
    (par défaut rapport ×1, feuille de chambre ×5, cuisson PDJ ×1 ; feuilles et exemplaires au choix dans Réglages).
+   Si l'imprimante est en recto verso, cocher l'option dans Réglages : les feuilles de chambre restent seules
+   sur leur feuille (page blanche derrière), le rapport et la cuisson partagent une feuille.
    Pour un PDF, choisir l'imprimante « Enregistrer au format PDF ».
 
 Corrections à la main, comme dans Excel :

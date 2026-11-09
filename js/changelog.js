@@ -7,6 +7,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.6', date: '2026-11-09', titre: 'Impression en recto verso',
+      changements: [
+        ['nouveau', "Réglages → Impressions de la nuit : case « L'imprimante imprime en recto verso ». Cochée, chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière), tandis que le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et partagent les feuilles (rapport au recto, cuisson au verso)."],
+        ['amelioration', "Le choix vaut pour « Tout imprimer » de l'accueil comme pour la feuille de chambre imprimée depuis son onglet (et la feuille vierge). Le bandeau de l'accueil et l'aperçu le rappellent."],
+      ],
+    },
+    {
       version: '3.5', date: '2026-11-09', titre: 'Cuisson PDJ : plaques et fournées',
       changements: [
         ['nouveau', "Cuisson PDJ : croissants et pains au chocolat arrondis à la plaque entière (12 pièces au départ). La feuille indique le total en pièces et en plaques."],

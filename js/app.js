@@ -25,6 +25,7 @@
     parts[2] = Math.max(0, 100 - parts[0] - parts[1]);
     cfg.fournees = cfg.fournees.map((f, i) => ({ ...f, part: parts[i] }));
     // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
+    cfg.rectoVerso = !!r.rectoVerso;
     cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, recap: false, ...(r.impressionNuit || {}) };
     // horaires clés (pied de page de l'accueil) : valeur saisie dans Réglages, sinon valeur de départ ; '' = masqué
     cfg.horairesValeurs = Object.fromEntries(cfg.horaires.map((h) => [h.id, (r.horaires && h.id in r.horaires) ? r.horaires[h.id] : h.defaut]));
@@ -455,11 +456,25 @@
   window.addEventListener('afterprint', () => { $('#impression').innerHTML = ''; });
   const repeter = (html, n) => Array.from({ length: n }, () => html);
 
+  /* Recto verso (Réglages) : le navigateur ne choisit pas le recto verso, c'est l'imprimante.
+     Quand elle imprime des deux côtés, chaque feuille de chambre doit rester seule sur sa feuille :
+     elle commence sur un recto et son verso est une page blanche. Les autres feuilles se suivent. */
+  const PAGE_BLANCHE = '<div class="feuille portrait page-blanche"></div>';
+  function rectoSeul(feuilles, dejaImprimees) {
+    const res = [];
+    if ((dejaImprimees || 0) % 2 === 1) res.push(PAGE_BLANCHE); // commencer sur un recto
+    feuilles.forEach((f, i) => { res.push(f); if (i < feuilles.length - 1) res.push(PAGE_BLANCHE); }); // pas de page blanche tout à la fin
+    return res;
+  }
+  const rectoVerso = () => !!(etat.reglages && etat.reglages.rectoVerso);
+  /** Exemplaires de la feuille de chambre, avec un verso blanc si l'imprimante est en recto verso. */
+  const copiesFdc = (html, n) => (rectoVerso() ? rectoSeul(repeter(html, n)) : repeter(html, n));
+
   /* ---------- Aperçu avant impression ----------
      Montre la feuille telle qu'elle sortira (noir et blanc, A4), réduite pour tenir dans la fenêtre. */
   let apercuImprimer = null;
 
-  function apercu(titre, feuille, copies) {
+  function apercu(titre, feuille, copies, rectoSeulFdc) {
     const esc = RDJ.vues.esc;
     const paysage = feuille.includes('feuille paysage');
     const a = $('#apercu');
@@ -467,7 +482,7 @@
       <div class="apercu-barre">
         <div class="apercu-titre">
           <b>Aperçu avant impression · ${esc(titre)}</b>
-          <span>A4 ${paysage ? 'paysage' : 'portrait'} · noir et blanc · ${copies} exemplaire${copies > 1 ? 's' : ''}</span>
+          <span>A4 ${paysage ? 'paysage' : 'portrait'} · noir et blanc · ${copies} exemplaire${copies > 1 ? 's' : ''}${rectoSeulFdc && rectoVerso() ? ' · recto seul (verso blanc)' : ''}</span>
         </div>
         <div class="apercu-boutons">
           <button class="btn" data-action="apercu-fermer">Fermer</button>
@@ -475,7 +490,7 @@
         </div>
       </div>
       <div class="apercu-zone"><div class="apercu-page nb">${feuille}</div></div>`;
-    apercuImprimer = () => imprimer(repeter(feuille, copies));
+    apercuImprimer = () => imprimer(rectoSeulFdc ? copiesFdc(feuille, copies) : repeter(feuille, copies));
     a.hidden = false;
     document.body.classList.add('apercu-ouvert');
     ajusterApercu();
@@ -530,25 +545,30 @@
     'imprimer-tout': () => {
       const ctx = contexte();
       const choix = ctx.cfg.impressionNuit;
-      const feuilles = [
+      const fdc = choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : [];
+      const autres = [
         ...(choix.rapport ? [RDJ.vues.feuilleRapport(ctx)] : []),
-        ...(choix.fdc ? repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc) : []),
         ...(choix.pdj ? [RDJ.vues.feuillePdj(ctx)] : []),
         ...(choix.plan ? [RDJ.vues.feuillePlan(ctx)] : []),
         ...(choix.recap ? [RDJ.vues.feuilleRecap(ctx)] : []),
       ];
+      // recto verso : rapport, cuisson, plan et historique d'abord (ils partagent les feuilles),
+      // puis chaque feuille de chambre seule sur sa feuille
+      const feuilles = rectoVerso()
+        ? [...autres, ...rectoSeul(fdc, autres.length)]
+        : [...autres.slice(0, choix.rapport ? 1 : 0), ...fdc, ...autres.slice(choix.rapport ? 1 : 0)];
       if (!feuilles.length) return notice('Aucune feuille cochée pour les impressions de la nuit (onglet Réglages).', 'alerte');
       imprimer(feuilles);
     },
     'apercu-rapport': () => apercu('Rapport du jour', RDJ.vues.feuilleRapport(contexte()), 1),
-    'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc); },
+    'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc, true); },
     'apercu-pdj': () => apercu('Cuisson PDJ', RDJ.vues.feuillePdj(contexte()), 1),
     'apercu-recap': () => apercu('Historique', RDJ.vues.feuilleRecap(contexte()), 1),
     'apercu-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge :", saisie: '1', type: 'number', ok: 'Voir l\'aperçu' });
       const n = parseInt(rep, 10);
       if (!(n >= 1 && n <= 50)) return;
-      apercu('Feuille de chambre vierge', RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n);
+      apercu('Feuille de chambre vierge', RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n, true);
     },
     'apercu-plan': () => apercu('Plan de chambre', RDJ.vues.feuillePlan(contexte()), 1),
     'imprimer-plan': () => imprimer([RDJ.vues.feuillePlan(contexte())]),
@@ -563,12 +583,12 @@
     'apercu-imprimer': () => { const f = apercuImprimer; fermerApercu(); if (f) f(); },
 
     'imprimer-rapport': () => imprimer([RDJ.vues.feuilleRapport(contexte())]),
-    'imprimer-fdc': () => { const ctx = contexte(); imprimer(repeter(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc)); },
+    'imprimer-fdc': () => { const ctx = contexte(); imprimer(copiesFdc(RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc)); },
     'imprimer-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge à imprimer :", saisie: '1', type: 'number', ok: 'Imprimer' });
       const n = parseInt(rep, 10);
       if (!(n >= 1 && n <= 50)) return;
-      imprimer(repeter(RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n));
+      imprimer(copiesFdc(RDJ.vues.feuilleFdc(contexte(), { vierge: true }), n));
     },
     'imprimer-pdj': () => imprimer([RDJ.vues.feuillePdj(contexte())]),
     'imprimer-recap': () => imprimer([RDJ.vues.feuilleRecap(contexte())]),
@@ -695,6 +715,7 @@
       const k = t.dataset.reglage;
       if (k === 'hotel') etat.reglages.hotel = t.value.trim() || undefined;
       else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
+      else if (k === 'rectoVerso') etat.reglages.rectoVerso = t.checked || undefined;
       else if (k.startsWith('horaire-')) etat.reglages.horaires = { ...(etat.reglages.horaires || {}), [k.slice(8)]: t.value.trim() };
       else if (k.startsWith('impression-')) etat.reglages.impressionNuit = { ...(etat.reglages.impressionNuit || {}), [k.slice(11)]: t.checked };
       else if (k === 'fournee1' || k === 'fournee2') {
