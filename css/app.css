@@ -245,18 +245,7 @@ button, input, select { font: inherit; }
 .acc-valeur.alerte b { color: var(--rouge); }
 .acc-valeur.ok b { color: var(--accent); }
 
-.acc-imprimer {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; padding: 14px 18px;
-  border-radius: 14px; color: #fff; background: linear-gradient(120deg, #157f77 0%, #1c2a48 100%);
-  width: 100%; border: 0; font: inherit; text-align: left; cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-.acc-imprimer:hover { filter: brightness(1.08); box-shadow: 0 6px 18px rgba(28,42,72,.25); transform: translateY(-1px); }
-.acc-imprimer:active { transform: translateY(0); box-shadow: none; }
-.acc-imprimer:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
-.acc-imprimer .ai-texte { display: flex; flex-direction: column; gap: 2px; }
-.acc-imprimer b { font-size: 15px; }
-.acc-imprimer .ai-texte span { font-size: 13px; color: #d9f2ee; }@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-imports, .acc-chiffres { grid-template-columns: 1fr; } }
 
 /* En-tête commun des onglets (titre + nuit + aide à gauche, boutons à droite) */
@@ -608,9 +597,6 @@ body.depot .voile-depot { display: grid; }
 .acc-valeur small { color: var(--marine); opacity: .7; }
 .acc-valeur.ok b { color: var(--menthe-fonce); }
 
-.acc-imprimer { background: var(--marine); border-radius: 18px; transition: background .15s; }
-.acc-imprimer:hover { background: #26385e; filter: none; box-shadow: none; transform: none; }
-.acc-imprimer .ai-texte span { color: #c9d3e6; }
 
 /* en-tête des onglets : fond pastel propre à chaque onglet */
 .ecran-tete { border: 0; border-radius: 18px; box-shadow: none; padding: 16px 20px; background: var(--sauge); }
@@ -775,16 +761,29 @@ body.depot .voile-depot { display: grid; }
 @media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-chiffres { grid-template-columns: 1fr; } }
 
-/* accueil : bandeau des impressions en pastel, avec un vrai bouton */
-.acc-imprimer { background: var(--perle); color: var(--marine); }
-.acc-imprimer:hover { background: #dbe2ee; }
-.acc-imprimer .ai-texte span { color: var(--perle-fonce); }
-.acc-imprimer .ai-bouton {
-  flex: none; padding: 9px 16px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
-  transition: background .15s;
+/* accueil : impressions en pastilles — « Tout imprimer » en vert Campanile, puis une pastille par feuille
+   dans la couleur de son onglet (ouvre l'aperçu de cette feuille) */
+.acc-impr { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 16px; padding: 14px 18px; border-radius: 18px; background: var(--surface); }
+.acc-impr-titre {
+  flex: none; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  background: var(--perle); color: var(--perle-fonce);
 }
-.acc-imprimer:hover .ai-bouton { background: var(--accent-fonce); }
-.acc-imprimer:focus-visible { outline-color: #7fe3cf; }
+.acc-impr-pastilles { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
+.acc-impr button { font: inherit; border: 0; cursor: pointer; border-radius: 999px; transition: background .15s, filter .15s, transform .1s ease-out; }
+.acc-impr button:active { transform: scale(.97); }
+.impr-tout { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px 8px 12px; background: var(--accent); color: #fff; }
+.impr-tout:hover { background: var(--accent-fonce); }
+.impr-tout b { font-size: 14px; }
+.impr-tout small { font-size: 12px; opacity: .85; white-space: nowrap; }
+.impr-tout .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.impr-feuille { padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--marine); background: var(--fond); }
+.impr-feuille:hover { filter: saturate(1.3) brightness(.97); }
+.impr-feuille.f-rapport { background: var(--peche); color: var(--peche-fonce); }
+.impr-feuille.f-fdc { background: var(--ciel); color: var(--ciel-fonce); }
+.impr-feuille.f-pdj { background: var(--beurre); color: var(--beurre-fonce); }
+.impr-feuille.f-plan { background: var(--menthe); color: var(--menthe-fonce); }
+.impr-feuille.f-recap { background: var(--lilas); color: var(--lilas-fonce); }
+@media (max-width: 1500px) { .impr-tout small { display: none; } }  /* détail au survol (title) sur les écrans moins larges */
 
 /* réglages : chambres sans type en pastille, au lieu d'une liste rouge */
 .types-ch .tc-sans {
@@ -798,8 +797,8 @@ body.depot .voile-depot { display: grid; }
 }
 
 /* réponse immédiate à l'appui, anneau visible au clavier */
-.btn, #onglets button, .acc-groupe, .acc-imprimer, .pastille.bouton, .cs-pas, .cs-segments label { transition: background .15s, transform .1s ease-out, filter .15s; }
-.btn:active:not(:disabled), #onglets button:active, .acc-imprimer:active, .pastille.bouton:active, .cs-pas:active { transform: scale(.97); }
+.btn, #onglets button, .acc-groupe, .pastille.bouton, .cs-pas, .cs-segments label { transition: background .15s, transform .1s ease-out, filter .15s; }
+.btn:active:not(:disabled), #onglets button:active, .pastille.bouton:active, .cs-pas:active { transform: scale(.97); }
 .acc-groupe:active { transform: scale(.98); }
 :focus-visible { outline: 3px solid #7fe3cf; outline-offset: 2px; }
 .btn:focus:not(:focus-visible), #onglets button:focus:not(:focus-visible) { outline: none; }

@@ -549,6 +549,7 @@
 
   /* ================= ÉCRANS ================= */
 
+  const ICONE_IMPRIMANTE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>';
   // feuilles possibles pour « Imprimer tout » (Réglages → Impressions de la nuit)
   const FEUILLES_NUIT = [
     ['rapport', 'Rapport du jour'],
@@ -646,13 +647,15 @@
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
       </div>
 
-      <button type="button" class="acc-imprimer" data-action="imprimer-tout">
-        <span class="ai-texte">
-          <b>Impressions de la nuit</b>
-          <span>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie : voir Réglages')}</span>
-        </span>
-        <span class="ai-bouton">Tout imprimer</span>
-      </button>
+      <section class="acc-impr" aria-label="Impressions de la nuit">
+        <span class="acc-impr-titre">Impressions</span>
+        <div class="acc-impr-pastilles">
+          <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg) || 'Aucune feuille choisie : voir Réglages')}">
+            ${ICONE_IMPRIMANTE}<b>Tout imprimer</b><small>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie')}</small>
+          </button>
+          ${FEUILLES_NUIT.map(([k, lib]) => `<button type="button" class="impr-feuille f-${k}" data-action="apercu-${k}" title="Aperçu puis impression : ${esc(lib)}">${esc(lib)}${k === 'fdc' ? ' ×' + ctx.cfg.nbExemplairesFdc : ''}</button>`).join('')}
+        </div>
+      </section>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
         <button class="btn" data-action="sauvegarder">Télécharger une sauvegarde</button></div>` : ''}
@@ -666,7 +669,7 @@
               <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
               <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
-              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou « Imprimer tout ». Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
+              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles « Impressions » de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>
           </div>
           <div class="me-colonne">

@@ -13,6 +13,7 @@
         ['nouveau', "Le motif du blocage s'affiche au survol de la chambre sur le plan, et en bas de la feuille de chambre imprimée (« Chambres bloquées (maintenance) »). Les chambres bloquées comptent dans le total HS."],
         ['amelioration', "Le fichier est reconnu tout seul s'il est déposé dans la fenêtre (colonne Chambre avec un motif ou des dates). Une chambre dont le blocage est déjà terminé est ignorée ; une chambre bloquée mais occupée d'après le rapport clients présents garde son client et est signalée."],
         ['amelioration', "Accueil : troisième carte d'import « Rapport de maintenance » ; le mode d'emploi mentionne les deux rapports facultatifs. Un double-clic sur la chambre (plan ou feuille) permet toujours de la remettre en service."],
+        ['amelioration', "Accueil : le bandeau « Impressions de la nuit » est remplacé par une ligne de pastilles. « Tout imprimer » (vert Campanile) imprime les feuilles choisies dans Réglages ; puis une pastille par feuille, dans la couleur de son onglet (Rapport du jour, Feuille de chambre ×5, Cuisson PDJ, Plan de chambre, Historique), qui ouvre l'aperçu de cette seule feuille."],
         ['amelioration', "« Rapport des soldes » devient « Rapport des départs » partout : menu Importer, carte de l'accueil, mode d'emploi, messages et en-tête du rapport imprimé (« Départs : nom du fichier »)."],
         ['amelioration', "Feuille de chambre : les cases HS sont en rouge pastel à l'écran (au lieu du gris) ; sur la feuille imprimée, en noir et blanc, elles sont hachurées."],
       ],
