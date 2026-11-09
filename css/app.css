@@ -990,7 +990,8 @@ body.depot .voile-depot { display: grid; }
 .s-sale .pl-nom { font-weight: 700; }
 .pl-ch.clic { cursor: pointer; user-select: none; }
 #infobulle p.astuce { color: #666; font-weight: 400; font-style: italic; }
-.s-hs { background: repeating-linear-gradient(-45deg, #e5e7eb 0 1.2mm, #fff 1.2mm 2.4mm); border-color: #6b7280; color: #374151; }
+/* hors service (chambre bloquée) : hachures rouges à l'écran, hachures grises à l'impression (voir .nb) */
+.s-hs { background: repeating-linear-gradient(-45deg, #f4a3a3 0 1.2mm, #fff5f5 1.2mm 2.4mm); border-color: #b42318; color: #8a1c14; }
 .pl-local {
   align-items: center; justify-content: center; text-align: center; gap: .5mm;
   background: #d1d5db; border-color: #9ca3af; color: #4b5563;

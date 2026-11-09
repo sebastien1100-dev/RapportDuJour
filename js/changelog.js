@@ -22,6 +22,7 @@
         ['nouveau', "Types de chambre remplis pour les 81 chambres, d'après l'écran « Statut chambre » : 1K (258 à 265, 378 à 385), 2S (14 chambres), 1Q pour les autres, PMR pour 001 à 003. Un type changé dans Réglages reste prioritaire."],
         ['amelioration', "Plan de chambre : côté parking renommé « Côté McDonald's / parking »."],
         ['correction', "Plan de chambre : le plan occupe toute la largeur de la feuille (plus de marge vide à droite) ; les cases s'élargissent et l'escalier reste aligné d'un étage à l'autre. Même chose pour le plan vierge."],
+        ['amelioration', "Plan de chambre : les chambres hors service (bloquées) sont en hachuré rouge à l'écran, dans le plan comme dans la légende et le compteur. À l'impression, elles restent hachurées en gris (noir et blanc)."],
       ],
     },
     {
