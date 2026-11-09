@@ -77,7 +77,7 @@ js/calculs.js         règles métier (fonctions pures, testées)
 js/store.js           stockage local + sauvegarde/restauration .json
 js/vues.js            HTML des écrans et des feuilles imprimables
 js/app.js             état, événements, impression
-tests/tests.html      89 tests, dont l'export réel du 25/11/2025
+tests/tests.html      90 tests, dont l'export réel du 25/11/2025
 outils/serveur.ps1    petit serveur local (développement et tests uniquement)
 ANALYSE.md            analyse du classeur d'origine et règles métier
 ```
