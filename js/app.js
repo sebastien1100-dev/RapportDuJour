@@ -19,6 +19,8 @@
     cfg.types = RDJ.typesChambres(cfg.typesChambresDefaut, r.typesChambres);
     // feuilles de « Imprimer tout » (Réglages) : rapport, feuille de chambre et cuisson PDJ par défaut
     cfg.impressionNuit = { rapport: true, fdc: true, pdj: true, plan: false, recap: false, ...(r.impressionNuit || {}) };
+    // horaires clés (pied de page de l'accueil) : valeur saisie dans Réglages, sinon valeur de départ ; '' = masqué
+    cfg.horairesValeurs = Object.fromEntries(cfg.horaires.map((h) => [h.id, (r.horaires && h.id in r.horaires) ? r.horaires[h.id] : h.defaut]));
     return cfg;
   }
 
@@ -686,6 +688,7 @@
       const k = t.dataset.reglage;
       if (k === 'hotel') etat.reglages.hotel = t.value.trim() || undefined;
       else if (k === 'sauvegardeHebdo') etat.reglages.sauvegardeHebdo = t.checked || undefined;
+      else if (k.startsWith('horaire-')) etat.reglages.horaires = { ...(etat.reglages.horaires || {}), [k.slice(8)]: t.value.trim() };
       else if (k.startsWith('impression-')) etat.reglages.impressionNuit = { ...(etat.reglages.impressionNuit || {}), [k.slice(11)]: t.checked };
       else { const n = parseInt(t.value, 10); etat.reglages[k] = n > 0 ? n : undefined; }
     } else if (t.id === 'fichier-import') {

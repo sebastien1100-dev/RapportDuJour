@@ -21,6 +21,15 @@
     nbChambres: 81,
     nbExemplairesFdc: 5,
 
+    /* Horaires clés, affichés en pied de page de l'accueil et modifiables dans Réglages.
+       Valeurs de départ à vérifier ; un horaire vide n'est pas affiché. */
+    horaires: [
+      { id: 'pdj', nom: 'Petit déjeuner', defaut: '6h30 – 10h00' },
+      { id: 'arrivees', nom: 'Arrivées', defaut: 'à partir de 15h00' },
+      { id: 'departs', nom: 'Départs', defaut: 'avant 12h00' },
+      { id: 'restaurant', nom: 'Restaurant', defaut: '19h00 – 22h00' },
+    ],
+
     /* Feuille femme de chambre : 6 colonnes, chambres de haut en bas.
        noir = case grisée en noir (chambre inexistante ou à ne pas remplir). */
     planFdc: [

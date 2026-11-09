@@ -731,6 +731,19 @@ body.depot .voile-depot { display: grid; }
 .acc-pied-hotel { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .acc-pied-hotel b { font-size: 20px; font-weight: 700; }
 .acc-pied-hotel small { font-size: 13px; opacity: .8; }
+.acc-pied-hotel { flex: 0 1 auto; }
+.acc-horaires { list-style: none; margin: 0 0 0 auto; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.acc-horaires li { display: flex; flex-direction: column; gap: 2px; min-width: 130px; padding: 10px 16px; border-radius: 16px; background: rgba(255,255,255,.14); }
+.acc-horaires span { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.acc-horaires b { font-size: 17px; font-weight: 700; white-space: nowrap; }
+@media (max-width: 960px) { .acc-horaires { margin-left: 0; justify-content: flex-start; } }
+
+/* réglages : horaires clés */
+.reglages .carte.rg-carte.rg-horaires { margin: 0 0 14px; }
+.rg-horaires .aide { margin: 0 0 12px; }
+.rg-horaires-grille { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 960px) { .rg-horaires-grille { grid-template-columns: 1fr 1fr; } }
+.reglages .carte.rg-carte .rg-horaires-grille label { margin: 0; }
 
 /* boîte de dialogue et aperçu */
 #dialogue { border-radius: 20px; }

@@ -644,6 +644,10 @@
       <footer class="acc-pied">
         <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
         <span class="acc-pied-hotel"><b>Rapport du jour</b><small>version ${esc(RDJ.VERSION || '')}</small></span>
+        <ul class="acc-horaires" aria-label="Horaires clés">
+          ${ctx.cfg.horaires.filter((h) => ctx.cfg.horairesValeurs[h.id]).map((h) => `
+            <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
+        </ul>
       </footer>
     </section>`;
   };
@@ -880,6 +884,14 @@
             <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.</small></span></label>
         </section>
       </div>
+
+      <section class="carte rg-carte rg-horaires">
+        <h3>Horaires clés</h3>
+        <p class="aide">Affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
+        <div class="rg-horaires-grille">
+          ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
+        </div>
+      </section>
 
       <section class="carte rg-carte rg-impressions">
         <h3>Impressions de la nuit</h3>
