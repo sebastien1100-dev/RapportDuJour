@@ -519,6 +519,10 @@ body.depot .voile-depot { display: grid; }
 .types-ch summary > b { font-size: 15px; color: var(--marine); }
 .types-ch .tc-compte { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: #444; }
 .types-ch .tc-sans { color: var(--rouge); }
+/* nombre de chambres de l'hôtel (taux d'occupation), dans la même carte que les types */
+.types-ch .tc-nombre { display: inline-flex; flex-direction: row; align-items: center; max-width: none; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: var(--marine); cursor: default; }
+.types-ch .tc-nombre input { width: 64px; padding: 4px 8px; font-size: 14px; font-weight: 700; }
+.types-ch .tc-nombre small { font-weight: 400; color: var(--doux); }
 .types-ch .tc-ouvrir { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); }
 .types-ch .tc-ouvrir::after { content: " ▾"; }
 .types-ch[open] .tc-ouvrir { font-size: 0; }

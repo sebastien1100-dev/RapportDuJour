@@ -879,9 +879,10 @@
     return `
       <details class="carte types-ch"${V.typesOuvert ? ' open' : ''}>
         <summary>
-          <b>Types de chambre</b>
+          <b>Chambres</b>
+          <label class="tc-nombre" title="Sert au calcul du taux d'occupation"><input type="number" min="1" data-reglage="nbChambres" value="${ctx.cfg.nbChambres}" aria-label="Nombre de chambres de l'hôtel"> chambres <small>(taux d'occupation)</small></label>
           <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans" title="${esc(sans.join(', '))}">${sans.length} chambre${sans.length > 1 ? 's' : ''} sans type</span>` : ''}</span>
-          <span class="tc-ouvrir">Modifier</span>
+          <span class="tc-ouvrir">Modifier les types</span>
         </summary>
         <div class="tc-etages">
           ${etages.map((e) => `
@@ -902,16 +903,13 @@
     const sauv = ctx.etat.derniereSauvegarde;
     return `
     <section class="ecran reglages">
-      ${teteEcran('reglages', 'Réglages', 'Version web ' + esc(RDJ.VERSION || '') + ' · reprise du classeur Excel v7.1',
+      ${teteEcran('reglages', 'Réglages', 'Version ' + esc(RDJ.VERSION || ''),
         'Les changements sont enregistrés tout de suite.', '')}
 
       <div class="rg-grille">
         <section class="carte rg-carte">
           <h3>En-tête</h3>
           <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
-          <div class="rg-ligne">
-            <label>Chambres de l'hôtel<input type="number" min="1" data-reglage="nbChambres" value="${r.nbChambres}"><small>pour le taux d'occupation</small></label>
-          </div>
         </section>
 
         <section class="carte rg-carte">
