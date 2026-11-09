@@ -922,9 +922,10 @@ body.depot .voile-depot { display: grid; }
 .pl-taux > i { display: inline-block; width: 22mm; height: 1.8mm; border-radius: 1mm; background: #e3e8ee; overflow: hidden; }
 .pl-taux > i > i { display: block; height: 100%; background: var(--anneau-taux); border-radius: 1mm; }
 /* mêmes couleurs que l'anneau de l'accueil (menthe / ambre / corail) */
-.pl-taux.haut { --anneau-taux: #7fe3cf; }
+/* remplissage de l'étage : échelle inversée par rapport à l'accueil — étage plein = corail, peu rempli = menthe */
+.pl-taux.haut { --anneau-taux: #ff9f8f; }
 .pl-taux.moyen { --anneau-taux: #ffd27a; }
-.pl-taux.bas { --anneau-taux: #ff9f8f; }
+.pl-taux.bas { --anneau-taux: #7fe3cf; }
 .pl-taux > i { box-shadow: inset 0 0 0 .2mm rgba(28,42,72,.15); }
 .nb .pl-taux { color: #000; }
 .nb .pl-taux > i { background: #fff; border: .25mm solid #000; }
