@@ -175,7 +175,7 @@
     const cls = [s.manuel ? 'aj' : '', comm && comm.cote ? 'comm-' + comm.cote : '', s.sansClient ? 'clic' : ''].filter(Boolean).join(' ');
     return `<div class="pl-ch s-${s.statut}${cls ? ' ' + cls : ''}" data-bulle="${esc(bulle)}"${s.sansClient ? ` data-plan="${esc(no)}"` : ''}>
       <div class="pl-haut"><b>${esc(no)}</b>${comm && !comm.cote ? `<i class="pl-comm">⇄ ${esc(comm.avec)}</i>` : ''}${badgeType}</div>
-      <span class="pl-nom">${s.statut === 'hs' ? 'HORS SERVICE' : s.statut === 'sale' ? 'SALE · à faire' : s.statut === 'libre' ? 'libre' : esc(s.nom)}</span>
+      <span class="pl-nom">${s.statut === 'hs' ? 'HS' : s.statut === 'sale' ? 'SALE · à faire' : s.statut === 'libre' ? 'libre' : esc(s.nom)}</span>
       <span class="pl-info"><span>${esc(infos.join(' · '))}</span>${s.groupe ? '<i class="pl-grp">GRP</i>' : s.nonPaye ? '<i class="pl-np">€</i>' : ''}</span>
     </div>`;
   }
