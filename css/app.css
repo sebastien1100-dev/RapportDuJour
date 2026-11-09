@@ -863,8 +863,10 @@ body.depot .voile-depot { display: grid; }
 .r-enc-grp h3 { color: var(--marine); flex-wrap: wrap; row-gap: 0; }
 .r-enc-grp h3 small { flex-basis: 100%; }
 .r-enc-grp .grp { font-size: 8pt; line-height: 1.35; }
-.r-grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; align-items: start; }
-.r-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8pt; }
+/* la grille prend toute la hauteur libre de la page : les lignes s'agrandissent quand il y a peu de chambres */
+.r-grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; align-items: stretch; flex: 1 1 auto; min-height: 0; }
+.r-table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8pt; }
+.r-table thead tr { height: 4.5mm; }
 .r-table.petite { font-size: 7pt; }
 .r-table th { background: var(--marine); color: #fff; font-weight: 600; font-size: 7pt; padding: .8mm .5mm; }
 .r-table td { border: .2mm solid #b5b5b5; padding: 0 .8mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

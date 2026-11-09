@@ -39,8 +39,9 @@
   V.feuilleRapport = function (ctx) {
     const { nuit, chiffres: c, grille } = ctx;
     const demain = RDJ.jours(nuit, 1);
-    // hauteur des lignes de la grille : la page doit tenir sur une feuille A4 paysage,
-    // l'encadré « À encaisser » (3 chambres par ligne) et la liste des autres prennent sur la grille
+    // hauteur minimale des lignes de la grille : la page doit tenir sur une feuille A4 paysage,
+    // l'encadré « À encaisser » (3 chambres par ligne) et la liste des autres prennent sur la grille.
+    // Avec peu de chambres, la grille s'étire ensuite pour occuper toute la hauteur restante (CSS .r-grille).
     const rangsEnc = Math.max(1, Math.ceil(c.aEncaisser.length / 3), c.groupes.length);
     const hEnc = 8 + rangsEnc * 5.4 + (c.nonPayeesRestent.length ? 5 : 0);
     const hLigne = Math.min(6.4, (108 - Math.max(0, hEnc - 16)) / Math.max(grille.parBloc, 1)); // 4 mm pris par la ligne « Sources »
@@ -74,7 +75,10 @@
             <td class="c clic${mod('PDJ')}" data-modif="pdj" data-ch="${esc(l.chambre)}">${l.pdj ? 'Oui' : ''}</td>
             <td class="c clic${l.paye ? '' : l.groupe ? ' npg' : ' np'}${mod('PAYE')}" data-modif="paye" data-ch="${esc(l.chambre)}">${l.paye ? 'Oui' : l.groupe ? 'GRP' : 'NON'}</td>
           </tr>`;
-        }).join('')}</tbody>
+        }).join('')}${
+          // colonnes plus courtes complétées par des lignes vides : les lignes restent alignées d'une colonne à l'autre
+          // et au moins 12 lignes par colonne, pour que les lignes ne deviennent pas immenses avec très peu de chambres
+          '<tr class="vide"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'.repeat(Math.max(0, Math.max(grille.parBloc, 12) - lignes.length))}</tbody>
       </table>`;
 
     const modifs = texteModifs(ctx.modifs, ctx.ajouts);
