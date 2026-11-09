@@ -559,12 +559,12 @@
     ['recap', 'Historique'],
   ];
   /** « Rapport ×1 · feuille de chambre ×5 · … » selon les feuilles cochées ('' si aucune). */
-  function texteImpressionNuit(cfg) {
+  function texteImpressionNuit(cfg, sansQuantites) {
     const nb = { rapport: 1, fdc: cfg.nbExemplairesFdc, pdj: 1, plan: 1, recap: 1 };
     const noms = { rapport: 'Rapport', fdc: 'feuille de chambre', pdj: 'cuisson PDJ', plan: 'plan de chambre', recap: 'historique' };
     // recto verso : les feuilles de chambre passent en dernier, chacune seule sur sa feuille (voir app.js)
     const ordre = cfg.rectoVerso ? [...FEUILLES_NUIT.filter(([k]) => k !== 'fdc'), ...FEUILLES_NUIT.filter(([k]) => k === 'fdc')] : FEUILLES_NUIT;
-    const texte = ordre.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + ' ×' + nb[k]).join(' · ');
+    const texte = ordre.filter(([k]) => cfg.impressionNuit[k]).map(([k]) => noms[k] + (sansQuantites ? '' : ' ×' + nb[k])).join(' · ');
     return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
@@ -649,8 +649,8 @@
 
       <section class="acc-impr" aria-label="Impressions de la nuit">
         <div class="acc-impr-pastilles">
-          <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg) || 'Aucune feuille choisie : voir Réglages')}">
-            ${ICONE_IMPRIMANTE}<b>Tout imprimer</b><small>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie')}</small>
+          <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg, true) || 'Aucune feuille choisie : voir Réglages')}">
+            ${ICONE_IMPRIMANTE}<b>Tout imprimer</b><small>${esc(texteImpressionNuit(ctx.cfg, true) || 'aucune feuille choisie')}</small>
           </button>
           ${FEUILLES_NUIT.map(([k, lib]) => `<button type="button" class="impr-feuille f-${k}" data-action="apercu-${k}" title="Aperçu puis impression : ${esc(lib)}">${esc(lib)}${k === 'fdc' ? ' ×' + ctx.cfg.nbExemplairesFdc : ''}</button>`).join('')}
         </div>
