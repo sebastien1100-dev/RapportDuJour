@@ -484,7 +484,7 @@ body.apercu-ouvert { overflow: hidden; }
 body.depot .voile-depot { display: grid; }
 
 /* Cuisson PDJ : panneau de saisie */
-.cuisson-saisie { display: grid; grid-template-columns: minmax(240px, 320px) minmax(360px, 560px); gap: 14px; margin-bottom: 16px; align-items: stretch; }
+.cuisson-saisie { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(360px, 2fr); gap: 14px; margin-bottom: 16px; align-items: stretch; }
 @media (max-width: 720px) { .cuisson-saisie { grid-template-columns: 1fr; } }
 .cs-carte {
   background: var(--surface); border: 1px solid var(--bord); border-radius: 12px; padding: 14px 16px;
