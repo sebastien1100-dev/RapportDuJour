@@ -355,7 +355,7 @@
         const e = ctx.etatsFdc[k] || { etat: '', corrige: false };
         const nv = !vierge && ctx.fdc.nv[k];
         corps += `<td class="no${sep}">${esc(no)}</td>` +
-          `<td class="etat clic${!vierge && e.corrige ? ' corrige' : ''}" data-fdc="etat" data-ch="${esc(k)}">${vierge ? '' : esc(e.etat)}</td>` +
+          `<td class="etat clic${!vierge && e.corrige ? ' corrige' : ''}${!vierge && e.etat === 'HS' ? ' hs' : ''}" data-fdc="etat" data-ch="${esc(k)}">${vierge ? '' : esc(e.etat)}</td>` +
           `<td class="nv clic" data-fdc="nv" data-ch="${esc(k)}">${nv ? 'NV' : ''}</td>`;
       });
       corps += '</tr>';

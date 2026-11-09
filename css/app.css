@@ -1093,6 +1093,8 @@ body.depot .voile-depot { display: grid; }
 .f-grille td.nv { font-size: 9pt; }
 /* case changée à la main : gris léger, à l'écran comme sur papier */
 .f-grille td.corrige { background: #e6e8eb; }
+/* chambre hors service : rouge pastel à l'écran (hachures grises à l'impression, voir .nb) */
+.f-grille td.hs { background: #fadcdc; color: #9b2c2c; }
 .f-grille td.clic:hover { outline: .5mm solid var(--accent); outline-offset: -.5mm; }
 .f-corr { margin-top: 3mm; border: .4mm solid #000; min-height: 18mm; padding: 1.5mm 3mm; font-size: 9pt; line-height: 1.45; }
 .f-corr-titre { font-weight: 700; text-decoration: underline; margin-bottom: .5mm; }
@@ -1231,6 +1233,7 @@ body.depot .voile-depot { display: grid; }
 .nb .r-encaisser h3 small, .nb .r-encaisser .aucune { color: #000; }
 .nb .r-tete, .nb .p-tete { border-bottom-color: #000; }
 .nb .f-grille td.corrige { background: #dcdcdc; }  /* un peu plus soutenu que les cases vides de fin de colonne (#f2f2f2) */
+.nb .f-grille td.hs { background: repeating-linear-gradient(-45deg, #c8c8c8 0 .5mm, #fff .5mm 1.6mm); color: #000; }
 
 @media (max-width: 720px) {
   #vue { padding: 12px; }
