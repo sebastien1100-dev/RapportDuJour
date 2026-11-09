@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.12', date: '2026-11-10', titre: 'Rapport : bas de la dernière colonne régulier',
+      changements: [
+        ['correction', "Rapport du jour : quand la dernière colonne a moins de chambres que les autres, elle est complétée par des lignes vides de la même hauteur que les autres, au lieu de deux ou trois grandes cases étirées."],
+      ],
+    },
+    {
       version: '3.11', date: '2026-11-10', titre: 'Les trois rapports importés en une fois',
       changements: [
         ['nouveau', "Import : on peut glisser les trois fichiers d'un coup dans la fenêtre (ou les choisir ensemble avec « Importer »). Chacun est reconnu tout seul, puis importé dans le bon ordre (rapport clients présents, départs, maintenance), avec un seul message récapitulatif."],
@@ -48,7 +54,32 @@
         ['amelioration', "« Rapport des soldes » devient « Rapport des départs » partout : menu Importer, carte de l'accueil, mode d'emploi, messages et en-tête du rapport imprimé (« Départs : nom du fichier »)."],
         ['amelioration', "Feuille de chambre : les cases HS sont en rouge pastel à l'écran (au lieu du gris) ; sur la feuille imprimée, en noir et blanc, elles sont hachurées."],
       ],
-    }
+    },
+    {
+      version: '3.6', date: '2026-11-09', titre: 'Impression en recto verso',
+      changements: [
+        ['nouveau', "Réglages → Impressions de la nuit : case « L'imprimante imprime en recto verso ». Cochée, chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière), tandis que le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et partagent les feuilles (rapport au recto, cuisson au verso)."],
+        ['amelioration', "Le choix vaut pour « Tout imprimer » de l'accueil comme pour la feuille de chambre imprimée depuis son onglet (et la feuille vierge). Le bandeau de l'accueil et l'aperçu le rappellent."],
+      ],
+    },
+    {
+      version: '3.5', date: '2026-11-09', titre: 'Cuisson PDJ : plaques et fournées',
+      changements: [
+        ['nouveau', "Cuisson PDJ : croissants et pains au chocolat arrondis à la plaque entière (12 pièces au départ). La feuille indique le total en pièces et en plaques."],
+        ['nouveau', "Cuisson PDJ : les pièces de viennoiseries sont réparties en fournées : 60 % à 6h30, 30 % à 7h30 et une réserve de 10 % à cuire seulement si le buffet baisse (par exemple 38 croissants : 23, 12 et 3). Sous chaque fournée, le nombre de plaques (« 1 plaque + 4 »). Les pains sont cuits en une seule fois, à 6h30."],
+        ['nouveau', "Réglages → Cuisson PDJ : pièces par plaque, part des fournées de 6h30 et de 7h30 (la réserve est le reste)."],
+      ],
+    },
+    {
+      version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page, retouches',
+      changements: [
+        ['amelioration', "Cuisson PDJ : les cartes « Petits déjeuners » et « Type de clientèle » occupent toute la largeur de la page, alignées sur l'en-tête et la feuille."],
+        ['amelioration', "Rapport : le tableau des chambres occupe toute la hauteur de la feuille A4, quel que soit le nombre de chambres. Les lignes s'agrandissent quand il y a peu de chambres ; les colonnes plus courtes sont complétées par des lignes vides (au moins 12 par colonne) pour rester alignées."],
+        ['amelioration', "Plan de chambre : « HS » au lieu de « HORS SERVICE » dans la case d'une chambre bloquée, qui était coupé faute de place."],
+        ['amelioration', "Feuille de chambre : les cases changées à la main sont en gris léger, à l'écran comme sur la feuille imprimée (avant : jaune à l'écran, rien à l'impression)."],
+        ['amelioration', "Accueil : le mode d'emploi se réduit ou s'affiche d'un clic sur son titre (« Réduire ▴ » / « Afficher ▾ »). Le choix est retenu sur ce poste."],
+        ['nouveau', "Accueil : grand pied de page vert Campanile qui rappelle l'en-tête, avec le logo, les horaires clés (petit déjeuner, arrivées, départs, restaurant) et la version de l'application à droite."],
+        ['nouveau', "Réglages → Horaires clés : les horaires du pied de page se modifient ici ; une case vide n'est pas affichée."],
       ],
     },
     {

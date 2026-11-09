@@ -78,7 +78,8 @@
         }).join('')}${
           // colonnes plus courtes complétées par des lignes vides : les lignes restent alignées d'une colonne à l'autre
           // et au moins 12 lignes par colonne, pour que les lignes ne deviennent pas immenses avec très peu de chambres
-          '<tr class="vide"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'.repeat(Math.max(0, Math.max(grille.parBloc, 12) - lignes.length))}</tbody>
+          // même hauteur que les autres lignes : sinon elles absorbent tout l'étirement de la colonne
+          `<tr class="vide" style="height:${hLigne}mm"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`.repeat(Math.max(0, Math.max(grille.parBloc, 12) - lignes.length))}</tbody>
       </table>`;
 
     const modifs = texteModifs(ctx.modifs, ctx.ajouts);

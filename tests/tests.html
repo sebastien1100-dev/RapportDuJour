@@ -18,6 +18,7 @@
   <script src="../js/config.js"></script>
   <script src="../js/xlsx-reader.js"></script>
   <script src="../js/calculs.js"></script>
+  <script src="../js/changelog.js"></script>
   <script>
   (async function () {
     const resultats = [];
@@ -27,6 +28,12 @@
     };
 
     /* ---- Fonctions unitaires ---- */
+    // change log lisible (une erreur de fusion l'avait vidé) : versions uniques, de la plus récente à la plus ancienne
+    const cl = (RDJ.CHANGELOG || []).map((v) => v.version);
+    const num = (v) => v.split('.').map(Number);
+    egal('change log chargé, versions uniques et dans l\'ordre',
+      [cl.length > 0, new Set(cl).size === cl.length, cl.every((v, i) => i === 0 || num(cl[i - 1])[0] > num(v)[0] || (num(cl[i - 1])[0] === num(v)[0] && num(cl[i - 1])[1] > num(v)[1]))],
+      [true, true, true]);
     egal('normTitre accents/ponctuation', RDJ.normTitre("Statut d'enrg."), 'statutdenrg');
     egal('normTitre Arrivée', RDJ.normTitre(' Arrivée '), 'arrivee');
     egal('versISO numéro de série', RDJ.versISO(45986), '2025-11-25');
