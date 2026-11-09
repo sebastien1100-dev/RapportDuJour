@@ -323,13 +323,14 @@
     return lignes.length ? '<div class="f-corr-titre">CORRECTIONS DU JOUR</div>' + lignes.join('') : '';
   }
 
-  /** Chambres bloquées par le rapport de maintenance, en HS sur la feuille (sans correction à la main). */
+  /** Chambres bloquées par le rapport de maintenance, en HS sur la feuille (sans correction à la main),
+      regroupées par motif : « Ménage (10) : 330, 333 à 335, 380 à 385 ». */
   function texteBloquees(ctx) {
-    const nos = Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige)
-      .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    const nos = Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige);
     if (!nos.length) return '';
-    const detail = nos.map((k) => esc(k) + (ctx.etatsFdc[k].motif ? ' (' + esc(ctx.etatsFdc[k].motif) + ')' : '')).join(', ');
-    return `<div class="f-corr-titre">CHAMBRES BLOQUÉES (MAINTENANCE)</div><div><b>HORS SERVICE :</b> ${detail}</div>`;
+    const groupes = RDJ.grouperBloquees(nos.map((k) => [k, ctx.etatsFdc[k].motif]));
+    return `<div class="f-corr-titre">CHAMBRES BLOQUÉES (MAINTENANCE) · ${nos.length}</div>` +
+      groupes.map((g) => `<div class="f-bloq"><b>${esc(g.motif)} (${g.chambres.length}) :</b> ${esc(RDJ.plagesChambres(g.chambres))}</div>`).join('');
   }
 
   /** opts.vierge : feuille sans date ni saisie, à remplir à la main. */

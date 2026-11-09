@@ -7,6 +7,20 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.11', date: '2026-11-10', titre: 'Les trois rapports importés en une fois',
+      changements: [
+        ['nouveau', "Import : on peut glisser les trois fichiers d'un coup dans la fenêtre (ou les choisir ensemble avec « Importer »). Chacun est reconnu tout seul, puis importé dans le bon ordre (rapport clients présents, départs, maintenance), avec un seul message récapitulatif."],
+        ['correction', "Import : un rapport des départs ou de maintenance importé avant le rapport clients présents (moins de 12 h avant) est rattaché à la bonne nuit, au lieu de disparaître du rapport et de la feuille de chambre."],
+        ['correction', "Glisser-déposer de plusieurs fichiers : seul le premier était importé, les autres étaient ignorés sans message."],
+      ],
+    },
+    {
+      version: '3.10', date: '2026-11-10', titre: 'Chambres bloquées regroupées par motif',
+      changements: [
+        ['amelioration', "Feuille de chambre : l'encadré « Chambres bloquées (maintenance) » donne le nombre total et regroupe les chambres par motif, le plus fréquent d'abord, avec les numéros qui se suivent réunis (par exemple « Menage (10) : 330, 333 à 335, 380 à 385 »). Le rapport de maintenance est lu en français comme en anglais."],
+      ],
+    },
+    {
       version: '3.9', date: '2026-11-10', titre: 'Rapport des départs en français ou en anglais',
       changements: [
         ['amelioration', "Rapport des départs : l'export du logiciel est reconnu dans les deux langues (« Montant dû » / « Amount Due », « Chambre » / « Room », « Réservation » / « Reservation ») ; le montant dû est rattaché à chaque départ par la chambre et le numéro de réservation."],

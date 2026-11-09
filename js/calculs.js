@@ -173,6 +173,26 @@
     return { chambres: {}, resas: {}, lignes: 0, manquants: ['Montant dû (ou Solde)', 'Chambre ou Réservation'] };
   };
 
+  /* ---------- Plusieurs rapports importés ensemble ---------- */
+
+  /** Nature d'un fichier : 'clients' (rapport clients présents), 'departs', 'maintenance' ou null.
+      L'ordre de RDJ.ORDRE_RAPPORTS est celui de l'import : la nuit vient du rapport clients. */
+  RDJ.ORDRE_RAPPORTS = ['clients', 'departs', 'maintenance'];
+  RDJ.typeRapport = function (lignes) {
+    if (!RDJ.lireExport(lignes).manquants.length) return 'clients';
+    if (RDJ.lireSoldes(lignes).lignes) return 'departs';
+    if (RDJ.lireMaintenance(lignes, null, true).lignes) return 'maintenance';
+    return null;
+  };
+
+  /** Rapport des départs ou de maintenance importé il y a moins de `heures` heures pour une autre nuit :
+      rattaché à la nuit du nouveau rapport clients (importé dans le désordre). Sinon inchangé. */
+  RDJ.rattacherNuit = function (rapport, nuit, maintenant, heures) {
+    if (!rapport || !rapport.importeLe || rapport.nuit === nuit) return rapport;
+    const ecart = (new Date(maintenant) - new Date(rapport.importeLe)) / 3600000;
+    return ecart >= 0 && ecart <= (heures || 12) ? { ...rapport, nuit } : rapport;
+  };
+
   /* ---------- Rapport de maintenance (chambres bloquées) ----------
      Troisième export, facultatif et au format encore inconnu : on cherche, dans les 15 premières lignes,
      une ligne de titres avec une colonne chambre ; motif et dates de blocage sont lus s'ils existent.
@@ -586,6 +606,32 @@
       m[x] = y; m[y] = x;
     }
     return m;
+  };
+
+  /** ['330', '333', '334', '335'] -> '330, 333 à 335' (numéros qui se suivent réunis). */
+  RDJ.plagesChambres = function (nos) {
+    const tri = [...nos].sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    const plages = [];
+    for (const no of tri) {
+      const der = plages[plages.length - 1];
+      if (der && /^\d+$/.test(no) && /^\d+$/.test(der.fin) && parseInt(no, 10) === parseInt(der.fin, 10) + 1) der.fin = no;
+      else plages.push({ debut: no, fin: no });
+    }
+    return plages.map((p) => (p.debut === p.fin ? p.debut : p.debut + (parseInt(p.fin, 10) - parseInt(p.debut, 10) > 1 ? ' à ' : ', ') + p.fin)).join(', ');
+  };
+
+  /** Chambres bloquées par la maintenance, regroupées par motif (casse et accents ignorés) :
+      [{ motif, chambres: [no…] }], le motif le plus fréquent d'abord. */
+  RDJ.grouperBloquees = function (bloquees) {
+    const groupes = new Map();
+    for (const [no, motif] of bloquees) {
+      let lib = texte(motif) || 'Sans motif';
+      if (lib === lib.toUpperCase()) lib = lib.toLowerCase(); // « CHAMBRE MISE SOUS SCELÉ » -> « Chambre mise sous scellé »
+      const cle = RDJ.normTitre(lib);
+      if (!groupes.has(cle)) groupes.set(cle, { motif: lib.charAt(0).toUpperCase() + lib.slice(1), chambres: [] });
+      groupes.get(cle).chambres.push(no);
+    }
+    return [...groupes.values()].sort((a, b) => b.chambres.length - a.chambres.length || a.motif.localeCompare(b.motif, 'fr'));
   };
 
   RDJ.chambresEtage = (e) => e.ailes.flatMap((a) => [...a.haut, ...a.bas]).filter((c) => typeof c === 'string');

@@ -70,6 +70,23 @@
     const departsEn = RDJ.lireSoldes(departs(['Room', 'Room Type', 'Rewards & VIP', 'Guest Name', 'Meal Plan', 'Amount Due', 'Arrival', 'Nights Stay', 'Departure', 'Reservation', 'Total Guests', 'Client', 'Group', 'Group Id', 'Booking File Id']));
     egal('rapport des départs FR : montant dû par chambre et par réservation', [departsFr.chambres, departsFr.resas['5000000001']], [{ 115: 73.3, 223: 0 }, 73.3]);
     egal('rapport des départs EN : même lecture qu\'en français', departsEn, departsFr);
+    // import groupé : chaque fichier reconnu, puis rattaché à la nuit du rapport clients
+    const clientsFictif = [['Chambre', 'Arrivée', 'Départ', 'Total clients', 'Meal plan', "Statut d'enrg."], ['115', 46335, 46336, '1', 'RO', 'IN']];
+    const maintFictif = [['Maintenance Report', 'Room', 'Type', 'Description'], ['0000000001', '341', 'BSTD----1Q', 'scellés']];
+    egal('type de rapport : clients, départs FR, départs EN, maintenance, inconnu',
+      [clientsFictif, [['Chambre', 'Montant dû', 'Réservation'], ['115', '73.300000', '5000000001']],
+        [['Room', 'Amount Due', 'Reservation'], ['115', '73.300000', '5000000001']], maintFictif, [['Nom', 'Prénom']]].map(RDJ.typeRapport),
+      ['clients', 'departs', 'departs', 'maintenance', null]);
+    const dep = { nuit: '2026-11-10', importeLe: '2026-11-10T01:50' };
+    egal('départs importés 10 min avant le rapport clients : rattachés à sa nuit', RDJ.rattacherNuit(dep, '2026-11-09', '2026-11-10T02:00').nuit, '2026-11-09');
+    egal('départs de la veille (plus de 12 h) : laissés sur leur nuit', RDJ.rattacherNuit({ nuit: '2026-11-08', importeLe: '2026-11-09T02:00' }, '2026-11-09', '2026-11-10T02:00').nuit, '2026-11-08');
+    egal('même nuit ou aucun rapport : inchangé', [RDJ.rattacherNuit(dep, '2026-11-10', '2026-11-10T02:00') === dep, RDJ.rattacherNuit(null, '2026-11-09', '2026-11-10T02:00')], [true, null]);
+    egal('plages de chambres', RDJ.plagesChambres(['385', '330', '333', '334', '335', '380', '381', '382', '383', '384', '267', '268']),
+      '267, 268, 330, 333 à 335, 380 à 385');
+    egal('chambres bloquées groupées par motif (casse ignorée, plus fréquent d\'abord)',
+      RDJ.grouperBloquees([['380', 'menage'], ['267', 'vomi odeur'], ['381', 'Ménage'], ['341', 'CHAMBRE MISE SOUS SCELÉ'], ['330', '']]),
+      [{ motif: 'Menage', chambres: ['380', '381'] }, { motif: 'Chambre mise sous scelé', chambres: ['341'] },
+        { motif: 'Sans motif', chambres: ['330'] }, { motif: 'Vomi odeur', chambres: ['267'] }]);
 
     /* ---- Export réel du 25/11/2025 ---- */
     try {
