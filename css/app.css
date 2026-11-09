@@ -764,10 +764,6 @@ body.depot .voile-depot { display: grid; }
 /* accueil : impressions en pastilles — « Tout imprimer » en vert Campanile, puis une pastille par feuille
    dans la couleur de son onglet (ouvre l'aperçu de cette feuille) */
 .acc-impr { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 16px; padding: 14px 18px; border-radius: 18px; background: var(--surface); }
-.acc-impr-titre {
-  flex: none; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  background: var(--perle); color: var(--perle-fonce);
-}
 .acc-impr-pastilles { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
 .acc-impr button { font: inherit; border: 0; cursor: pointer; border-radius: 999px; transition: background .15s, filter .15s, transform .1s ease-out; }
 .acc-impr button:active { transform: scale(.97); }

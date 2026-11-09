@@ -648,7 +648,6 @@
       </div>
 
       <section class="acc-impr" aria-label="Impressions de la nuit">
-        <span class="acc-impr-titre">Impressions</span>
         <div class="acc-impr-pastilles">
           <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg) || 'Aucune feuille choisie : voir Réglages')}">
             ${ICONE_IMPRIMANTE}<b>Tout imprimer</b><small>${esc(texteImpressionNuit(ctx.cfg) || 'aucune feuille choisie')}</small>
@@ -669,7 +668,7 @@
               <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
               <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
-              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles « Impressions » de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
+              <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles d'impression de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>
           </div>
           <div class="me-colonne">
