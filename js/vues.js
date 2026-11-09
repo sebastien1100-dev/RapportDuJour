@@ -643,11 +643,11 @@
 
       <footer class="acc-pied">
         <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
-        <span class="acc-pied-hotel"><b>Rapport du jour</b><small>version ${esc(RDJ.VERSION || '')}</small></span>
         <ul class="acc-horaires" aria-label="Horaires clés">
           ${ctx.cfg.horaires.filter((h) => ctx.cfg.horairesValeurs[h.id]).map((h) => `
             <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
         </ul>
+        <span class="acc-pied-version">version ${esc(RDJ.VERSION || '')}</span>
       </footer>
     </section>`;
   };
