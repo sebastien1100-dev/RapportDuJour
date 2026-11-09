@@ -760,7 +760,7 @@ body.depot .voile-depot { display: grid; }
 /* accueil : anneau neutre tant que rien n'est importé */
 .hero.attente { --anneau: #c9d3e0; }
 /* accueil : « Petits déjeuners » sur une ligne */
-.acc-chiffres { grid-template-columns: 2fr 2fr 1.3fr 2fr; }
+.acc-chiffres { grid-template-columns: 2.5fr 1.8fr 1.3fr 1.9fr; } /* Occupation : 3 chiffres sur une ligne */
 .acc-groupe-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-chiffres { grid-template-columns: 1fr; } }

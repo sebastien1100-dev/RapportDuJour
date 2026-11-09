@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.13', date: '2026-11-10', titre: 'Accueil : chambres bloquées',
+      changements: [
+        ['amelioration', "Accueil : la carte « Occupation » affiche aussi le nombre de chambres bloquées par le rapport de maintenance (hors service), à côté des chambres occupées et des clients. Une chambre remise en service à la main n'est plus comptée."],
+      ],
+    },
+    {
       version: '3.12', date: '2026-11-10', titre: 'Rapport : bas de la dernière colonne régulier',
       changements: [
         ['correction', "Rapport du jour : quand la dernière colonne a moins de chambres que les autres, elle est complétée par des lignes vides de la même hauteur que les autres, au lieu de deux ou trois grandes cases étirées."],

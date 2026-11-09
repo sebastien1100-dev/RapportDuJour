@@ -326,8 +326,12 @@
 
   /** Chambres bloquées par le rapport de maintenance, en HS sur la feuille (sans correction à la main),
       regroupées par motif : « Ménage (10) : 330, 333 à 335, 380 à 385 ». */
+  /** Chambres bloquées par la maintenance et toujours hors service (non remises en service à la main). */
+  const chambresBloquees = (ctx) =>
+    Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige);
+
   function texteBloquees(ctx) {
-    const nos = Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige);
+    const nos = chambresBloquees(ctx);
     if (!nos.length) return '';
     const groupes = RDJ.grouperBloquees(nos.map((k) => [k, ctx.etatsFdc[k].motif]));
     return `<div class="f-corr-titre">CHAMBRES BLOQUÉES (MAINTENANCE) · ${nos.length}</div>` +
@@ -643,7 +647,7 @@
       </div>
 
       <div class="acc-chiffres">
-        ${groupe('Occupation', 'plan', [['Chambres occupées', c.chambres], ['Clients', c.clients]])}
+        ${groupe('Occupation', 'plan', [['Chambres occupées', c.chambres], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length]])}
         ${groupe('Mouvements', 'fdc', [['Départs', c.departs], ['Recouches', c.recouches]])}
         ${groupe('Petits déjeuners', 'pdj', [['Couverts', c.pdj]])}
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
