@@ -7,8 +7,9 @@
 
   RDJ.CHANGELOG = [
     {
-      version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page',
+      version: '3.4', date: '2026-11-09', titre: 'Accueil : mode d\'emploi repliable et pied de page, retouches',
       changements: [
+        ['amelioration', "Feuille de chambre : les cases changées à la main sont en gris léger, à l'écran comme sur la feuille imprimée (avant : jaune à l'écran, rien à l'impression)."],
         ['amelioration', "Accueil : le mode d'emploi se réduit ou s'affiche d'un clic sur son titre (« Réduire ▴ » / « Afficher ▾ »). Le choix est retenu sur ce poste."],
         ['nouveau', "Accueil : grand pied de page vert Campanile qui rappelle l'en-tête, avec le logo, les horaires clés (petit déjeuner, arrivées, départs, restaurant) et la version de l'application à droite."],
         ['nouveau', "Réglages → Horaires clés : les horaires du pied de page se modifient ici ; une case vide n'est pas affichée."],
