@@ -147,6 +147,21 @@
       egal('ajout : compté dans les chiffres', [cA.chambres, cA.clients, cA.departs, cA.pdj], [70, 85, 41, 57]);
       egal('ajout : à encaisser avec son montant', cA.aEncaisser.find((e) => e.chambre === libres[0]).montant, 75);
       egal('ajout : compté en B sur la feuille de chambre', RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, avec, nuit, {})[libres[0]].etat, 'B');
+
+      // Rapport de maintenance (chambres bloquées)
+      const lignesMaint = [['Rapport maintenance'], [], ['N° chambre', 'Motif', 'Début', 'Fin prévue'],
+        [libres[0], 'Fuite salle de bain', nuit, RDJ.jours(nuit, 2)], [libres[0], 'Clim', nuit, ''],
+        ['155', 'Ampoule', nuit, ''], [libres[1], 'Peinture', RDJ.jours(nuit, -5), RDJ.jours(nuit, -1)], ['', 'ligne vide', '', '']];
+      const mt = RDJ.lireMaintenance(lignesMaint, nuit, true);
+      egal('maintenance : chambres lues, motifs réunis, blocage terminé ignoré',
+        [Object.keys(mt.chambres).sort(), mt.chambres[libres[0]].motif, mt.terminees, mt.lignes],
+        [[libres[0], '155'].sort(), 'Fuite salle de bain ; Clim', [libres[1]], 4]);
+      egal('maintenance : un fichier sans motif ni date n\'est pas reconnu au glisser-déposer', RDJ.lireMaintenance([['Chambre'], ['112']], nuit, true).lignes, 0);
+      egal('maintenance : mais il l\'est par le menu Importer', RDJ.lireMaintenance([['Chambre'], [112]], nuit, false).chambres, { 112: { motif: '', fin: null } });
+      const efM = RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, {}, mt.chambres);
+      egal('maintenance : chambre libre bloquée en HS, chambre occupée inchangée',
+        [efM[libres[0]].etat, efM[libres[0]].bloquee, efM[libres[0]].corrige, efM['155'].etat, efM['155'].bloquee], ['HS', true, false, 'B', true]);
+      egal('maintenance : une correction à la main l\'emporte', RDJ.etatsFdc(RDJ.CONFIG_DEFAUT.planFdc, res, nuit, { [libres[0]]: 'X' }, mt.chambres)[libres[0]].etat, '');
       egal('ajout : retiré si la chambre est dans l\'import', RDJ.nettoyerAjouts(res, [{ ...ajout, chambre: res[0].chambre }]).retires.length, 1);
       egal('ajout : l\'import n\'est pas modifié', res.length, 69);
 

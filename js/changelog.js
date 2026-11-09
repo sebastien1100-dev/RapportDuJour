@@ -7,6 +7,15 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.7', date: '2026-11-09', titre: 'Rapport de maintenance : chambres bloquées',
+      changements: [
+        ['nouveau', "Menu « Importer ▾ » : troisième choix « Rapport de maintenance », facultatif. Les chambres bloquées qu'il contient passent hors service (HS) sur la feuille de chambre et le plan de chambre (hachuré rouge), pour la nuit en cours."],
+        ['nouveau', "Le motif du blocage s'affiche au survol de la chambre sur le plan, et en bas de la feuille de chambre imprimée (« Chambres bloquées (maintenance) »). Les chambres bloquées comptent dans le total HS."],
+        ['amelioration', "Le fichier est reconnu tout seul s'il est déposé dans la fenêtre (colonne Chambre avec un motif ou des dates). Une chambre dont le blocage est déjà terminé est ignorée ; une chambre bloquée mais occupée d'après le rapport clients présents garde son client et est signalée."],
+        ['amelioration', "Accueil : troisième carte d'import « Rapport de maintenance » ; le mode d'emploi mentionne les deux rapports facultatifs. Un double-clic sur la chambre (plan ou feuille) permet toujours de la remettre en service."],
+      ],
+    },
+    {
       version: '3.6', date: '2026-11-09', titre: 'Impression en recto verso',
       changements: [
         ['nouveau', "Réglages → Impressions de la nuit : case « L'imprimante imprime en recto verso ». Cochée, chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière), tandis que le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et partagent les feuilles (rapport au recto, cuisson au verso)."],

@@ -173,6 +173,7 @@
       ${ligne('Départ', s.depart ? RDJ.dateFr(s.depart) : '')}${ligne('Petit déj.', s.statut === 'depart' || s.statut === 'recouche' ? (s.pdj ? 'Oui' : 'Non') : '')}
       ${ligne('Groupe', s.groupe ? 'Oui' : '')}
       ${ligne('Paiement', (s.statut === 'depart' || s.statut === 'recouche') && !s.groupe ? (s.nonPaye ? 'NON PAYÉE' : 'Payée') : '', s.nonPaye ? 'non-paye' : '')}
+      ${s.bloquee ? `<p class="non-paye">Bloquée (rapport de maintenance)${s.motif ? ' : ' + esc(s.motif) : ''}</p>` : ''}
       ${comm ? `<p>Communicante avec la ${esc(comm.avec)}</p>` : ''}
       ${s.manuel ? '<p>Ajoutée à la main</p>' : ''}${s.corrige && !s.sansClient ? '<p>Corrigée sur la feuille de chambre</p>' : ''}
       ${s.sansClient ? '<p class="astuce">Double-clic : libre → sale → hors service</p>' : ''}`;
@@ -322,6 +323,15 @@
     return lignes.length ? '<div class="f-corr-titre">CORRECTIONS DU JOUR</div>' + lignes.join('') : '';
   }
 
+  /** Chambres bloquées par le rapport de maintenance, en HS sur la feuille (sans correction à la main). */
+  function texteBloquees(ctx) {
+    const nos = Object.keys(ctx.etatsFdc).filter((k) => ctx.etatsFdc[k].bloquee && ctx.etatsFdc[k].etat === 'HS' && !ctx.etatsFdc[k].corrige)
+      .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    if (!nos.length) return '';
+    const detail = nos.map((k) => esc(k) + (ctx.etatsFdc[k].motif ? ' (' + esc(ctx.etatsFdc[k].motif) + ')' : '')).join(', ');
+    return `<div class="f-corr-titre">CHAMBRES BLOQUÉES (MAINTENANCE)</div><div><b>HORS SERVICE :</b> ${detail}</div>`;
+  }
+
   /** opts.vierge : feuille sans date ni saisie, à remplir à la main. */
   V.feuilleFdc = function (ctx, opts) {
     const vierge = !!(opts && opts.vierge);
@@ -363,7 +373,7 @@
         </table>`}
       </header>
       <table class="f-grille"><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
-      <div class="f-corr">${vierge ? '' : texteCorrections(ctx.fdc.corrections)}</div>
+      <div class="f-corr">${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
     </div>`;
   };
 
@@ -571,7 +581,7 @@
 
     const carteImport = (o) => `
       <section class="acc-import${o.fait ? ' fait' : ''}${o.obligatoire ? '' : ' option'}">
-        <i class="acc-pastille" aria-hidden="true">${o.fait ? '✓' : o.obligatoire ? '1' : '2'}</i>
+        <i class="acc-pastille" aria-hidden="true">${o.fait ? '✓' : o.numero || (o.obligatoire ? '1' : '2')}</i>
         <div class="acc-import-texte">
           <b>${esc(o.titre)}${o.obligatoire ? '' : ' <small>facultatif</small>'}</b>
           <span>${o.fait ? 'Importé : ' + o.fait : esc(o.aide)}</span>
@@ -621,6 +631,11 @@
           fait: ctx.soldes ? `${esc(ctx.soldes.fichier)} · ${esc(RDJ.dateFr(ctx.soldes.importeLe.slice(0, 10)))} à ${esc(ctx.soldes.importeLe.slice(11, 16))}` : '',
           aide: 'Montant dû des chambres en départ',
         })}
+        ${carteImport({
+          action: 'importer-maintenance', titre: 'Rapport de maintenance', obligatoire: false, numero: 3,
+          fait: ctx.maintenance ? `${esc(ctx.maintenance.fichier)} · ${Object.keys(ctx.maintenance.chambres).length} chambre(s) bloquée(s)` : '',
+          aide: 'Chambres bloquées : hors service sur le plan',
+        })}
         <p class="acc-depot">Vous pouvez aussi déposer les fichiers n'importe où dans la fenêtre : ils sont reconnus tout seuls.</p>
       </div>
 
@@ -649,7 +664,7 @@
             <h4>Chaque nuit</h4>
             <ol class="me-etapes">
               <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
-              <li><i>2</i><div><b>Importer le rapport des soldes</b><span>Facultatif : le montant dû s'affiche alors dans l'encadré « À encaisser » du rapport.</span></div></li>
+              <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des soldes : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
               <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou « Imprimer tout ». Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>

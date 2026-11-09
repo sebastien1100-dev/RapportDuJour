@@ -46,10 +46,12 @@
     const eff = RDJ.appliquerModifs(base, modifs, nuit);
     const chiffres = RDJ.chiffres(eff, nuit, cfg.nbChambres);
     const fdc = etat.fdc.nuit === nuit ? etat.fdc : { corrections: {}, nv: {} };
-    const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections);
+    // chambres bloquées du rapport de maintenance, s'il a été importé pour cette nuit
+    const maintenance = etat.maintenance && etat.maintenance.nuit === nuit ? etat.maintenance : null;
+    const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections, maintenance && maintenance.chambres);
     const pdjManuel = etat.pdj.nombre !== null && etat.pdj.nombre !== undefined;
     return {
-      etat, cfg, raw, nuit, modifs, soldes, ajouts, base, eff, chiffres, fdc, etatsFdc,
+      etat, cfg, raw, nuit, modifs, soldes, maintenance, ajouts, base, eff, chiffres, fdc, etatsFdc,
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
       grille: RDJ.grilleRapport(eff, nuit),
@@ -197,8 +199,11 @@
       return false;
     }
     const lu = RDJ.lireExport(lignes);
-    // pas le rapport clients présents mais un rapport des soldes (glisser-déposer) : on l'importe comme tel
+    // pas le rapport clients présents mais un rapport des soldes ou de maintenance (glisser-déposer) : on l'importe comme tel
     if (lu.manquants.length && RDJ.lireSoldes(lignes).lignes) return enregistrerSoldes(fichier, RDJ.lireSoldes(lignes));
+    if (lu.manquants.length && RDJ.lireMaintenance(lignes, contexte().nuit, true).lignes) {
+      return enregistrerMaintenance(fichier, RDJ.lireMaintenance(lignes, contexte().nuit, true));
+    }
     if (lu.manquants.length) {
       notice('Ce fichier ne ressemble pas au rapport du jour.\nColonnes introuvables : ' + lu.manquants.join(', '), 'erreur');
       return false;
@@ -270,6 +275,45 @@
           (ctx.chiffres.totalDu !== null ? ' · total dû ' + RDJ.formatMontant(ctx.chiffres.totalDu) : '') + '.'
         : "Importez aussi le rapport clients présents pour voir les montants sur le rapport."),
       ctx.raw.length && avecMontant < ctx.chiffres.aEncaisser.length ? 'alerte' : 'ok');
+    return true;
+  }
+
+  /* ---------- Import du rapport de maintenance (chambres bloquées, facultatif) ----------
+     Les chambres bloquées passent en HS sur la feuille de chambre et le plan, pour la nuit en cours. */
+
+  async function importerMaintenance(fichier) {
+    let lignes;
+    try {
+      lignes = await RDJ.lireFichierTableur(fichier);
+    } catch (err) {
+      notice('Import impossible : ' + err.message, 'erreur');
+      return false;
+    }
+    const m = RDJ.lireMaintenance(lignes, contexte().nuit, false);
+    if (!m.lignes) {
+      notice("Ce fichier ne ressemble pas au rapport de maintenance.\nIl faut une colonne Chambre (avec, si possible, le motif et les dates du blocage).", 'erreur');
+      return false;
+    }
+    return enregistrerMaintenance(fichier, m);
+  }
+  RDJ.importerMaintenance = importerMaintenance; // utilisé par les tests
+
+  function enregistrerMaintenance(fichier, m) {
+    const nuit = contexte().nuit;
+    etat.maintenance = { fichier: fichier.name, importeLe: RDJ.maintenantLocal(), nuit, chambres: m.chambres };
+    enregistrer();
+    const ctx = contexte();
+    const nos = Object.keys(m.chambres).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+    const horsPlan = nos.filter((k) => !(k in ctx.etatsFdc));
+    const occupees = nos.filter((k) => ctx.etatsFdc[k] && ctx.etatsFdc[k].base !== 'HS');
+    const hs = nos.filter((k) => ctx.etatsFdc[k] && ctx.etatsFdc[k].base === 'HS');
+    let bilan = 'Rapport de maintenance importé (' + fichier.name + ').\n' +
+      (hs.length ? hs.length + ' chambre(s) bloquée(s), hors service sur la feuille de chambre et le plan : ' + hs.join(', ') + '.' : 'Aucune chambre bloquée pour cette nuit.');
+    if (occupees.length) bilan += '\nBloquées mais occupées d\'après le rapport clients présents (laissées telles quelles) : ' + occupees.join(', ');
+    if (horsPlan.length) bilan += '\nChambres inconnues du plan : ' + horsPlan.join(', ');
+    if (m.terminees.length) bilan += '\nBlocage déjà terminé (ignorées) : ' + m.terminees.join(', ');
+    aller('plan');
+    notice(bilan, occupees.length || horsPlan.length ? 'alerte' : 'ok');
     return true;
   }
 
@@ -523,6 +567,7 @@
   const ACTIONS = {
     importer: () => { fermerMenuImport(); $('#fichier-import').click(); },
     'importer-soldes': () => { fermerMenuImport(); $('#fichier-soldes').click(); },
+    'importer-maintenance': () => { fermerMenuImport(); $('#fichier-maintenance').click(); },
     'menu-import': () => {
       const m = $('#menu-import');
       m.hidden = !m.hidden;
@@ -739,6 +784,11 @@
       const f = t.files[0];
       t.value = '';
       if (f) importerSoldes(f);
+      return;
+    } else if (t.id === 'fichier-maintenance') {
+      const f = t.files[0];
+      t.value = '';
+      if (f) importerMaintenance(f);
       return;
     } else if (t.id === 'fichier-restaurer') {
       const f = t.files[0];
