@@ -7,6 +7,27 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.16', date: '2026-11-11', titre: 'Rapport : total dû lisible',
+      changements: [
+        ['correction', "Rapport du jour, encadré « À encaisser » : le « Total dû » s'affichait dans un carré rouge à l'écran et dans un carré noir à l'impression, où il était illisible. Il est maintenant écrit en noir, sans fond, à droite du titre ; seul le badge « À ENCAISSER » garde son fond."],
+      ],
+    },
+    {
+      version: '3.15', date: '2026-11-11', titre: 'Taille des feuilles au curseur',
+      changements: [
+        ['amelioration', "Rapport, Femme de chambre, Plan de chambre et Cuisson PDJ : la liste « Affichage » est remplacée par une barre « Taille » : « Ajuster » (la feuille s'adapte à l'écran), « Largeur » (toute la largeur de la fenêtre) et un curseur de 50 % à 250 %, avec des boutons − et + (10 % par clic). La feuille suit le curseur en direct et le pourcentage s'affiche à côté."],
+        ['amelioration', "Le choix est retenu sur ce poste et vaut pour toutes les feuilles. En mode « Ajuster » ou « Largeur », le curseur indique la taille calculée ; le bouger passe en taille choisie. L'impression n'est pas concernée."],
+      ],
+    },
+    {
+      version: '3.14', date: '2026-11-11', titre: 'Accueil : une seule zone pour importer',
+      changements: [
+        ['amelioration', "Accueil : les trois cartes d'import sont remplacées par une seule zone de dépôt. On y glisse les rapports de la nuit (un seul ou les trois), ou on clique dessus pour les choisir ; ils sont reconnus et importés dans le bon ordre. La zone, le mode d'emploi, le menu « Importer ▾ » et le voile du glisser-déposer précisent que les exports peuvent être en français ou en anglais."],
+        ['amelioration', "Sous la zone, une pastille par rapport : menthe quand il est importé (nombre de chambres, total dû des départs, chambres bloquées), jaune quand le rapport clients présents manque, en pointillé pour un rapport facultatif absent. Une fois le rapport clients importé, la zone se fait plus compacte."],
+        ['amelioration', "Mode d'emploi de l'accueil mis à jour. Le menu « Importer ▾ » de la barre du haut reste disponible pour réimporter un seul rapport précis."],
+      ],
+    },
+    {
       version: '3.13', date: '2026-11-10', titre: 'Accueil : chambres bloquées',
       changements: [
         ['amelioration', "Accueil : la carte « Occupation » affiche aussi le nombre de chambres bloquées par le rapport de maintenance (hors service), à côté des chambres occupées et des clients. Une chambre remise en service à la main n'est plus comptée."],

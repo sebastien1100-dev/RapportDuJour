@@ -98,21 +98,41 @@
      (portable, Full HD, ultra-large) ; l'impression n'est pas concernée.
      ajuster : page paysage entière visible (largeur et hauteur) mais au moins 2/3 de la largeur de la fenêtre,
                page portrait à la largeur (max 150 %)
-     largeur : toute la largeur de la fenêtre · 100 : taille réelle */
-  const MODES_AFFICHAGE = [['ajuster', 'Ajuster à la fenêtre'], ['largeur', 'Toute la largeur'], ['100', 'Taille réelle (100 %)']];
+     largeur : toute la largeur de la fenêtre · un nombre (50 à 250) : zoom choisi au curseur, en % */
+  const ZOOM_MIN = 50, ZOOM_MAX = 250, ZOOM_PAS = 5;
   function modeAffichage() {
     try { return localStorage.getItem('rdj.affichage') || 'ajuster'; } catch (e) { return 'ajuster'; }
   }
+  function choisirAffichage(m) {
+    try { localStorage.setItem('rdj.affichage', String(m)); } catch (e) { /* sans importance */ }
+    ajusterFeuilles();
+  }
 
+  /** Barre de taille des feuilles : « Ajuster » (à l'écran), « Largeur », curseur de zoom avec − / +. */
   function ajouterChoixAffichage() {
     const outils = document.querySelector('#vue .outils');
     if (!outils || !document.querySelector('#vue .papier')) return;
-    const m = modeAffichage();
-    const l = document.createElement('label');
-    l.className = 'choix-affichage';
-    l.innerHTML = `Affichage <select id="mode-affichage">${MODES_AFFICHAGE.map(([k, t]) => `<option value="${k}" ${k === m ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
-    outils.appendChild(l);
+    const d = document.createElement('div');
+    d.className = 'choix-affichage';
+    d.innerHTML = `<span class="ca-lib">Taille</span>
+      <button type="button" class="ca-mode" data-action="zoom-ajuster" title="Feuille adaptée à l'écran">Ajuster</button>
+      <button type="button" class="ca-mode" data-action="zoom-largeur" title="Toute la largeur de la fenêtre">Largeur</button>
+      <button type="button" class="ca-pas" data-action="zoom-moins" aria-label="Réduire la feuille">−</button>
+      <input type="range" id="zoom-feuille" min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="${ZOOM_PAS}" aria-label="Taille de la feuille à l'écran">
+      <button type="button" class="ca-pas" data-action="zoom-plus" aria-label="Agrandir la feuille">+</button>
+      <output class="ca-valeur" for="zoom-feuille"></output>`;
+    outils.appendChild(d);
   }
+
+  /** Zoom de la feuille affichée (en %), pour partir de la taille actuelle avec − / + ou le curseur. */
+  const zoomActuel = () => {
+    const f = document.querySelector('#vue .papier .feuille');
+    return f ? Math.round((parseFloat(f.style.zoom) || 1) * 100) : 100;
+  };
+  const pasZoom = (sens) => {
+    const z = Math.round(zoomActuel() / ZOOM_PAS) * ZOOM_PAS + sens * ZOOM_PAS * 2;
+    choisirAffichage(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z)));
+  };
 
   function ajusterFeuilles() {
     const mode = modeAffichage();
@@ -120,7 +140,7 @@
       const f = p.querySelector('.feuille');
       if (!f) return;
       f.style.zoom = 1;
-      if (mode === '100') return;
+      if (/^\d+$/.test(mode)) { f.style.zoom = (Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, +mode)) / 100).toFixed(3); return; }
       const cs = getComputedStyle(p);
       const largeur = (p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4) / f.offsetWidth;
       const haut = p.getBoundingClientRect().top + window.scrollY;
@@ -131,6 +151,17 @@
       let z = mode === 'largeur' ? largeur : paysage ? Math.min(largeur, Math.max(hauteur, deuxTiers)) : Math.min(largeur, 1.5);
       z = Math.max(0.5, Math.min(z, 3));
       f.style.zoom = z.toFixed(3);
+    });
+    // la barre suit la taille réelle, même en mode automatique
+    const z = zoomActuel();
+    const curseur = document.getElementById('zoom-feuille');
+    if (curseur) curseur.value = z;
+    const val = document.querySelector('.choix-affichage .ca-valeur');
+    if (val) val.textContent = z + ' %';
+    document.querySelectorAll('.choix-affichage .ca-mode').forEach((b) => {
+      const actif = b.dataset.action === 'zoom-' + mode;
+      b.classList.toggle('actif', actif);
+      b.setAttribute('aria-pressed', actif ? 'true' : 'false');
     });
   }
 
@@ -623,6 +654,10 @@
   /* ---------- Actions des boutons ---------- */
 
   const ACTIONS = {
+    'zoom-ajuster': () => choisirAffichage('ajuster'),
+    'zoom-largeur': () => choisirAffichage('largeur'),
+    'zoom-moins': () => pasZoom(-1),
+    'zoom-plus': () => pasZoom(1),
     importer: () => { fermerMenuImport(); $('#fichier-import').click(); },
     'importer-soldes': () => { fermerMenuImport(); $('#fichier-soldes').click(); },
     'importer-maintenance': () => { fermerMenuImport(); $('#fichier-maintenance').click(); },
@@ -798,13 +833,14 @@
     if (p) { ev.preventDefault(); window.getSelection().removeAllRanges(); return modifierPlan(p.dataset.plan); }
   });
 
+  // curseur de taille des feuilles : la feuille suit le glissement en direct
+  document.addEventListener('input', (ev) => {
+    if (ev.target.id === 'zoom-feuille') choisirAffichage(ev.target.value);
+  });
+
   document.addEventListener('change', (ev) => {
     const t = ev.target;
-    if (t.id === 'mode-affichage') {
-      try { localStorage.setItem('rdj.affichage', t.value); } catch (e) { /* sans importance */ }
-      ajusterFeuilles();
-      return;
-    }
+    if (t.id === 'zoom-feuille') return; // déjà appliqué pendant le glissement (événement input)
     if (t.id === 'date-rapport') {
       etat.dateRapportManuelle = /^\d{4}-\d{2}-\d{2}$/.test(t.value) ? t.value : null;
     } else if (t.id === 'pdj-nombre') {

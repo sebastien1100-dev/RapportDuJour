@@ -586,15 +586,22 @@
     const taux = Math.min(1, c.taux);
     const CIRC = 2 * Math.PI * 52;
 
-    const carteImport = (o) => `
-      <section class="acc-import${o.fait ? ' fait' : ''}${o.obligatoire ? '' : ' option'}">
-        <i class="acc-pastille" aria-hidden="true">${o.fait ? '✓' : o.numero || (o.obligatoire ? '1' : '2')}</i>
-        <div class="acc-import-texte">
-          <b>${esc(o.titre)}${o.obligatoire ? '' : ' <small>facultatif</small>'}</b>
-          <span>${o.fait ? 'Importé : ' + o.fait : esc(o.aide)}</span>
-        </div>
-        <button class="btn ${o.fait ? '' : 'primaire'}" data-action="${o.action}">${o.fait ? 'Réimporter' : 'Importer'}</button>
-      </section>`;
+    // zone de dépôt unique : les trois rapports d'un coup (ou un seul), reconnus tout seuls ;
+    // une pastille par rapport : importé (menthe), à importer (beurre), facultatif absent (pointillé)
+    const heure = (r) => `${esc(RDJ.dateFr(r.importeLe.slice(0, 10)))} à ${esc(r.importeLe.slice(11, 16))}`;
+    const nbBloquees = chambresBloquees(ctx).length;
+    const pastilleImport = (fait, nom, detail, titre, obligatoire) => `<span class="dz-pastille ${fait ? 'fait' : obligatoire ? 'manque' : 'option'}"${titre ? ` title="${titre}"` : ''}>${fait ? '✓ ' : ''}${esc(nom)} · ${detail}</span>`;
+    const zoneImport = `
+      <button type="button" class="acc-depot-zone${imp ? ' rempli' : ''}" data-action="importer">
+        <span class="dz-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
+        <b class="dz-titre">${imp ? 'Déposez de nouveaux rapports ici pour mettre à jour, ou cliquez pour les choisir' : 'Déposez les rapports de la nuit ici, ou cliquez pour les choisir'}</b>
+        <span class="dz-aide">Rapport clients présents, des départs et de maintenance, exportés en français ou en anglais : un seul ou les trois à la fois, ils sont reconnus tout seuls.</span>
+        <span class="dz-pastilles">
+          ${pastilleImport(imp, 'Clients présents', imp ? `${imp.reservations.length} ch. · ${heure(imp)}` : 'à importer', imp ? esc(imp.fichier) : '', true)}
+          ${pastilleImport(ctx.soldes, 'Départs', ctx.soldes ? (c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) + ' dus' : 'importé ' + heure(ctx.soldes)) : 'facultatif', ctx.soldes ? esc(ctx.soldes.fichier) : '')}
+          ${pastilleImport(ctx.maintenance, 'Maintenance', ctx.maintenance ? `${nbBloquees} bloquée${nbBloquees > 1 ? 's' : ''}` : 'facultatif', ctx.maintenance ? esc(ctx.maintenance.fichier) : '')}
+        </span>
+      </button>`;
     // groupe de chiffres ; clic -> onglet correspondant
     const groupe = (titre, vue, valeurs) => `
       <button class="acc-groupe g-${vue}" data-vue-aller="${vue}" title="Ouvrir l'onglet">
@@ -627,24 +634,7 @@
         </div>
       </header>
 
-      <div class="acc-imports">
-        ${carteImport({
-          action: 'importer', titre: 'Rapport clients présents', obligatoire: true,
-          fait: imp ? `${esc(imp.fichier)} · ${esc(RDJ.dateFr(imp.importeLe.slice(0, 10)))} à ${esc(imp.importeLe.slice(11, 16))}` : '',
-          aide: 'Chambres, clients, départs, PDJ, paiement',
-        })}
-        ${carteImport({
-          action: 'importer-soldes', titre: 'Rapport des départs', obligatoire: false,
-          fait: ctx.soldes ? `${esc(ctx.soldes.fichier)} · ${esc(RDJ.dateFr(ctx.soldes.importeLe.slice(0, 10)))} à ${esc(ctx.soldes.importeLe.slice(11, 16))}` : '',
-          aide: 'Montant dû des chambres en départ',
-        })}
-        ${carteImport({
-          action: 'importer-maintenance', titre: 'Rapport de maintenance', obligatoire: false, numero: 3,
-          fait: ctx.maintenance ? `${esc(ctx.maintenance.fichier)} · ${Object.keys(ctx.maintenance.chambres).length} chambre(s) bloquée(s)` : '',
-          aide: 'Chambres bloquées : hors service sur le plan',
-        })}
-        <p class="acc-depot">Vous pouvez aussi déposer les fichiers n'importe où dans la fenêtre : ils sont reconnus tout seuls.</p>
-      </div>
+      ${zoneImport}
 
       <div class="acc-chiffres">
         ${groupe('Occupation', 'plan', [['Chambres occupées', c.chambres], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length]])}
@@ -671,8 +661,8 @@
           <div class="me-colonne">
             <h4>Chaque nuit</h4>
             <ol class="me-etapes">
-              <li><i>1</i><div><b>Importer le rapport clients présents</b><span>« Importer ▾ » puis « Rapport clients présents », ou déposez le fichier n'importe où dans la fenêtre.</span></div></li>
-              <li><i>2</i><div><b>Importer les rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
+              <li><i>1</i><div><b>Importer les rapports de la nuit</b><span>Déposez-les dans la zone de l'accueil (ou n'importe où dans la fenêtre), ou cliquez sur la zone pour les choisir : un seul ou les trois à la fois, dans n'importe quel ordre. Les exports en français comme en anglais sont reconnus.</span></div></li>
+              <li><i>2</i><div><b>Rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
               <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles d'impression de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>
