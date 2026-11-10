@@ -12,6 +12,7 @@
         ['amelioration', "L'onglet « Cuisson PDJ » s'appelle maintenant « PDJ » et contient deux sous-onglets : « Cuisson PDJ » (inchangé : quantités et feuille de cuisson) et « Buffet PDJ ». Le sous-onglet choisi est retenu pendant la session."],
         ['nouveau', "Buffet PDJ : croquis du buffet du petit déjeuner vu de dessus (îlot et trois tables), chaque élément numéroté avec une légende par zone : boissons, viennoiseries et pains, fruits, produits frais, tables (céréales, œufs, assiettes, couverts). Proportions estimées d'après des photos, avec une échelle."],
         ['nouveau', "« Imprimer le buffet » ouvre l'aperçu : une page A4 paysage, en noir et blanc. La barre « Taille » permet d'agrandir le croquis à l'écran."],
+        ['amelioration', "Buffet PDJ précisé : boîte à thé, oranges à jus, presse-jus (une seule station), oranges pressées à jeter, coupelles à confiture, confiture / Nutella / miel, compote de pommes, ardoise de fromages, beurre doux et demi-sel, jambon et charcuterie, emmental en tranches. Numéros de la légende remis à la suite (1 à 38)."],
       ],
     },
     {

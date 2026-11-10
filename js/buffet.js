@@ -33,9 +33,8 @@
   <g stroke="#1c2a48" stroke-width="0.6" fill="#ffffff">
     <rect x="50" y="68" width="42" height="28" rx="2" fill="#fff4cc"/>
     <rect x="50" y="100" width="42" height="38" rx="3" fill="#e9ecf0"/>
-    <circle cx="71" cy="157" r="15" fill="#ffe08a"/>
-    <rect x="53" y="176" width="36" height="28" rx="3" fill="#cfd6df"/>
-    <rect x="51" y="208" width="40" height="22" rx="2" fill="#e8cfa6"/>
+    <circle cx="71" cy="157" r="15" fill="#ffbf69"/>
+    <rect x="51" y="176" width="40" height="54" rx="3" fill="#cfd6df"/>
     <rect x="54" y="234" width="34" height="16" rx="3"/>
     <rect x="103" y="67" width="40" height="26" rx="2" fill="#f3dfb8"/>
     <circle cx="157" cy="80" r="12" fill="#e8cfa6"/>
@@ -58,7 +57,7 @@
     <rect x="178" y="181" width="54" height="32" rx="7" fill="#f6d2cf"/>
     <rect x="238" y="183" width="30" height="58" rx="2" fill="#ffffff"/>
     <circle cx="115" cy="236" r="11" fill="#ffffff"/>
-    <path d="M132 244 L150 244 L141 228 Z" fill="#f7f2e3"/>
+    <rect x="130" y="226" width="23" height="20" rx="1" fill="#3a3a3a"/>
     <rect x="158" y="220" width="15" height="30" rx="1" fill="#e8cfa6"/>
     <rect x="180" y="219" width="50" height="23" rx="1" fill="#fbefc6"/>
     <circle cx="279" cy="194" r="6"/>
@@ -89,20 +88,20 @@
 
   <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48">
     <text x="71" y="84">1</text><text x="71" y="121">2</text><text x="71" y="159">3</text>
-    <text x="71" y="192">4</text><text x="71" y="221">5</text><text x="71" y="244">6</text>
-    <text x="123" y="82">7</text><text x="157" y="82">8</text><text x="192" y="82">9</text>
-    <text x="234" y="82">10</text><text x="280" y="82">11</text><text x="319" y="81">12</text>
-    <text x="117" y="116">13</text><text x="146" y="118">14</text>
-    <text x="204" y="124" fill="#ffffff">15</text><text x="226" y="124" fill="#ffffff">15</text>
-    <text x="251" y="123">16</text><text x="283" y="123">17</text><text x="319" y="112">18</text>
-    <text x="318" y="162">19</text>
-    <text x="115" y="196">20</text><text x="145" y="196">21</text><text x="205" y="199">25</text><text x="253" y="214">27</text>
-    <text x="115" y="238">22</text><text x="141" y="241">23</text><text x="165" y="237">24</text><text x="205" y="233">26</text>
-    <text x="298" y="200">28</text><text x="318" y="236">29</text>
-    <text x="406" y="78">38</text><text x="439" y="72">39</text><text x="439" y="92">39</text><text x="405" y="122">39</text>
-    <text x="402" y="143">37</text><text x="402" y="168">37</text><text x="402" y="189" font-size="5">33</text>
-    <text x="435" y="140">35</text><text x="430" y="155" font-size="5">35</text><text x="446.5" y="154.5" font-size="4.5">36</text><text x="435" y="177">34</text>
-    <text x="397" y="232">30</text><text x="419" y="210">33</text><text x="440" y="232">31</text><text x="426" y="248">32</text>
+    <text x="71" y="205">4</text><text x="71" y="244">5</text>
+    <text x="123" y="82">6</text><text x="157" y="82">7</text><text x="192" y="82">8</text>
+    <text x="234" y="82">9</text><text x="280" y="82">10</text><text x="319" y="81">11</text>
+    <text x="117" y="116">12</text><text x="146" y="118">13</text>
+    <text x="204" y="124" fill="#ffffff">14</text><text x="226" y="124" fill="#ffffff">14</text>
+    <text x="251" y="123">15</text><text x="283" y="123">16</text><text x="319" y="112">17</text>
+    <text x="318" y="162">18</text>
+    <text x="115" y="196">19</text><text x="145" y="196">20</text><text x="205" y="199">24</text><text x="253" y="214">26</text>
+    <text x="115" y="238">21</text><text x="141.5" y="238" fill="#ffffff">22</text><text x="165" y="237">23</text><text x="205" y="233">25</text>
+    <text x="298" y="200">27</text><text x="318" y="236">28</text>
+    <text x="406" y="78">37</text><text x="439" y="72">38</text><text x="439" y="92">38</text><text x="405" y="122">38</text>
+    <text x="402" y="143">36</text><text x="402" y="168">36</text><text x="402" y="189" font-size="5">32</text>
+    <text x="435" y="140">34</text><text x="430" y="155" font-size="5">34</text><text x="446.5" y="154.5" font-size="4.5">35</text><text x="435" y="177">33</text>
+    <text x="397" y="232">29</text><text x="419" y="210">32</text><text x="440" y="232">30</text><text x="426" y="248">31</text>
   </g>
   <g font-size="4.2" fill="#ffffff" text-anchor="middle"><text x="174" y="114.5">ardoise</text></g>
 
@@ -117,31 +116,32 @@
     <text x="480" y="60" font-size="7" font-weight="bold">Légende</text>
     <rect x="480" y="66" width="7" height="5" fill="#d5f2ea"/>
     <text x="490" y="71" font-weight="bold">Bout boissons</text>
-    <text x="484" y="79">1 Thés (coffret)   2 Verres   3 Citrons</text>
-    <text x="484" y="86">4 Presse-agrumes   5 Planche et couteau   6 Plat</text>
+    <text x="484" y="79">1 Boîte à thé   2 Verres   3 Oranges à jus</text>
+    <text x="484" y="86">4 Presse-jus   5 Oranges pressées (à jeter)</text>
     <rect x="480" y="93" width="7" height="5" fill="#fbefc6"/>
     <text x="490" y="98" font-weight="bold">Côté viennoiseries et pains</text>
-    <text x="484" y="106">7 Pain de mie, cake   8 Confitures   9 Brioche</text>
-    <text x="484" y="113">10 Pains au chocolat   11 Croissants</text>
-    <text x="484" y="120">12 Planche à pain   13 Ramequins   14 Miel</text>
-    <text x="484" y="127">15 Bols noirs   16 Baguettes   17 Corbeilles de pain</text>
-    <text x="484" y="134">18 Grille-pain</text>
+    <text x="484" y="106">6 Pain de mie, cake   7 Confitures   8 Brioche</text>
+    <text x="484" y="113">9 Pains au chocolat   10 Croissants   11 Planche à pain</text>
+    <text x="484" y="120">12 Coupelles à confiture   13 Confiture, Nutella, miel</text>
+    <text x="484" y="127">14 Bols noirs   15 Baguettes   16 Corbeilles de pain</text>
+    <text x="484" y="134">17 Grille-pain</text>
     <rect x="480" y="141" width="7" height="5" fill="#fde3d4"/>
     <text x="490" y="146" font-weight="bold">Bout fruits</text>
-    <text x="484" y="154">19 Présentoir à fruits (3 étages, plateau tournant)</text>
+    <text x="484" y="154">18 Présentoir à fruits (3 étages, plateau tournant)</text>
     <rect x="480" y="161" width="7" height="5" fill="#dde9f8"/>
     <text x="490" y="166" font-weight="bold">Côté produits frais</text>
-    <text x="484" y="174">20 Compote   21 Salade de fruits   22 Fromage blanc</text>
-    <text x="484" y="181">23 Fromage   24 Beurre   25 Charcuterie (cloche)</text>
-    <text x="484" y="188">26 Fromage en tranches   27 Yaourts</text>
-    <text x="484" y="195">28 Lait et jus de fruits   29 Crêpes</text>
-    <rect x="480" y="202" width="7" height="5" fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.4"/>
-    <text x="490" y="207" font-weight="bold">Trois tables accolées</text>
-    <text x="484" y="215">30 Distributeurs de céréales   31 Bocaux (granola,</text>
-    <text x="490" y="222">fruits secs)   32 Sucre   33 Bols</text>
-    <text x="484" y="229">34 Cuiseur à œufs   35 Œufs et coquetiers</text>
-    <text x="484" y="236">36 Sel et poivre   37 Assiettes   38 Assiettes carrées</text>
-    <text x="484" y="243">39 Couverts</text>
+    <text x="484" y="174">19 Compote de pommes   20 Salade de fruits</text>
+    <text x="484" y="181">21 Fromage blanc   22 Ardoise de fromages</text>
+    <text x="484" y="188">23 Beurre doux et demi-sel   24 Jambon et charcuterie</text>
+    <text x="484" y="195">25 Emmental en tranches   26 Yaourts</text>
+    <text x="484" y="202">27 Lait et jus de fruits   28 Crêpes</text>
+    <rect x="480" y="209" width="7" height="5" fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.4"/>
+    <text x="490" y="214" font-weight="bold">Trois tables accolées</text>
+    <text x="484" y="222">29 Distributeurs de céréales   30 Bocaux (granola,</text>
+    <text x="490" y="229">fruits secs)   31 Sucre   32 Bols</text>
+    <text x="484" y="236">33 Cuiseur à œufs   34 Œufs et coquetiers</text>
+    <text x="484" y="243">35 Sel et poivre   36 Assiettes   37 Assiettes carrées</text>
+    <text x="484" y="250">38 Couverts</text>
   </g>
 </svg>`;
 })();
