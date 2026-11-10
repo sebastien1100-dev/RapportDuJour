@@ -613,6 +613,16 @@ body.depot .voile-depot { display: grid; }
 .ecran-tete .btn:not(.primaire) { background: rgba(255,255,255,.7); }
 .ecran-tete .btn:not(.primaire):hover:not(:disabled) { background: #fff; }
 .ecran-tete .choix-affichage { border-left-color: rgba(28,42,72,.12); color: var(--marine); }
+/* onglet PDJ : sous-onglets Cuisson PDJ / Buffet PDJ */
+.sous-onglets { display: flex; gap: 6px; margin: 0 auto 12px; max-width: var(--largeur, 1180px); }
+.sous-onglets button {
+  border: 0; border-radius: 999px; padding: 8px 18px; background: var(--beurre); color: var(--beurre-fonce);
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, transform .1s ease-out;
+}
+.sous-onglets button:hover { background: #f6e3a3; }
+.sous-onglets button:active { transform: scale(.97); }
+.sous-onglets button.actif { background: var(--accent); color: #fff; }
+
 /* taille des feuilles : Ajuster / Largeur, curseur de zoom avec − / + */
 .choix-affichage { gap: 4px; }
 .choix-affichage .ca-lib { margin-right: 4px; font-size: 13px; }
@@ -836,6 +846,15 @@ body.depot .voile-depot { display: grid; }
 .feuille h1 { margin: 0; font-size: 17pt; color: var(--accent); letter-spacing: .02em; }
 .feuille .sous { color: #555; font-size: 8.5pt; margin-top: 1mm; }
 .feuille .clic { cursor: pointer; user-select: none; }
+
+/* Buffet PDJ : croquis vu de dessus sur une page A4 paysage */
+.feuille.buffet { display: flex; flex-direction: column; }
+.b-tete { border-bottom: .6mm solid var(--accent); padding-bottom: 2mm; }
+.b-plan { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding-top: 4mm; }
+.b-plan .buffet-svg { width: 100%; height: auto; max-height: 100%; display: block; }
+.nb .b-tete { border-bottom-color: #000; }
+.nb .feuille.buffet h1 { color: #000; }
+.nb .b-plan .buffet-svg { filter: grayscale(1); }
 
 /* Rapport */
 .r-tete { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: .6mm solid var(--accent); padding-bottom: 2mm; }

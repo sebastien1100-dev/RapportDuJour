@@ -16,7 +16,9 @@ dans le navigateur (double-clic sur `index.html`). Toute la conversation avec l'
 - `js/calculs.js` : règles métier, fonctions pures, testées. `js/vues.js` : HTML des écrans et des feuilles.
 - `js/app.js` : état, événements, impression, aperçu. `js/store.js` : stockage. `js/xlsx-reader.js` : lecture .xlsx/.csv.
 - `js/changelog.js` : historique affiché dans l'onglet Change log. `css/app.css` : écrans + impression (A4 en mm).
-- Onglets : Accueil, Rapport, Femme de chambre, Plan de chambre, Cuisson PDJ, Historique (code : `recap`), Réglages, Change log.
+- `js/buffet.js` : croquis SVG du buffet du petit déjeuner (sous-onglet Buffet PDJ).
+- Onglets : Accueil, Rapport, Femme de chambre, Plan de chambre, PDJ (sous-onglets Cuisson PDJ et Buffet PDJ, code : `pdj`),
+  Historique (code : `recap`), Réglages, Change log.
 
 ## Règles de l'utilisateur
 - **Change log** : ajouter les modifications visibles en haut de `js/changelog.js` (pas de date affichée).

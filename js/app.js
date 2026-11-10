@@ -7,6 +7,14 @@
   let etat = RDJ.store.charger();
   let vue = 'accueil';
   try { vue = sessionStorage.getItem('rdj.vue') || 'accueil'; } catch (e) { /* sans importance */ }
+  // sous-onglet de l'onglet PDJ : 'cuisson' ou 'buffet' (retenu pendant la session)
+  let pdjSous = 'cuisson';
+  try { pdjSous = sessionStorage.getItem('rdj.pdjSous') || 'cuisson'; } catch (e) { /* sans importance */ }
+  function choisirPdj(s) {
+    pdjSous = s;
+    try { sessionStorage.setItem('rdj.pdjSous', s); } catch (e) { /* sans importance */ }
+    afficher();
+  }
 
   /* ---------- Contexte calculé ---------- */
 
@@ -61,6 +69,7 @@
       pdjManuel,
       pdjNombre: pdjManuel ? etat.pdj.nombre : chiffres.pdj,
       pdjType: etat.pdj.type || 'business',
+      pdjSous,
     };
   }
 
@@ -701,6 +710,9 @@
     'apercu-rapport': () => apercu('Rapport du jour', RDJ.vues.feuilleRapport(contexte()), 1),
     'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc, true); },
     'apercu-pdj': () => apercu('Cuisson PDJ', RDJ.vues.feuillePdj(contexte()), 1),
+    'apercu-buffet': () => apercu('Buffet PDJ', RDJ.vues.feuilleBuffet(contexte()), 1),
+    'pdj-cuisson': () => choisirPdj('cuisson'),
+    'pdj-buffet': () => choisirPdj('buffet'),
     'apercu-recap': () => apercu('Historique', RDJ.vues.feuilleRecap(contexte()), 1),
     'apercu-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge :", saisie: '1', type: 'number', ok: 'Voir l\'aperçu' });

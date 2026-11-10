@@ -737,9 +737,36 @@
       ${papier(V.feuilleFdc(ctx))}
     </section>`;
 
+  /** Feuille « Buffet PDJ » : croquis du buffet vu de dessus (js/buffet.js), A4 paysage. */
+  V.feuilleBuffet = (ctx) => `
+    <div class="feuille paysage buffet">
+      <header class="b-tete">
+        <div><h1>BUFFET PDJ</h1><div class="sous">${esc(ctx.cfg.hotel)} · disposition du buffet du petit déjeuner, vue de dessus</div></div>
+      </header>
+      <div class="b-plan">${RDJ.SVG_BUFFET || ''}</div>
+    </div>`;
+
+  /** Onglet PDJ : deux sous-onglets, Cuisson PDJ (quantités) et Buffet PDJ (croquis). */
   V.ecranPdj = (ctx) => {
+    const sous = ctx.pdjSous === 'buffet' ? 'buffet' : 'cuisson';
+    const sousOnglets = `
+      <nav class="sous-onglets" role="tablist" aria-label="PDJ">
+        <button type="button" role="tab" class="${sous === 'cuisson' ? 'actif' : ''}" aria-selected="${sous === 'cuisson'}" data-action="pdj-cuisson">Cuisson PDJ</button>
+        <button type="button" role="tab" class="${sous === 'buffet' ? 'actif' : ''}" aria-selected="${sous === 'buffet'}" data-action="pdj-buffet">Buffet PDJ</button>
+      </nav>`;
+    if (sous === 'buffet') {
+      return `
+    <section class="ecran">
+      ${sousOnglets}
+      ${teteEcran('pdj', 'Buffet PDJ', 'Disposition du buffet, vue de dessus',
+        'Chaque élément porte un numéro, repris dans la légende. Proportions estimées d\'après des photos du buffet.', `
+        <button class="btn primaire" data-action="apercu-buffet">Imprimer le buffet</button>`)}
+      ${papier(V.feuilleBuffet(ctx))}
+    </section>`;
+    }
     return `
     <section class="ecran">
+      ${sousOnglets}
       ${teteEcran('pdj', 'Cuisson PDJ', 'Matin du ' + esc(titreJour(ctx.mep)),
         'Les quantités se recalculent dès qu\'un chiffre change.', `
         <button class="btn primaire" data-action="apercu-pdj">Imprimer la cuisson PDJ</button>`)}
