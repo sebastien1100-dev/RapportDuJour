@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.18', date: '2026-11-11', titre: 'Rapport imprimé : départs en gris plus clair',
+      changements: [
+        ['amelioration', "Rapport du jour imprimé : le fond gris des lignes « Départ du jour » (et de sa case dans la légende) est nettement plus clair, pour que les noms restent bien lisibles sur papier."],
+      ],
+    },
+    {
       version: '3.17', date: '2026-11-11', titre: 'Onglet PDJ : cuisson et buffet',
       changements: [
         ['amelioration', "L'onglet « Cuisson PDJ » s'appelle maintenant « PDJ » et contient deux sous-onglets : « Cuisson PDJ » (inchangé : quantités et feuille de cuisson) et « Buffet PDJ ». Le sous-onglet choisi est retenu pendant la session."],

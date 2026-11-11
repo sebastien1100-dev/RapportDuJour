@@ -1236,7 +1236,7 @@ body.depot .voile-depot { display: grid; }
 }
 .nb .r-table td, .nb .p-table td, .nb .r-legende .ech { border-color: #555; }
 /* Rapport : un seul gris (départ) et du noir plein (non payée) pour qu'on ne les confonde pas */
-.nb .r-table tr.dep td, .nb .r-legende .ech.dep { background: #d0d0d0; }
+.nb .r-table tr.dep td, .nb .r-legende .ech.dep { background: #ebebeb; } /* gris clair : ressort plus foncé sur papier */
 .nb .r-table tr td.np, .nb .r-legende .ech.np { background: #000; color: #fff; }
 .nb .r-legende { border-top-color: #000; }
 /* Plan des chambres en N&B : départ gris, recouche blanc trait plein, libre pointillé, HS hachuré */
