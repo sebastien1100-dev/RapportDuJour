@@ -177,12 +177,83 @@
 
   /** Nature d'un fichier : 'clients' (rapport clients présents), 'departs', 'maintenance' ou null.
       L'ordre de RDJ.ORDRE_RAPPORTS est celui de l'import : la nuit vient du rapport clients. */
-  RDJ.ORDRE_RAPPORTS = ['clients', 'departs', 'maintenance'];
+  RDJ.ORDRE_RAPPORTS = ['clients', 'departs', 'maintenance', 'arrivees'];
   RDJ.typeRapport = function (lignes) {
     if (!RDJ.lireExport(lignes).manquants.length) return 'clients';
     if (RDJ.lireSoldes(lignes).lignes) return 'departs';
+    // avant la maintenance : le rapport des arrivées a aussi une colonne Chambre et une colonne Description
+    if (RDJ.lireArrivees(lignes).lignes) return 'arrivees';
     if (RDJ.lireMaintenance(lignes, null, true).lignes) return 'maintenance';
     return null;
+  };
+
+  /* ---------- Rapport des arrivées (facultatif) ----------
+     Réservations qui arrivent : une ligne par réservation, avec la date d'arrivée et le type de chambre
+     en clair (« Chambre Standard-1 Lit Queen ») ou en code de catégorie. On compte les chambres par type. */
+  RDJ.COLONNES_ARRIVEES = {
+    arrivee: ['arrivee', 'arrival', 'datedarrivee', 'arrivaldate'],
+    type: ['description', 'typedechambre', 'categoriedechambre', 'roomtype', 'roomtypedescription', 'categorie'],
+    nombre: ['totalreservations', 'nombredechambres', 'nbchambres', 'rooms', 'numberofrooms'],
+  };
+
+  /** « Chambre Supérieure - 1 Lit King » -> '1K' ; code de catégorie (BSTD----1Q) aussi reconnu ; '' si inconnu. */
+  RDJ.typeDepuisDescription = function (desc, types) {
+    const d = RDJ.normTitre(desc);
+    const existe = (code) => (types || []).some((t) => t.code === code);
+    let code = '';
+    if (/pmr|handicap|accessible|mobilitereduite/.test(d)) code = 'PMR';
+    else if (/king/.test(d)) code = '1K';
+    else if (/queen/.test(d)) code = '1Q';
+    else if (/2lits|deuxlits|twin|simples|2single|twobeds/.test(d)) code = '2S';
+    if (code && existe(code)) return code;
+    return RDJ.typeDepuisCategorie(desc, types);
+  };
+
+  /** Chambres disponibles pour les arrivées, par type : ni recouche (R, BR) ni hors service (HS) ;
+      les départs du jour et les chambres libres ou sales comptent. typesParChambre : { no: code }. */
+  RDJ.disponiblesParType = function (etatsFdc, typesParChambre) {
+    const res = {};
+    for (const k in etatsFdc) {
+      const e = etatsFdc[k].etat;
+      if (e === 'R' || e === 'BR' || e === 'HS') continue;
+      const code = (typesParChambre || {})[k] || '';
+      res[code] = (res[code] || 0) + 1;
+    }
+    return res;
+  };
+
+  /** Lignes du tableur -> { date, total, parType: {code: n}, autres: {description: n}, lignes }.
+      date = jour d'arrivée le plus fréquent ; seules les lignes de ce jour sont comptées. */
+  RDJ.lireArrivees = function (lignes, types) {
+    const C = RDJ.COLONNES_ARRIVEES;
+    for (let h = 0; h < Math.min(15, lignes.length); h++) {
+      const titres = (lignes[h] || []).map(RDJ.normTitre);
+      const col = (noms) => titres.findIndex((t) => t && noms.includes(t));
+      const iA = col(C.arrivee), iT = col(C.type), iN = col(C.nombre);
+      if (iA < 0 || iT < 0) continue;
+      const lues = [];
+      for (let i = h + 1; i < lignes.length; i++) {
+        const l = lignes[i] || [];
+        const date = RDJ.versISO(l[iA]);
+        if (!date) continue;
+        const n = iN >= 0 ? parseInt(l[iN], 10) : 1;
+        lues.push({ date, desc: texte(l[iT]), n: n > 0 ? n : 1 });
+      }
+      if (!lues.length) continue;
+      const parDate = {};
+      for (const x of lues) parDate[x.date] = (parDate[x.date] || 0) + x.n;
+      const date = Object.keys(parDate).sort((a, b) => parDate[b] - parDate[a] || (a < b ? -1 : 1))[0];
+      const parType = {}, autres = {};
+      let total = 0;
+      for (const x of lues.filter((y) => y.date === date)) {
+        const code = RDJ.typeDepuisDescription(x.desc, types || (RDJ.CONFIG_DEFAUT && RDJ.CONFIG_DEFAUT.typesChambre));
+        if (code) parType[code] = (parType[code] || 0) + x.n;
+        else { const k = x.desc || 'Type inconnu'; autres[k] = (autres[k] || 0) + x.n; }
+        total += x.n;
+      }
+      return { date, total, parType, autres, lignes: lues.length };
+    }
+    return { date: null, total: 0, parType: {}, autres: {}, lignes: 0 };
   };
 
   /** Rapport des départs ou de maintenance importé il y a moins de `heures` heures pour une autre nuit :

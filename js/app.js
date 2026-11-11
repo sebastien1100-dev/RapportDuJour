@@ -58,8 +58,11 @@
     const maintenance = etat.maintenance && etat.maintenance.nuit === nuit ? etat.maintenance : null;
     const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections, maintenance && maintenance.chambres);
     const pdjManuel = etat.pdj.nombre !== null && etat.pdj.nombre !== undefined;
+    // rapport des arrivées : montré tant que son jour d'arrivée n'est pas passé (le lendemain de la nuit, en général)
+    const arrivees = etat.arrivees && etat.arrivees.date && etat.arrivees.date >= nuit ? etat.arrivees : null;
     return {
-      etat, cfg, raw, nuit, modifs, soldes, maintenance, ajouts, base, eff, chiffres, fdc, etatsFdc,
+      etat, cfg, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
+      disponibles: RDJ.disponiblesParType(etatsFdc, cfg.types),
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
       grille: RDJ.grilleRapport(eff, nuit),
@@ -256,6 +259,7 @@
     const lu = RDJ.lireExport(lignes);
     // pas le rapport clients présents mais un rapport des soldes ou de maintenance (glisser-déposer) : on l'importe comme tel
     if (lu.manquants.length && RDJ.lireSoldes(lignes).lignes) return enregistrerSoldes(fichier, RDJ.lireSoldes(lignes), silencieux);
+    if (lu.manquants.length && RDJ.lireArrivees(lignes).lignes) return enregistrerArrivees(fichier, RDJ.lireArrivees(lignes, config().typesChambre), silencieux);
     if (lu.manquants.length && RDJ.lireMaintenance(lignes, contexte().nuit, true).lignes) {
       return enregistrerMaintenance(fichier, RDJ.lireMaintenance(lignes, contexte().nuit, true), silencieux);
     }
@@ -310,7 +314,7 @@
 
   /** Plusieurs fichiers d'un coup (glisser-déposer ou bouton Importer) : chacun est reconnu puis importé
       dans l'ordre rapport clients -> départs -> maintenance (la nuit vient du rapport clients), avec un seul message. */
-  const NOMS_RAPPORTS = { clients: 'rapport clients présents', departs: 'rapport des départs', maintenance: 'rapport de maintenance' };
+  const NOMS_RAPPORTS = { clients: 'rapport clients présents', departs: 'rapport des départs', maintenance: 'rapport de maintenance', arrivees: 'rapport des arrivées' };
   async function importerPlusieurs(fichiers) {
     fichiers = Array.from(fichiers || []);
     if (fichiers.length <= 1) return fichiers.length ? importer(fichiers[0]) : false;
@@ -332,7 +336,8 @@
     for (const l of lus) {
       const r = l.type === 'clients' ? await importer(l.f, { lignes: l.lignes, silencieux: true })
         : l.type === 'departs' ? enregistrerSoldes(l.f, RDJ.lireSoldes(l.lignes), true)
-          : enregistrerMaintenance(l.f, RDJ.lireMaintenance(l.lignes, contexte().nuit, true), true);
+          : l.type === 'arrivees' ? enregistrerArrivees(l.f, RDJ.lireArrivees(l.lignes, config().typesChambre), true)
+            : enregistrerMaintenance(l.f, RDJ.lireMaintenance(l.lignes, contexte().nuit, true), true);
       bilans.push(r.bilan);
       if (r.niveau !== 'ok' && niveau !== 'erreur') niveau = r.niveau;
     }
@@ -413,6 +418,38 @@
     if (horsPlan.length) bilan += '\nChambres inconnues du plan : ' + horsPlan.join(', ');
     if (m.terminees.length) bilan += '\nBlocage déjà terminé (ignorées) : ' + m.terminees.join(', ');
     return finImport(bilan, occupees.length || horsPlan.length ? 'alerte' : 'ok', 'plan', silencieux);
+  }
+
+  /* ---------- Import du rapport des arrivées (facultatif) ----------
+     Nombre d'arrivées par type de chambre, affiché sur l'accueil avec les chambres disponibles de chaque type. */
+
+  async function importerArrivees(fichier) {
+    let lignes;
+    try {
+      lignes = await RDJ.lireFichierTableur(fichier);
+    } catch (err) {
+      notice('Import impossible : ' + err.message, 'erreur');
+      return false;
+    }
+    const a = RDJ.lireArrivees(lignes, config().typesChambre);
+    if (!a.lignes) {
+      notice("Ce fichier ne ressemble pas au rapport des arrivées.\nIl faut une colonne Arrivée (date) et une colonne Description ou Type de chambre.", 'erreur');
+      return false;
+    }
+    return enregistrerArrivees(fichier, a);
+  }
+  RDJ.importerArrivees = importerArrivees; // utilisé par les tests
+
+  function enregistrerArrivees(fichier, a, silencieux) {
+    etat.arrivees = { fichier: fichier.name, importeLe: RDJ.maintenantLocal(), date: a.date, total: a.total, parType: a.parType, autres: a.autres };
+    enregistrer();
+    const types = config().typesChambre;
+    const detail = [...types.filter((t) => a.parType[t.code]).map((t) => t.code + ' ' + a.parType[t.code]),
+      ...Object.keys(a.autres).map((d) => d + ' ' + a.autres[d])].join(' · ');
+    const inconnus = Object.keys(a.autres).length;
+    return finImport('Rapport des arrivées importé (' + fichier.name + ') : ' + a.total + ' arrivée(s) le ' + RDJ.dateFr(a.date) +
+      (detail ? ' — ' + detail : '') + '.' + (inconnus ? '\nType non reconnu pour : ' + Object.keys(a.autres).join(', ') : ''),
+      inconnus ? 'alerte' : 'ok', 'accueil', silencieux);
   }
 
   /* ---------- Modifications du rapport (double-clic) ---------- */
@@ -670,6 +707,7 @@
     importer: () => { fermerMenuImport(); $('#fichier-import').click(); },
     'importer-soldes': () => { fermerMenuImport(); $('#fichier-soldes').click(); },
     'importer-maintenance': () => { fermerMenuImport(); $('#fichier-maintenance').click(); },
+    'importer-arrivees': () => { fermerMenuImport(); $('#fichier-arrivees').click(); },
     'menu-import': () => {
       const m = $('#menu-import');
       m.hidden = !m.hidden;
@@ -895,6 +933,11 @@
       const f = t.files[0];
       t.value = '';
       if (f) importerMaintenance(f);
+      return;
+    } else if (t.id === 'fichier-arrivees') {
+      const f = t.files[0];
+      t.value = '';
+      if (f) importerArrivees(f);
       return;
     } else if (t.id === 'fichier-restaurer') {
       const f = t.files[0];

@@ -782,6 +782,22 @@ body.depot .voile-depot { display: grid; }
 .hero.attente { --anneau: #c9d3e0; }
 /* accueil : « Petits déjeuners » sur une ligne */
 .acc-chiffres { grid-template-columns: 2.5fr 1.8fr 1.3fr 1.9fr; } /* Occupation : 3 chiffres sur une ligne */
+
+/* accueil : arrivées par type de chambre (rapport des arrivées) */
+.acc-arrivees { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin: 0 0 16px; padding: 14px 20px; border-radius: 18px; background: var(--lilas); }
+.acc-arrivees .acc-groupe-titre { color: var(--lilas-fonce); margin-bottom: 2px; }
+.arr-tete { display: flex; flex-direction: column; }
+.arr-total { display: flex; align-items: baseline; gap: 8px; }
+.arr-total b { font-size: 34px; line-height: 1.05; color: var(--marine); font-variant-numeric: tabular-nums; }
+.arr-total small { font-size: 13px; color: var(--marine); opacity: .75; }
+.arr-types { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; justify-content: flex-end; }
+.arr-type { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 14px; border-radius: 14px; background: rgba(255,255,255,.75); color: var(--marine); }
+.arr-type b { font-size: 13px; color: var(--lilas-fonce); }
+.arr-type .arr-n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.arr-type small { font-size: 12px; opacity: .75; }
+.arr-type.manque { background: var(--rose); color: var(--rose-fonce); }
+.arr-type.manque b, .arr-type.manque small { color: var(--rose-fonce); opacity: 1; font-weight: 700; }
+.arr-type.inconnu small { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-groupe-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 1250px) { .acc-chiffres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 720px) { .acc-chiffres { grid-template-columns: 1fr; } }

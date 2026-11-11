@@ -574,6 +574,32 @@
     return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
+  /** Accueil : arrivées par type de chambre (rapport des arrivées), comparées aux chambres disponibles du type
+      (départs du jour, libres et sales ; ni recouche ni hors service). Rien si le rapport n'est pas importé. */
+  function carteArrivees(ctx) {
+    const a = ctx.arrivees;
+    if (!a) return '';
+    const types = ctx.cfg.typesChambre;
+    const dispo = ctx.disponibles || {};
+    const lignes = [
+      ...types.filter((t) => a.parType[t.code]).map((t) => {
+        const n = a.parType[t.code], d = dispo[t.code] || 0;
+        return `<span class="arr-type${n > d ? ' manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
+          <b>${esc(t.code)}</b><span class="arr-n">${n}</span><small>${n > d ? 'manque ' + (n - d) : d + ' dispo'}</small></span>`;
+      }),
+      ...Object.keys(a.autres).map((desc) => `<span class="arr-type inconnu" title="Type non reconnu"><b>?</b><span class="arr-n">${a.autres[desc]}</span><small>${esc(desc)}</small></span>`),
+    ];
+    const jour = a.date === RDJ.jours(ctx.nuit, 1) ? 'demain, ' + titreJour(a.date) : maj(titreJour(a.date));
+    return `
+      <section class="acc-arrivees" aria-label="Arrivées par type de chambre">
+        <div class="arr-tete">
+          <span class="acc-groupe-titre">Arrivées</span>
+          <span class="arr-total"><b>${a.total}</b><small>chambre${a.total > 1 ? 's' : ''} · ${esc(jour)}</small></span>
+        </div>
+        <div class="arr-types">${lignes.join('')}</div>
+      </section>`;
+  }
+
   V.ecranAccueil = function (ctx) {
     const c = ctx.chiffres;
     const imp = ctx.etat.import;
@@ -595,11 +621,12 @@
       <button type="button" class="acc-depot-zone${imp ? ' rempli' : ''}" data-action="importer">
         <span class="dz-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
         <b class="dz-titre">${imp ? 'Déposez de nouveaux rapports ici pour mettre à jour, ou cliquez pour les choisir' : 'Déposez les rapports de la nuit ici, ou cliquez pour les choisir'}</b>
-        <span class="dz-aide">Rapport clients présents, des départs et de maintenance, exportés en français ou en anglais : un seul ou les trois à la fois, ils sont reconnus tout seuls.</span>
+        <span class="dz-aide">Rapport clients présents, des départs, de maintenance et des arrivées, exportés en français ou en anglais : un seul ou plusieurs à la fois, ils sont reconnus tout seuls.</span>
         <span class="dz-pastilles">
           ${pastilleImport(imp, 'Clients présents', imp ? `${imp.reservations.length} ch. · ${heure(imp)}` : 'à importer', imp ? esc(imp.fichier) : '', true)}
           ${pastilleImport(ctx.soldes, 'Départs', ctx.soldes ? (c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) + ' dus' : 'importé ' + heure(ctx.soldes)) : 'facultatif', ctx.soldes ? esc(ctx.soldes.fichier) : '')}
           ${pastilleImport(ctx.maintenance, 'Maintenance', ctx.maintenance ? `${nbBloquees} bloquée${nbBloquees > 1 ? 's' : ''}` : 'facultatif', ctx.maintenance ? esc(ctx.maintenance.fichier) : '')}
+          ${pastilleImport(ctx.arrivees, 'Arrivées', ctx.arrivees ? `${ctx.arrivees.total} le ${esc(RDJ.dateFr(ctx.arrivees.date))}` : 'facultatif', ctx.arrivees ? esc(ctx.arrivees.fichier) : '')}
         </span>
       </button>`;
     // groupe de chiffres ; clic -> onglet correspondant
@@ -643,6 +670,8 @@
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
       </div>
 
+      ${carteArrivees(ctx)}
+
       <section class="acc-impr" aria-label="Impressions de la nuit">
         <div class="acc-impr-pastilles">
           <button type="button" class="impr-tout" data-action="imprimer-tout" title="${esc(texteImpressionNuit(ctx.cfg, true) || 'Aucune feuille choisie : voir Réglages')}">
@@ -662,7 +691,7 @@
             <h4>Chaque nuit</h4>
             <ol class="me-etapes">
               <li><i>1</i><div><b>Importer les rapports de la nuit</b><span>Déposez-les dans la zone de l'accueil (ou n'importe où dans la fenêtre), ou cliquez sur la zone pour les choisir : un seul ou les trois à la fois, dans n'importe quel ordre. Les exports en français comme en anglais sont reconnus.</span></div></li>
-              <li><i>2</i><div><b>Rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre.</span></div></li>
+              <li><i>2</i><div><b>Rapports facultatifs</b><span>Rapport des départs : le montant dû s'affiche dans l'encadré « À encaisser » du rapport. Rapport de maintenance : les chambres bloquées passent hors service sur le plan et la feuille de chambre. Rapport des arrivées : le nombre d'arrivées par type de chambre s'affiche sur l'accueil.</span></div></li>
               <li><i>3</i><div><b>Vérifier et corriger</b><span>Rapport, feuille de chambre, plan, cuisson PDJ et historique se mettent à jour et sont enregistrés tout seuls.</span></div></li>
               <li><i>4</i><div><b>Imprimer</b><span>Depuis chaque onglet, ou avec les pastilles d'impression de l'accueil : « Tout imprimer » ou une seule feuille. Pour un PDF : imprimante « Enregistrer au format PDF ».</span></div></li>
             </ol>

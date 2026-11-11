@@ -7,6 +7,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.19', date: '2026-11-11', titre: 'Rapport des arrivées : arrivées par type de chambre',
+      changements: [
+        ['nouveau', "Quatrième import, facultatif : « Rapport des arrivées » (menu Importer ▾, ou déposé dans la zone de l'accueil avec les autres rapports : il est reconnu tout seul). On y lit la date d'arrivée et le type de chambre de chaque réservation (colonne « Description », par exemple « Chambre Standard-1 Lit Queen » → 1Q)."],
+        ['nouveau', "Accueil : carte « Arrivées » avec le nombre de chambres qui arrivent et le détail par type (PMR, 1K, 1Q, 2S), chacun comparé aux chambres disponibles de ce type (départs, libres et sales ; ni recouches ni hors service). Si un type n'a pas assez de chambres, sa pastille passe en rouge (« manque 2 »)."],
+        ['amelioration', "La carte reste affichée jusqu'au jour d'arrivée ; un type de chambre non reconnu est montré à part avec sa description."],
+      ],
+    },
+    {
       version: '3.18', date: '2026-11-11', titre: 'Rapport imprimé : départs en gris plus clair',
       changements: [
         ['amelioration', "Rapport du jour imprimé : le fond gris des lignes « Départ du jour » (et de sa case dans la légende) est nettement plus clair, pour que les noms restent bien lisibles sur papier."],

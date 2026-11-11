@@ -59,6 +59,10 @@ en attendant, elle apparaît dans « Autre » avec son nom d'origine.
 *Reste à payer*, *Balance*…) et une colonne *Chambre* ou *Réservation*. Les montants sont reportés sur les
 départs non payés de la nuit en cours.
 
+**Rapport des arrivées** (menu *Importer ▾*, facultatif) : export des arrivées avec une colonne *Arrivée* (date)
+et une colonne *Description* (ou *Type de chambre*, *Room type*) ; *TotalReservations* sert de nombre de chambres.
+L'accueil montre le nombre d'arrivées par type (PMR, 1K, 1Q, 2S), comparé aux chambres disponibles de chaque type.
+
 **Rapport de maintenance** (menu *Importer ▾*, facultatif) : export avec une colonne *Chambre* (ou *N° chambre*, *Room*),
 et si possible *Motif* (ou *Commentaire*, *Description*…) et les dates *Début* / *Fin*. Les chambres bloquées passent en HS
 sur la feuille de chambre et le plan pour la nuit en cours ; le motif apparaît au survol et en bas de la feuille de chambre.
@@ -84,7 +88,7 @@ js/calculs.js         règles métier (fonctions pures, testées)
 js/store.js           stockage local + sauvegarde/restauration .json
 js/vues.js            HTML des écrans et des feuilles imprimables
 js/app.js             état, événements, impression
-tests/tests.html      103 tests, dont l'export réel du 25/11/2025
+tests/tests.html      117 tests, dont l'export réel du 25/11/2025
 outils/serveur.ps1    petit serveur local (développement et tests uniquement)
 ANALYSE.md            analyse du classeur d'origine et règles métier
 ```
