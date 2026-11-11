@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.20', date: '2026-11-11', titre: 'Change log rangé dans les Réglages',
+      changements: [
+        ['amelioration', "Le Change log n'a plus d'onglet à lui : il se trouve dans Réglages, qui a maintenant deux sous-onglets, « Paramètres » et « Change log » (comme Cuisson / Buffet dans l'onglet PDJ). La barre du haut compte un onglet de moins."],
+      ],
+    },
+    {
       version: '3.19', date: '2026-11-11', titre: 'Rapport des arrivées : arrivées par type de chambre',
       changements: [
         ['nouveau', "Quatrième import, facultatif : « Rapport des arrivées » (menu Importer ▾, ou déposé dans la zone de l'accueil avec les autres rapports : il est reconnu tout seul). On y lit la date d'arrivée et le type de chambre de chaque réservation (colonne « Description », par exemple « Chambre Standard-1 Lit Queen » → 1Q)."],

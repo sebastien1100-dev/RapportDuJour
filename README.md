@@ -82,7 +82,7 @@ index.html            page unique
 css/app.css           écrans + mise en page d'impression (A4, en mm)
 img/logo-campanile.png  logo de l'en-tête (remplacer ce fichier pour changer le logo)
 js/config.js          hôtel : plan de la feuille de chambre (sert aussi au Plan de chambre), produits PDJ  ← à modifier ici
-js/changelog.js       historique des versions (onglet Change log) ← ajouter une entrée à chaque modification
+js/changelog.js       historique des versions (Réglages → Change log) ← ajouter une entrée à chaque modification
 js/xlsx-reader.js     lecture .xlsx / .csv sans bibliothèque (zip + XML natifs du navigateur)
 js/calculs.js         règles métier (fonctions pures, testées)
 js/store.js           stockage local + sauvegarde/restauration .json

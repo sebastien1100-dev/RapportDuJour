@@ -913,11 +913,22 @@
     </section>`;
   };
 
-  V.ecranChangelog = () => {
+  /** Onglet Réglages : deux sous-onglets, Paramètres et Change log (même présentation que l'onglet PDJ). */
+  const sousReglages = (ctx) => {
+    const s = ctx && ctx.reglagesSous === 'changelog' ? 'changelog' : 'parametres';
+    return `
+      <nav class="sous-onglets" role="tablist" aria-label="Réglages">
+        <button type="button" role="tab" class="${s === 'parametres' ? 'actif' : ''}" aria-selected="${s === 'parametres'}" data-action="reglages-parametres">Paramètres</button>
+        <button type="button" role="tab" class="${s === 'changelog' ? 'actif' : ''}" aria-selected="${s === 'changelog'}" data-action="reglages-changelog">Change log</button>
+      </nav>`;
+  };
+
+  V.ecranChangelog = (ctx) => {
     const TYPES = { nouveau: 'Nouveau', amelioration: 'Amélioration', correction: 'Correction' };
     const versions = RDJ.CHANGELOG || [];
     return `
     <section class="ecran changelog">
+      ${sousReglages(ctx)}
       ${teteEcran('changelog', 'Change log', 'Version actuelle : ' + esc(RDJ.VERSION || ''), 'Toutes les modifications de l\'application, de la plus récente à la plus ancienne.', '')}
       <ol class="cl-liste">
         ${versions.map((v, i) => `
@@ -972,6 +983,7 @@
     const sauv = ctx.etat.derniereSauvegarde;
     return `
     <section class="ecran reglages">
+      ${sousReglages(ctx)}
       ${teteEcran('reglages', 'Réglages', 'Version ' + esc(RDJ.VERSION || ''),
         'Les changements sont enregistrés tout de suite.', '')}
 

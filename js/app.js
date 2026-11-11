@@ -15,6 +15,15 @@
     try { sessionStorage.setItem('rdj.pdjSous', s); } catch (e) { /* sans importance */ }
     afficher();
   }
+  // sous-onglet de l'onglet Réglages : 'parametres' ou 'changelog' (le Change log n'a plus d'onglet à lui)
+  let reglagesSous = 'parametres';
+  try { reglagesSous = sessionStorage.getItem('rdj.reglagesSous') || 'parametres'; } catch (e) { /* sans importance */ }
+  if (vue === 'changelog') { vue = 'reglages'; reglagesSous = 'changelog'; }
+  function choisirReglages(s) {
+    reglagesSous = s;
+    try { sessionStorage.setItem('rdj.reglagesSous', s); } catch (e) { /* sans importance */ }
+    afficher();
+  }
 
   /* ---------- Contexte calculé ---------- */
 
@@ -73,6 +82,7 @@
       pdjNombre: pdjManuel ? etat.pdj.nombre : chiffres.pdj,
       pdjType: etat.pdj.type || 'business',
       pdjSous,
+      reglagesSous,
     };
   }
 
@@ -91,8 +101,7 @@
     plan: RDJ.vues.ecranPlan,
     pdj: RDJ.vues.ecranPdj,
     recap: RDJ.vues.ecranRecap,
-    reglages: RDJ.vues.ecranReglages,
-    changelog: RDJ.vues.ecranChangelog,
+    reglages: (ctx) => (ctx.reglagesSous === 'changelog' ? RDJ.vues.ecranChangelog(ctx) : RDJ.vues.ecranReglages(ctx)),
   };
 
   function afficher() {
@@ -751,6 +760,8 @@
     'apercu-buffet': () => apercu('Buffet PDJ', RDJ.vues.feuilleBuffet(contexte()), 1),
     'pdj-cuisson': () => choisirPdj('cuisson'),
     'pdj-buffet': () => choisirPdj('buffet'),
+    'reglages-parametres': () => choisirReglages('parametres'),
+    'reglages-changelog': () => choisirReglages('changelog'),
     'apercu-recap': () => apercu('Historique', RDJ.vues.feuilleRecap(contexte()), 1),
     'apercu-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge :", saisie: '1', type: 'number', ok: 'Voir l\'aperçu' });
