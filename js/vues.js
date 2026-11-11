@@ -602,19 +602,16 @@
     const lignes = [
       ...types.filter((t) => a.parType[t.code]).map((t) => {
         const n = a.parType[t.code], d = dispo[t.code] || 0;
-        return `<span class="arr-type${n > d ? ' manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
-          <b>${esc(t.code)}</b><span class="arr-n">${n}</span><small>${n > d ? 'manque ' + (n - d) : d + ' dispo'}</small></span>`;
+        return `<span class="acc-valeur arr-type${n > d ? ' manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
+          <b>${n}</b><small>${esc(t.code)} · ${n > d ? 'manque ' + (n - d) : d + ' dispo'}</small></span>`;
       }),
-      ...Object.keys(a.autres).map((desc) => `<span class="arr-type inconnu" title="Type non reconnu"><b>?</b><span class="arr-n">${a.autres[desc]}</span><small>${esc(desc)}</small></span>`),
+      ...Object.keys(a.autres).map((desc) => `<span class="acc-valeur arr-type inconnu" title="Type non reconnu : ${esc(desc)}"><b>${a.autres[desc]}</b><small>? ${esc(desc)}</small></span>`),
     ];
-    const jour = a.date === RDJ.jours(ctx.nuit, 1) ? 'demain, ' + titreJour(a.date) : maj(titreJour(a.date));
+    // même forme que les cartes Occupation, Mouvements… : 5e carte de la rangée des chiffres
     return `
-      <section class="acc-arrivees" aria-label="Arrivées par type de chambre">
-        <div class="arr-tete">
-          <span class="acc-groupe-titre">Arrivées</span>
-          <span class="arr-total"><b>${a.total}</b><small>chambre${a.total > 1 ? 's' : ''} · ${esc(jour)}</small></span>
-        </div>
-        <div class="arr-types">${lignes.join('')}</div>
+      <section class="acc-groupe g-arrivees" aria-label="Arrivées par type de chambre" title="Arrivées du ${esc(titreJour(a.date))}">
+        <span class="acc-groupe-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))}</span>
+        <span class="acc-valeurs"><span class="acc-valeur"><b>${a.total}</b><small>Chambres</small></span>${lignes.join('')}</span>
       </section>`;
   }
 
@@ -681,14 +678,13 @@
 
       ${zoneImport}
 
-      <div class="acc-chiffres">
+      <div class="acc-chiffres${ctx.arrivees ? ' avec-arrivees' : ''}">
         ${groupe('Occupation', 'plan', [['Chambres occupées', c.chambres], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length]])}
         ${groupe('Mouvements', 'fdc', [['Départs', c.departs], ['Recouches', c.recouches]])}
         ${groupe('Petits déjeuners', 'pdj', [['Couverts', c.pdj]])}
         ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
+        ${carteArrivees(ctx)}
       </div>
-
-      ${carteArrivees(ctx)}
 
       <section class="acc-impr" aria-label="Impressions de la nuit">
         <div class="acc-impr-pastilles">
