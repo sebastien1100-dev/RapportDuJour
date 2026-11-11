@@ -11,7 +11,7 @@
       changements: [
         ['nouveau', "Quatrième import, facultatif : « Rapport des arrivées » (menu Importer ▾, ou déposé dans la zone de l'accueil avec les autres rapports : il est reconnu tout seul). On y lit la date d'arrivée et le type de chambre de chaque réservation (colonne « Description », par exemple « Chambre Standard-1 Lit Queen » → 1Q)."],
         ['nouveau', "Accueil : carte « Arrivées » avec le nombre de chambres qui arrivent et le détail par type (PMR, 1K, 1Q, 2S), chacun comparé aux chambres disponibles de ce type (départs, libres et sales ; ni recouches ni hors service). Si un type n'a pas assez de chambres, sa pastille passe en rouge (« manque 2 »)."],
-        ['nouveau', "Feuille de chambre : en bas à droite, encadré « À préparer · arrivées du … » avec le nombre de chambres qui arrivent et le détail par type (PMR, 1K, 1Q, 2S), quand le rapport des arrivées est importé. Les corrections restent à gauche."],
+        ['nouveau', "Feuille de chambre : en bas à droite, tableau « Arrivées du … » présenté comme celui des totaux en haut de la feuille : case « À PRÉPARER » en noir avec le nombre de chambres, puis une colonne par type (PMR, 1K, 1Q, 2S), 0 en grisé. Affiché quand le rapport des arrivées est importé ; les corrections restent à gauche."],
         ['amelioration', "Accueil : la carte « Arrivées du … » rejoint la rangée des chiffres (Occupation, Mouvements, Petits déjeuners, Paiements) : les cinq cartes tiennent sur une seule ligne, plus compactes sur les écrans moyens."],
         ['amelioration', "La carte reste affichée jusqu'au jour d'arrivée ; un type de chambre non reconnu est montré à part avec sa description."],
       ],

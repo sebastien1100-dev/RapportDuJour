@@ -391,13 +391,16 @@
   function besoinsArrivees(ctx) {
     const a = ctx.arrivees;
     if (!a) return '';
+    // même présentation que le tableau des totaux en haut de la feuille ; les quatre types toujours présents (0 en grisé)
     const types = ctx.cfg.typesChambre;
-    const lignes = [...types.filter((t) => a.parType[t.code]).map((t) => [t.code, a.parType[t.code]]),
-      ...Object.keys(a.autres).map((d) => [d, a.autres[d]])];
+    const nbAutres = Object.values(a.autres).reduce((s, n) => s + n, 0);
+    const cols = [...types.map((t) => [t.code, a.parType[t.code] || 0]), ...(nbAutres ? [['Autre', nbAutres]] : [])];
     return `<div class="f-besoins">
-        <div class="f-corr-titre">À PRÉPARER · ARRIVÉES DU ${esc(RDJ.dateFr(a.date).slice(0, 5))}</div>
-        <div class="f-besoins-total"><b>${a.total}</b> chambre${a.total > 1 ? 's' : ''}</div>
-        <div class="f-besoins-types">${lignes.map(([t, n]) => `<span><b>${esc(t)}</b> ${n}</span>`).join('')}</div>
+        <div class="f-besoins-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))}</div>
+        <table class="f-cpt f-arr">
+          <tr><th>À PRÉPARER</th>${cols.map(([c]) => `<th>${esc(c)}</th>`).join('')}</tr>
+          <tr><td>${a.total}</td>${cols.map(([, n]) => `<td${n ? '' : ' class="zero"'}>${n}</td>`).join('')}</tr>
+        </table>
       </div>`;
   }
 
