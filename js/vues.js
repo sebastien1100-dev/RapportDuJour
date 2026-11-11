@@ -741,7 +741,7 @@
   V.feuilleBuffet = (ctx) => `
     <div class="feuille paysage buffet">
       <header class="b-tete">
-        <div><h1>BUFFET PDJ</h1><div class="sous">${esc(ctx.cfg.hotel)} · disposition du buffet du petit déjeuner, vue de dessus</div></div>
+        <div><h1>BUFFET PDJ</h1><div class="sous">Disposition du buffet du petit déjeuner, vue de dessus</div></div>
       </header>
       <div class="b-plan">${RDJ.SVG_BUFFET || ''}</div>
     </div>`;
@@ -759,7 +759,7 @@
     <section class="ecran">
       ${sousOnglets}
       ${teteEcran('pdj', 'Buffet PDJ', 'Disposition du buffet, vue de dessus',
-        'Chaque élément porte un numéro, repris dans la légende. Proportions estimées d\'après des photos du buffet.', `
+        'Chaque élément porte un numéro, repris dans la légende.', `
         <button class="btn primaire" data-action="apercu-buffet">Imprimer le buffet</button>`)}
       ${papier(V.feuilleBuffet(ctx))}
     </section>`;
