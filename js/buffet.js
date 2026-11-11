@@ -6,7 +6,7 @@
   'use strict';
   const RDJ = (window.RDJ = window.RDJ || {});
 
-  RDJ.SVG_BUFFET = `<svg class="buffet-svg" xmlns="http://www.w3.org/2000/svg" viewBox="26 42 614 262" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Plan du buffet du petit déjeuner, vue de dessus">
+  RDJ.SVG_BUFFET = `<svg class="buffet-svg" xmlns="http://www.w3.org/2000/svg" viewBox="26 42 642 262" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Plan du buffet du petit déjeuner, vue de dessus">
   <g fill="#5f6b7a" font-size="6" font-weight="bold" text-anchor="middle">
     <text x="190" y="52">Côté viennoiseries et pains</text>
     <text x="190" y="274">Côté produits frais</text>
@@ -141,40 +141,51 @@
     <rect x="426" y="289" width="8" height="6" rx="1" fill="#e3e6ea" stroke="#1c2a48"/><text x="437" y="294">Vaisselle et matériel</text>
   </g>
 
-  <!-- légende -->
-  <g font-size="5.6" fill="#1c2a48">
-    <text x="430" y="62" font-size="7" font-weight="bold">Légende</text>
-    <rect x="430" y="68" width="7" height="5" fill="#f4faf7" stroke="#9aa3ad" stroke-width="0.4"/>
-    <text x="440" y="73" font-weight="bold">Bout boissons</text>
-    <text x="434" y="81">1 Boîte à thé   2 Verres   3 Oranges à jus</text>
-    <text x="434" y="88">4 Presse-jus   5 Oranges pressées (à jeter)</text>
-    <rect x="430" y="95" width="7" height="5" fill="#fdf9ee" stroke="#9aa3ad" stroke-width="0.4"/>
-    <text x="440" y="100" font-weight="bold">Côté viennoiseries et pains</text>
-    <text x="434" y="108">6 Pain de mie   7 Cake   8 Brioche</text>
-    <text x="434" y="115">9 Pains au chocolat   10 Croissants   11 Planche à pain</text>
-    <text x="434" y="122">12 Coupelles à confiture   13 Confiture, Nutella, miel</text>
-    <text x="434" y="129">14 Baguettes   15 Corbeilles de pain   16 Grille-pain</text>
-    <rect x="430" y="136" width="7" height="5" fill="#fdf4ef" stroke="#9aa3ad" stroke-width="0.4"/>
-    <text x="440" y="141" font-weight="bold">Bout fruits</text>
-    <text x="434" y="149">17 Présentoir à fruits (3 étages, plateau tournant)</text>
-    <rect x="430" y="156" width="7" height="5" fill="#14171c"/>
-    <text x="440" y="161" font-weight="bold">Structure centrale noire</text>
-    <text x="434" y="169">31 Bols, tout le long de la structure</text>
-    <rect x="430" y="176" width="7" height="5" fill="#f3f7fc" stroke="#9aa3ad" stroke-width="0.4"/>
-    <text x="440" y="181" font-weight="bold">Côté produits frais</text>
-    <text x="434" y="189">18 Compote de pommes   19 Salade de fruits</text>
-    <text x="434" y="196">20 Fromage blanc   21 Ardoise de fromages</text>
-    <text x="434" y="203">22 Beurre doux et demi-sel   23 Jambon et charcuterie</text>
-    <text x="434" y="210">24 Emmental en tranches   25 Yaourts</text>
-    <text x="434" y="217">26 Lait et eau minérale au fond, jus de fruits devant</text>
-    <text x="440" y="224">(2 pomme, 2 orange)   27 Crêpes</text>
-    <rect x="430" y="231" width="7" height="5" fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.4"/>
-    <text x="440" y="236" font-weight="bold">Trois tables collées au buffet</text>
-    <text x="434" y="244">28 Distributeurs de céréales   29 Bocaux (granola,</text>
-    <text x="440" y="251">fruits secs)   30 Sucre   31 Bols</text>
-    <text x="434" y="258">32 Cuiseur à œufs   33 Œufs et coquetiers</text>
-    <text x="434" y="265">34 Sel et poivre   35 Assiettes   36 Plateaux PDJ</text>
-    <text x="434" y="272">37 Petites et grandes cuillères</text>
-  </g>
+  <!-- légende : un élément par ligne, numéro dans une pastille de la couleur de sa famille (construite plus bas) -->
+  ${legende()}
 </svg>`;
+
+  /* Légende du croquis, en deux colonnes. Pour ajouter un élément : une ligne [numéro, famille, nom].
+     Familles : v viennoiseries et pains · s sucré à tartiner · f fruits et jus · l laitiers et fromages
+                o salé et œufs · c céréales · m vaisselle et matériel */
+  function legende() {
+    const FAM = { v: '#ebcb8b', s: '#dcd2f6', f: '#bfe8d6', l: '#c8dcf4', o: '#f4c7c7', c: '#f7e7b0', m: '#e3e6ea' };
+    const COLONNES = [
+      [
+        { titre: 'Bout boissons', fond: '#f4faf7', items: [[1, 'm', 'Boîte à thé'], [2, 'm', 'Verres'], [3, 'f', 'Oranges à jus'], [4, 'm', 'Presse-jus'], [5, 'm', 'Oranges pressées (à jeter)']] },
+        { titre: 'Côté viennoiseries et pains', fond: '#fdf9ee', items: [[6, 'v', 'Pain de mie'], [7, 'v', 'Cake'], [8, 'v', 'Brioche'], [9, 'v', 'Pains au chocolat'],
+          [10, 'v', 'Croissants'], [11, 'm', 'Planche à pain'], [12, 'm', 'Coupelles à confiture'], [13, 's', 'Confiture, Nutella, miel'],
+          [14, 'v', 'Baguettes'], [15, 'v', 'Corbeilles de pain'], [16, 'm', 'Grille-pain']] },
+        { titre: 'Bout fruits', fond: '#fdf4ef', items: [[17, 'f', 'Présentoir à fruits (3 étages)']] },
+        { titre: 'Structure centrale noire', fond: '#14171c', items: [[31, 'm', 'Bols, tout le long']] },
+      ],
+      [
+        { titre: 'Côté produits frais', fond: '#f3f7fc', items: [[18, 'f', 'Compote de pommes'], [19, 'f', 'Salade de fruits'], [20, 'l', 'Fromage blanc'],
+          [21, 'l', 'Ardoise de fromages'], [22, 'l', 'Beurre doux et demi-sel'], [23, 'o', 'Jambon et charcuterie'], [24, 'l', 'Emmental en tranches'],
+          [25, 'l', 'Yaourts'], [26, 'f', 'Lait, eau, jus (2 pomme, 2 orange)'], [27, 'v', 'Crêpes']] },
+        { titre: 'Trois tables collées au buffet', fond: '#e8d3b6', bord: '#9c7a52', items: [[28, 'c', 'Distributeurs de céréales'],
+          [29, 'c', 'Bocaux (granola, fruits secs)'], [30, 'c', 'Sucre'], [31, 'm', 'Bols'], [32, 'm', 'Cuiseur à œufs'], [33, 'o', 'Œufs et coquetiers'],
+          [34, 'm', 'Sel et poivre'], [35, 'm', 'Assiettes'], [36, 'm', 'Plateaux PDJ'], [37, 'm', 'Petites et grandes cuillères']] },
+      ],
+    ];
+    const LIGNE = 8.6;
+    let svg = '<g fill="#1c2a48"><text x="430" y="58" font-size="7.5" font-weight="bold">Légende</text></g>';
+    COLONNES.forEach((zones, c) => {
+      const x = 430 + c * 128;
+      let y = 70;
+      for (const z of zones) {
+        svg += `<rect x="${x}" y="${y - 5.2}" width="9" height="6" rx="1" fill="${z.fond}" stroke="${z.bord || '#9aa3ad'}" stroke-width="0.4"/>` +
+          `<text x="${x + 12}" y="${y}" font-size="6" font-weight="bold" fill="#1c2a48">${z.titre}</text>`;
+        y += LIGNE;
+        for (const [n, f, nom] of z.items) {
+          svg += `<rect x="${x}" y="${y - 5.4}" width="10" height="7" rx="1.5" fill="${FAM[f]}" stroke="#1c2a48" stroke-width="0.4"/>` +
+            `<text x="${x + 5}" y="${y - 0.3}" font-size="5" font-weight="bold" text-anchor="middle" fill="#1c2a48">${n}</text>` +
+            `<text x="${x + 13}" y="${y}" font-size="5.8" fill="#1c2a48">${nom}</text>`;
+          y += LIGNE;
+        }
+        y += 3.5; // espace entre deux zones
+      }
+    });
+    return svg;
+  }
 })();

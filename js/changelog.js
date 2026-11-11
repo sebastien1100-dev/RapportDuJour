@@ -15,6 +15,7 @@
     {
       version: '3.17', date: '2026-11-11', titre: 'Onglet PDJ : cuisson et buffet',
       changements: [
+        ['amelioration', "Buffet PDJ : légende plus claire, un élément par ligne sur deux colonnes, rangée par zone (titre avec la couleur de la zone). Chaque numéro est dans une pastille de la couleur de sa famille de produits, comme sur le croquis."],
         ['amelioration', "Buffet PDJ : croquis redessiné sur une grille régulière : même écart (4 cm) entre tous les éléments, éléments d'une même rangée alignés en haut et en bas, colonnes des deux bouts de même largeur, rectangles aux mêmes coins arrondis (corbeilles un peu plus arrondies), cercles réservés aux objets ronds (bols, assiettes, fruits, bocaux). Numéros centrés sur leur élément ; emplacements inchangés."],
         ['amelioration', "L'onglet « Cuisson PDJ » s'appelle maintenant « PDJ » et contient deux sous-onglets : « Cuisson PDJ » (inchangé : quantités et feuille de cuisson) et « Buffet PDJ ». Le sous-onglet choisi est retenu pendant la session."],
         ['nouveau', "Buffet PDJ : croquis du buffet du petit déjeuner vu de dessus (îlot et trois tables), chaque élément numéroté avec une légende par zone : boissons, viennoiseries et pains, fruits, produits frais, tables (céréales, œufs, assiettes, couverts). Proportions estimées d'après des photos, avec une échelle."],
