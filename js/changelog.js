@@ -7,8 +7,11 @@
 
   RDJ.CHANGELOG = [
     {
-      version: '3.20', date: '2026-11-11', titre: 'Change log rangé dans les Réglages',
+      version: '3.20', date: '2026-11-11', titre: 'Réglages réservés par un code, Change log rangé dans les Réglages',
       changements: [
+        ['nouveau', "Réglages → carte « Code d'accès » : un code de 4 à 8 chiffres réserve les Réglages et le Change log sur ce poste. Sans le code, l'onglet Réglages affiche un écran de verrouillage ; le reste de l'appli reste accessible à tous."],
+        ['nouveau', "Une fois ouverts, les Réglages se reverrouillent tout seuls après 10 minutes sans action, ou à la fermeture de l'appli ; bouton « Verrouiller maintenant ». Après 5 codes faux, il faut attendre 30 secondes."],
+        ['nouveau', "Code oublié : un code de secours (8 caractères) est donné une seule fois quand on choisit le code ; il permet d'en choisir un nouveau. Le code n'est jamais enregistré en clair (empreinte chiffrée seulement), ni dans les sauvegardes .json : il est propre à chaque navigateur."],
         ['amelioration', "Le Change log n'a plus d'onglet à lui : il se trouve dans Réglages, qui a maintenant deux sous-onglets, « Paramètres » et « Change log » (comme Cuisson / Buffet dans l'onglet PDJ). La barre du haut compte un onglet de moins."],
       ],
     },

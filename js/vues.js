@@ -913,6 +913,19 @@
     </section>`;
   };
 
+  /** Réglages verrouillés : le code est demandé avant d'ouvrir Paramètres et Change log. */
+  V.ecranVerrou = () => `
+    <section class="ecran reglages">
+      ${teteEcran('reglages', 'Réglages', 'Accès réservé', 'Les Réglages et le Change log sont protégés par un code sur ce poste.', '')}
+      <section class="carte rg-carte rg-verrou">
+        <div class="rg-verrou-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <label for="pin-saisie">Code d'accès</label>
+        <input type="password" id="pin-saisie" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="••••" autofocus>
+        <button class="btn primaire" data-action="deverrouiller">Ouvrir les Réglages</button>
+        <button class="btn lien" data-action="pin-oublie">Code oublié ?</button>
+      </section>
+    </section>`;
+
   /** Onglet Réglages : deux sous-onglets, Paramètres et Change log (même présentation que l'onglet PDJ). */
   const sousReglages = (ctx) => {
     const s = ctx && ctx.reglagesSous === 'changelog' ? 'changelog' : 'parametres';
@@ -1005,6 +1018,25 @@
             <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.</small></span></label>
         </section>
       </div>
+
+      <section class="carte rg-carte rg-code">
+        <h3>Code d'accès</h3>
+        ${ctx.pinDefini ? `
+        <p>Les Réglages et le Change log sont protégés par un code sur ce poste. Ils se reverrouillent tout seuls après 10 minutes sans action, ou à la fermeture de l'appli.</p>
+        <div class="rg-code-ligne">
+          <button class="btn primaire" data-action="verrouiller-reglages">Verrouiller maintenant</button>
+          <label>Nouveau code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
+          <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+          <button class="btn" data-action="pin-definir">Changer le code</button>
+          <button class="btn danger" data-action="pin-supprimer">Supprimer le code</button>
+        </div>` : `
+        <p>Réservez les Réglages et le Change log : choisissez un code de 4 à 8 chiffres. Il sera demandé à chaque ouverture des Réglages, sur ce poste.</p>
+        <div class="rg-code-ligne">
+          <label>Code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
+          <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+          <button class="btn primaire" data-action="pin-definir">Protéger les Réglages</button>
+        </div>`}
+      </section>
 
       <section class="carte rg-carte rg-horaires">
         <h3>Pied de page</h3>

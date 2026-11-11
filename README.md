@@ -27,6 +27,13 @@ Corrections à la main, comme dans Excel :
 Affichage : les feuilles s'adaptent à la fenêtre (choix « Affichage » dans la barre d'outils :
 ajuster, toute la largeur ou 100 %). Testé en 1440 × 900 (MacBook Air), 1920 × 1080 et 3440 × 1440.
 
+## Réglages réservés (code d'accès)
+
+Réglages → *Code d'accès* : un code de 4 à 8 chiffres réserve les Réglages et le Change log sur ce poste
+(reverrouillage après 10 minutes sans action). Un code de secours, affiché une seule fois, permet d'en choisir
+un nouveau en cas d'oubli. Le code est propre à chaque navigateur (il n'est pas dans les sauvegardes .json).
+C'est une protection dissuasive : l'appli n'a pas de serveur, quelqu'un d'averti peut toujours modifier les fichiers.
+
 ## Où sont les données ?
 
 Dans le navigateur, sur ce poste (stockage local). Conséquences :
@@ -88,7 +95,7 @@ js/calculs.js         règles métier (fonctions pures, testées)
 js/store.js           stockage local + sauvegarde/restauration .json
 js/vues.js            HTML des écrans et des feuilles imprimables
 js/app.js             état, événements, impression
-tests/tests.html      117 tests, dont l'export réel du 25/11/2025
+tests/tests.html      120 tests, dont l'export réel du 25/11/2025
 outils/serveur.ps1    petit serveur local (développement et tests uniquement)
 ANALYSE.md            analyse du classeur d'origine et règles métier
 ```

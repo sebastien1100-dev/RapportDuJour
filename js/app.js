@@ -15,6 +15,32 @@
     try { sessionStorage.setItem('rdj.pdjSous', s); } catch (e) { /* sans importance */ }
     afficher();
   }
+  /* ---------- Code d'accès aux Réglages ----------
+     Protection dissuasive (l'appli n'a pas de serveur) : le code n'est jamais gardé, seulement son empreinte
+     SHA-256 salée, dans ce navigateur (clé à part : pas dans les sauvegardes .json). Une fois déverrouillés,
+     les Réglages restent ouverts 10 minutes après la dernière action, et se referment avec l'onglet du navigateur. */
+  const PIN_CLE = 'rdj.pin', OUVERT_CLE = 'rdj.reglagesOuverts', DUREE_OUVERT = 10 * 60 * 1000;
+  let essaisRates = 0, bloqueJusqua = 0;
+  function pinInfo() {
+    try { return JSON.parse(localStorage.getItem(PIN_CLE) || 'null'); } catch (e) { return null; }
+  }
+  const empreinte = (sel, code) => RDJ.sha256(sel + ':' + code);
+  function reglagesOuverts() {
+    if (!pinInfo()) return true;
+    try { return Date.now() - (+sessionStorage.getItem(OUVERT_CLE) || 0) < DUREE_OUVERT; } catch (e) { return false; }
+  }
+  function prolongerReglages() {
+    try { sessionStorage.setItem(OUVERT_CLE, String(Date.now())); } catch (e) { /* sans importance */ }
+  }
+  function verrouillerReglages() {
+    try { sessionStorage.removeItem(OUVERT_CLE); } catch (e) { /* sans importance */ }
+  }
+  function aleatoire(n, alphabet) {
+    const t = new Uint32Array(n);
+    crypto.getRandomValues(t);
+    return Array.from(t, (x) => alphabet[x % alphabet.length]).join('');
+  }
+
   // sous-onglet de l'onglet Réglages : 'parametres' ou 'changelog' (le Change log n'a plus d'onglet à lui)
   let reglagesSous = 'parametres';
   try { reglagesSous = sessionStorage.getItem('rdj.reglagesSous') || 'parametres'; } catch (e) { /* sans importance */ }
@@ -83,6 +109,8 @@
       pdjType: etat.pdj.type || 'business',
       pdjSous,
       reglagesSous,
+      pinDefini: !!pinInfo(),
+      reglagesOuverts: reglagesOuverts(),
     };
   }
 
@@ -101,11 +129,14 @@
     plan: RDJ.vues.ecranPlan,
     pdj: RDJ.vues.ecranPdj,
     recap: RDJ.vues.ecranRecap,
-    reglages: (ctx) => (ctx.reglagesSous === 'changelog' ? RDJ.vues.ecranChangelog(ctx) : RDJ.vues.ecranReglages(ctx)),
+    reglages: (ctx) => (!ctx.reglagesOuverts ? RDJ.vues.ecranVerrou(ctx)
+      : ctx.reglagesSous === 'changelog' ? RDJ.vues.ecranChangelog(ctx) : RDJ.vues.ecranReglages(ctx)),
   };
 
   function afficher() {
     if (!ECRANS[vue]) vue = 'accueil';
+    // Réglages ouverts : chaque affichage (clic, saisie) repousse le reverrouillage de 10 minutes
+    if (vue === 'reglages' && pinInfo() && reglagesOuverts()) prolongerReglages();
     const ctx = contexte();
     $('#vue').innerHTML = ECRANS[vue](ctx);
     document.querySelectorAll('#onglets button').forEach((b) => b.classList.toggle('actif', b.dataset.vue === vue));
@@ -222,7 +253,7 @@
           <p>${esc(opts.message || '').replace(/\n/g, '<br>')}</p>
           ${opts.saisie !== undefined ? `<input type="${opts.type || 'text'}" value="${esc(opts.saisie)}" ${opts.type === 'number' ? 'min="1" max="50"' : ''} autocomplete="off">` : ''}
           <div class="boutons">
-            <button value="non" class="btn">Annuler</button>
+            ${opts.info ? '' : '<button value="non" class="btn">Annuler</button>'}
             <button value="oui" class="btn ${opts.danger ? 'danger-plein' : 'primaire'}">${esc(opts.ok || 'Confirmer')}</button>
           </div>
         </form>`;
@@ -762,6 +793,69 @@
     'pdj-buffet': () => choisirPdj('buffet'),
     'reglages-parametres': () => choisirReglages('parametres'),
     'reglages-changelog': () => choisirReglages('changelog'),
+
+    // code d'accès aux Réglages
+    deverrouiller: () => {
+      const p = pinInfo();
+      const champ = $('#pin-saisie');
+      if (!p || !champ) return;
+      if (Date.now() < bloqueJusqua) {
+        return notice('Trop d\'essais : réessayez dans ' + Math.ceil((bloqueJusqua - Date.now()) / 1000) + ' secondes.', 'alerte');
+      }
+      if (empreinte(p.sel, champ.value.trim()) === p.empreinte) {
+        essaisRates = 0;
+        prolongerReglages();
+        afficher();
+        return;
+      }
+      essaisRates++;
+      champ.value = '';
+      champ.focus();
+      if (essaisRates >= 5) { bloqueJusqua = Date.now() + 30000; essaisRates = 0; }
+      notice(Date.now() < bloqueJusqua ? 'Code incorrect. Trop d\'essais : attendez 30 secondes.' : 'Code incorrect.', 'erreur');
+    },
+    'verrouiller-reglages': () => { verrouillerReglages(); afficher(); notice('Réglages verrouillés.', 'ok'); },
+    'pin-definir': async () => {
+      const n = $('#pin-nouveau'), c = $('#pin-confirme');
+      const code = n ? n.value.trim() : '', conf = c ? c.value.trim() : '';
+      if (!RDJ.codeValide(code)) return notice('Le code doit faire de 4 à 8 chiffres.', 'erreur');
+      if (code !== conf) return notice('Les deux codes ne sont pas identiques.', 'erreur');
+      const secours = aleatoire(4, 'ABCDEFGHJKMNPQRSTUVWXYZ23456789') + '-' + aleatoire(4, 'ABCDEFGHJKMNPQRSTUVWXYZ23456789');
+      const sel = aleatoire(16, '0123456789abcdef');
+      const avait = !!pinInfo();
+      try {
+        localStorage.setItem(PIN_CLE, JSON.stringify({ sel, empreinte: empreinte(sel, code), secours: empreinte(sel, secours) }));
+      } catch (e) {
+        return notice("Impossible d'enregistrer le code dans ce navigateur.", 'erreur');
+      }
+      prolongerReglages();
+      afficher();
+      await dialogue({
+        titre: avait ? 'Code changé' : 'Réglages protégés',
+        message: 'Les Réglages demandent maintenant ce code.\n\nNotez ce code de secours et gardez-le à part : il permet de choisir un nouveau code si vous oubliez le vôtre.\n\n' +
+          secours + '\n\nIl ne sera plus affiché.',
+        ok: 'C\'est noté', info: true,
+      });
+    },
+    'pin-supprimer': async () => {
+      if (!await dialogue({ titre: 'Supprimer le code', message: 'Les Réglages ne seront plus protégés : tout le monde pourra les ouvrir sur ce poste.', ok: 'Supprimer le code', danger: true })) return;
+      try { localStorage.removeItem(PIN_CLE); } catch (e) { /* sans importance */ }
+      verrouillerReglages();
+      afficher();
+      notice('Code supprimé : les Réglages ne sont plus protégés.', 'ok');
+    },
+    'pin-oublie': async () => {
+      const p = pinInfo();
+      if (!p) return;
+      const rep = await dialogue({ titre: 'Code oublié', message: 'Entrez le code de secours donné quand le code a été choisi (8 caractères, par exemple ABCD-2345) :', saisie: '', ok: 'Valider' });
+      if (rep === null) return;
+      const s = rep.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (s.length === 8 && empreinte(p.sel, s.slice(0, 4) + '-' + s.slice(4)) === p.secours) {
+        try { localStorage.removeItem(PIN_CLE); } catch (e) { /* sans importance */ }
+        afficher();
+        notice('Code de secours accepté : choisissez un nouveau code dans la carte « Code d\'accès ».', 'ok');
+      } else notice('Code de secours incorrect.', 'erreur');
+    },
     'apercu-recap': () => apercu('Historique', RDJ.vues.feuilleRecap(contexte()), 1),
     'apercu-fdc-vierge': async () => {
       const rep = await dialogue({ titre: 'Feuille vierge', message: "Nombre d'exemplaires de la feuille vierge :", saisie: '1', type: 'number', ok: 'Voir l\'aperçu' });
@@ -858,6 +952,13 @@
   // clic ailleurs ou Échap : le menu se ferme
   document.addEventListener('click', (ev) => { if (!ev.target.closest('.menu-import')) fermerMenuImport(); }, true);
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermerMenuImport(); });
+  // code d'accès : Entrée valide le code ; Réglages ouverts mais inactifs depuis 10 minutes -> écran de verrouillage
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Enter' || !ev.target) return;
+    if (ev.target.id === 'pin-saisie') { ev.preventDefault(); ACTIONS.deverrouiller(); }
+    else if (ev.target.id === 'pin-confirme') { ev.preventDefault(); ACTIONS['pin-definir'](); }
+  });
+  setInterval(() => { if (vue === 'reglages' && pinInfo() && !reglagesOuverts() && !$('#pin-saisie')) afficher(); }, 30000);
 
   /* ---------- Événements ---------- */
 

@@ -85,6 +85,12 @@
         [['Room', 'Amount Due', 'Reservation'], ['115', '73.300000', '5000000001']], maintFictif, [['Nom', 'Prénom']]].map(RDJ.typeRapport),
       ['clients', 'departs', 'departs', 'maintenance', null]);
 
+    // code d'accès aux Réglages : empreinte SHA-256 (valeurs de référence officielles)
+    egal('sha256 : « abc » et texte vide', [RDJ.sha256('abc'), RDJ.sha256('')],
+      ['ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad', 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855']);
+    egal('sha256 : message de plus d\'un bloc', RDJ.sha256('abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq'), '248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1');
+    egal('code d\'accès : 4 à 8 chiffres', ['1234', '12345678', '123', '123456789', '12a4', ''].map(RDJ.codeValide), [true, true, false, false, false, false]);
+
     // rapport des arrivées (lignes fictives, mêmes titres que l'export réel)
     const arrFictif = [['Arrivée', 'Num. de réservation', 'Client', 'Chambre', 'TotalReservations', 'Nuits', 'Départ', 'Description', 'ID Groupe'],
       [46336, '5000000001', 'TEST, A', null, 1, 1, 46337, 'Chambre Standard-1 Lit Queen', '0'],

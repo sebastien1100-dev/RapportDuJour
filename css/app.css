@@ -783,6 +783,19 @@ body.depot .voile-depot { display: grid; }
 /* accueil : « Petits déjeuners » sur une ligne */
 .acc-chiffres { grid-template-columns: 2.5fr 1.8fr 1.3fr 1.9fr; } /* Occupation : 3 chiffres sur une ligne */
 
+/* réglages : code d'accès (carte) et écran de verrouillage */
+.reglages .carte.rg-carte.rg-code { margin: 0 0 14px; }
+.rg-code-ligne { display: flex; align-items: flex-end; gap: 10px 12px; flex-wrap: wrap; }
+.reglages .carte.rg-carte .rg-code-ligne label { margin: 0; max-width: 150px; }
+.rg-code-ligne input { letter-spacing: .2em; }
+.reglages .carte.rg-carte.rg-verrou {
+  max-width: 360px; margin: 40px auto; padding: 28px 28px 22px; display: flex; flex-direction: column; align-items: stretch; gap: 10px; text-align: center;
+}
+.rg-verrou-icone { align-self: center; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--sauge); color: var(--marine); margin-bottom: 4px; }
+.rg-verrou label { font-size: 13px; font-weight: 600; color: var(--marine); }
+.reglages .carte.rg-carte.rg-verrou input { font-size: 24px; text-align: center; letter-spacing: .35em; padding: 10px; }
+.rg-verrou .btn.lien { align-self: center; font-size: 13px; }
+
 /* accueil : arrivées par type de chambre (rapport des arrivées), 5e carte de la rangée des chiffres */
 .acc-chiffres.avec-arrivees { grid-template-columns: 2.4fr 1.6fr 1.2fr 1.8fr 2.2fr; }
 .acc-groupe.g-arrivees { background: var(--lilas); cursor: default; }
