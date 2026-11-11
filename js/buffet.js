@@ -49,7 +49,7 @@
     <rect x="50" y="100" width="42" height="38" rx="3"/>
     <circle cx="71" cy="157" r="15" fill="#bfe8d6"/>
     <rect x="51" y="176" width="40" height="54" rx="3"/>
-    <rect x="54" y="234" width="34" height="16" rx="3" fill="#bfe8d6"/>
+    <rect x="54" y="234" width="34" height="16" rx="3"/>
     <!-- côté viennoiseries et pains -->
     <rect x="103" y="67" width="32" height="26" rx="2" fill="#ebcb8b"/>
     <rect x="139" y="67" width="32" height="26" rx="2" fill="#ebcb8b"/>
@@ -57,7 +57,7 @@
     <ellipse cx="234" cy="80" rx="20" ry="14" fill="#ebcb8b"/>
     <ellipse cx="280" cy="80" rx="20" ry="14" fill="#ebcb8b"/>
     <rect x="304" y="67" width="30" height="24" rx="2"/>
-    <rect x="104" y="104" width="26" height="20" rx="2" fill="#dcd2f6"/>
+    <rect x="104" y="104" width="26" height="20" rx="2"/>
     <circle cx="152" cy="120" r="16" fill="#dcd2f6"/>
     <circle cx="229" cy="121" r="11" fill="#ebcb8b"/>
     <rect x="246" y="102" width="52" height="38" rx="3" fill="#ebcb8b"/>
@@ -72,7 +72,7 @@
     <rect x="238" y="183" width="30" height="58" rx="2" fill="#c8dcf4"/>
     <circle cx="115" cy="236" r="11" fill="#c8dcf4"/>
     <rect x="130" y="226" width="23" height="20" rx="1" fill="#c8dcf4"/>
-    <rect x="158" y="220" width="15" height="30" rx="1" fill="#dcd2f6"/>
+    <rect x="158" y="220" width="15" height="30" rx="1" fill="#c8dcf4"/>
     <rect x="180" y="219" width="50" height="23" rx="1" fill="#c8dcf4"/>
     <circle cx="278" cy="192" r="6" fill="#c8dcf4"/>
     <circle cx="291" cy="192" r="6"/>
