@@ -379,9 +379,27 @@
         </table>`}
       </header>
       <table class="f-grille"><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
-      <div class="f-corr">${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
+      <div class="f-corr">
+        <div class="f-corr-texte">${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
+        ${vierge ? '' : besoinsArrivees(ctx)}
+      </div>
     </div>`;
   };
+
+  /** Feuille de chambre, en bas à droite : chambres à préparer pour les arrivées du jour, par type
+      (rapport des arrivées). Rien si le rapport n'est pas importé. */
+  function besoinsArrivees(ctx) {
+    const a = ctx.arrivees;
+    if (!a) return '';
+    const types = ctx.cfg.typesChambre;
+    const lignes = [...types.filter((t) => a.parType[t.code]).map((t) => [t.code, a.parType[t.code]]),
+      ...Object.keys(a.autres).map((d) => [d, a.autres[d]])];
+    return `<div class="f-besoins">
+        <div class="f-corr-titre">À PRÉPARER · ARRIVÉES DU ${esc(RDJ.dateFr(a.date).slice(0, 5))}</div>
+        <div class="f-besoins-total"><b>${a.total}</b> chambre${a.total > 1 ? 's' : ''}</div>
+        <div class="f-besoins-types">${lignes.map(([t, n]) => `<span><b>${esc(t)}</b> ${n}</span>`).join('')}</div>
+      </div>`;
+  }
 
   /* ================= FEUILLE : CUISSON PDJ ================= */
 

@@ -1144,6 +1144,15 @@ body.depot .voile-depot { display: grid; }
 .f-grille td.clic:hover { outline: .5mm solid var(--accent); outline-offset: -.5mm; }
 .f-corr { margin-top: 3mm; border: .4mm solid #000; min-height: 18mm; padding: 1.5mm 3mm; font-size: 9pt; line-height: 1.45; }
 .f-corr-titre { font-weight: 700; text-decoration: underline; margin-bottom: .5mm; }
+/* bas de la feuille : corrections à gauche, arrivées du jour par type à droite */
+.f-corr { display: flex; gap: 4mm; align-items: stretch; }
+.f-corr-texte { flex: 1; min-width: 0; }
+.f-besoins { flex: none; min-width: 52mm; padding-left: 4mm; border-left: .4mm solid #000; }
+.f-besoins-total { font-size: 10pt; margin-bottom: .8mm; }
+.f-besoins-total b { font-size: 16pt; line-height: 1; }
+.f-besoins-types { display: flex; flex-wrap: wrap; gap: 1mm 2mm; }
+.f-besoins-types span { border: .3mm solid #000; border-radius: 1mm; padding: .2mm 1.6mm; font-size: 10pt; white-space: nowrap; }
+.f-besoins-types b { font-weight: 800; }
 
 /* Cuisson PDJ */
 /* Cuisson PDJ (feuille) */
