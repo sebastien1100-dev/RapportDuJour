@@ -11,16 +11,17 @@
     <text x="190" y="52">Côté viennoiseries et pains</text>
     <text x="190" y="274">Côté produits frais</text>
     <text x="34" y="160" transform="rotate(-90 34 160)">Bout boissons</text>
-    <text x="375" y="274">Trois tables collées au buffet</text>
+    <text x="379" y="274">Trois tables collées au buffet</text>
   </g>
 
   <!-- îlot : plateau noir à bouts arrondis, zones, structure centrale -->
-  <rect x="40" y="60" width="300" height="200" rx="22" fill="#2b2f36"/>
-  <!-- fonds de zone très clairs : les produits ressortent par leur couleur de famille -->
-  <rect x="44" y="64" width="56" height="192" rx="18" fill="#f4faf7"/>
+  <rect x="40" y="60" width="300" height="200" rx="8" fill="#2b2f36"/>
+  <!-- fonds de zone très clairs : les produits ressortent par leur couleur de famille ;
+       seuls les coins extérieurs des deux bouts sont légèrement arrondis (pas de vide noir dans les coins) -->
+  <path d="M100 64 H50 A6 6 0 0 0 44 70 V250 A6 6 0 0 0 50 256 H100 Z" fill="#f4faf7"/>
   <rect x="100" y="64" width="200" height="79" fill="#fdf9ee"/>
   <rect x="100" y="177" width="200" height="79" fill="#f3f7fc"/>
-  <rect x="300" y="64" width="36" height="192" rx="18" fill="#fdf4ef"/>
+  <path d="M300 64 H330 A6 6 0 0 1 336 70 V250 A6 6 0 0 1 330 256 H300 Z" fill="#fdf4ef"/>
   <rect x="100" y="145" width="200" height="30" fill="#14171c"/>
   <rect x="100" y="145" width="9" height="30" fill="#000"/>
   <rect x="291" y="145" width="9" height="30" fill="#000"/>
@@ -33,8 +34,8 @@
   </g>
   <text x="200" y="162" font-size="6" font-weight="bold" fill="#ffffff" text-anchor="middle">31</text>
 
-  <!-- trois tables collées au bout fruits -->
-  <g fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.8">
+  <!-- trois tables contre le bout fruits ; DECALAGE_TABLES : translate(4 0) = 4 cm de jour avec l'îlot -->
+  <g fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.8" transform="translate(4 0)">
     <rect x="340" y="55" width="70" height="70" rx="3"/>
     <rect x="340" y="125" width="70" height="70" rx="3"/>
     <rect x="340" y="195" width="70" height="70" rx="3"/>
@@ -81,6 +82,8 @@
     <circle cx="278" cy="220" r="6" fill="#bfe8d6"/>
     <circle cx="291" cy="220" r="6" fill="#bfe8d6"/>
     <circle cx="318" cy="234" r="16" fill="#ebcb8b"/>
+  </g>
+  <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea" transform="translate(4 0)">
     <!-- table 1 (côté viennoiseries) : plateaux PDJ, cuillères -->
     <rect x="344" y="59" width="34" height="34" rx="3"/>
     <rect x="382" y="61" width="24" height="16" rx="2"/>
@@ -116,6 +119,8 @@
     <text x="115" y="196">18</text><text x="145" y="196">19</text><text x="205" y="199">23</text><text x="253" y="214">25</text>
     <text x="115" y="238">20</text><text x="141.5" y="238">21</text><text x="165" y="237">22</text><text x="205" y="233">24</text>
     <text x="284.5" y="237">26</text><text x="318" y="236">27</text>
+  </g>
+  <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48" transform="translate(4 0)">
     <text x="361" y="78">36</text><text x="394" y="72">37</text><text x="394" y="92">37</text><text x="360" y="122">37</text>
     <text x="357" y="143">35</text><text x="357" y="168">35</text>
     <text x="390" y="140">33</text><text x="385" y="155" font-size="5">33</text><text x="401.5" y="154.5" font-size="4.5">34</text><text x="390" y="177">32</text>
