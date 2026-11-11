@@ -44,87 +44,89 @@
   <!-- couleur par famille de produits (voir « Familles » dans la légende) :
        viennoiseries et pains #ebcb8b · sucré à tartiner #dcd2f6 · fruits et jus #bfe8d6
        laitiers et fromages #c8dcf4 · salé et œufs #f4c7c7 · céréales #f7e7b0 · vaisselle et matériel #e3e6ea -->
+  <!-- éléments posés sur une grille régulière : 4 cm de jour partout, bords alignés par rangée,
+       rectangles aux mêmes coins arrondis (rx 2, corbeilles rx 4), cercles pour ce qui est rond (bols, assiettes, fruits) -->
   <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea">
-    <!-- bout boissons -->
-    <rect x="50" y="68" width="42" height="28" rx="2"/>
-    <rect x="50" y="100" width="42" height="38" rx="3"/>
-    <circle cx="71" cy="157" r="15" fill="#bfe8d6"/>
-    <rect x="51" y="176" width="40" height="54" rx="3"/>
-    <rect x="54" y="234" width="34" height="16" rx="3"/>
-    <!-- côté viennoiseries et pains -->
-    <rect x="103" y="67" width="32" height="26" rx="2" fill="#ebcb8b"/>
-    <rect x="139" y="67" width="32" height="26" rx="2" fill="#ebcb8b"/>
-    <rect x="173" y="67" width="38" height="75" rx="2" fill="#ebcb8b"/>
-    <ellipse cx="234" cy="80" rx="20" ry="14" fill="#ebcb8b"/>
-    <ellipse cx="280" cy="80" rx="20" ry="14" fill="#ebcb8b"/>
-    <rect x="304" y="67" width="30" height="24" rx="2"/>
-    <rect x="104" y="104" width="26" height="20" rx="2"/>
-    <circle cx="152" cy="120" r="16" fill="#dcd2f6"/>
-    <circle cx="229" cy="121" r="11" fill="#ebcb8b"/>
-    <rect x="246" y="102" width="52" height="38" rx="3" fill="#ebcb8b"/>
-    <rect x="304" y="99" width="30" height="22" rx="3"/>
-    <!-- bout fruits -->
+    <!-- bout boissons : une colonne de 44 cm de large -->
+    <rect x="50" y="68" width="44" height="28" rx="2"/>
+    <rect x="50" y="100" width="44" height="36" rx="2"/>
+    <circle cx="72" cy="154" r="14" fill="#bfe8d6"/>
+    <rect x="50" y="172" width="44" height="54" rx="2"/>
+    <rect x="50" y="230" width="44" height="20" rx="2"/>
+    <!-- côté viennoiseries et pains : rangée haute y 68 (h 30), rangée basse y 102 (h 36) -->
+    <rect x="104" y="68" width="30" height="30" rx="2" fill="#ebcb8b"/>
+    <rect x="138" y="68" width="30" height="30" rx="2" fill="#ebcb8b"/>
+    <rect x="172" y="68" width="36" height="70" rx="2" fill="#ebcb8b"/>
+    <rect x="212" y="68" width="40" height="30" rx="4" fill="#ebcb8b"/>
+    <rect x="256" y="68" width="40" height="30" rx="4" fill="#ebcb8b"/>
+    <rect x="104" y="102" width="30" height="36" rx="2"/>
+    <circle cx="153" cy="120" r="15" fill="#dcd2f6"/>
+    <circle cx="225" cy="120" r="13" fill="#ebcb8b"/>
+    <rect x="242" y="102" width="54" height="36" rx="4" fill="#ebcb8b"/>
+    <!-- bout fruits : une colonne de 30 cm de large -->
+    <rect x="303" y="68" width="30" height="28" rx="2"/>
+    <rect x="303" y="100" width="30" height="24" rx="2"/>
     <circle cx="318" cy="160" r="17" fill="#ffffff"/>
     <circle cx="318" cy="160" r="12" fill="#bfe8d6"/>
-    <!-- côté produits frais -->
-    <circle cx="115" cy="194" r="12" fill="#bfe8d6"/>
-    <circle cx="145" cy="194" r="15" fill="#bfe8d6"/>
-    <rect x="178" y="181" width="54" height="32" rx="7" fill="#f4c7c7"/>
-    <rect x="238" y="183" width="30" height="58" rx="2" fill="#c8dcf4"/>
-    <circle cx="115" cy="236" r="11" fill="#c8dcf4"/>
-    <rect x="130" y="226" width="23" height="20" rx="1" fill="#c8dcf4"/>
-    <rect x="158" y="220" width="15" height="30" rx="1" fill="#c8dcf4"/>
-    <rect x="180" y="219" width="50" height="23" rx="1" fill="#c8dcf4"/>
-    <circle cx="278" cy="192" r="6" fill="#c8dcf4"/>
-    <circle cx="291" cy="192" r="6"/>
-    <circle cx="278" cy="206" r="6" fill="#bfe8d6"/>
-    <circle cx="291" cy="206" r="6" fill="#bfe8d6"/>
-    <circle cx="278" cy="220" r="6" fill="#bfe8d6"/>
-    <circle cx="291" cy="220" r="6" fill="#bfe8d6"/>
-    <circle cx="318" cy="234" r="16" fill="#ebcb8b"/>
+    <circle cx="318" cy="235" r="15" fill="#ebcb8b"/>
+    <!-- côté produits frais : rangée haute y 181 (h 32), rangée basse y 220 (h 30) -->
+    <circle cx="119" cy="197" r="14" fill="#bfe8d6"/>
+    <circle cx="151" cy="197" r="14" fill="#bfe8d6"/>
+    <rect x="170" y="181" width="60" height="32" rx="2" fill="#f4c7c7"/>
+    <rect x="234" y="181" width="28" height="69" rx="2" fill="#c8dcf4"/>
+    <circle cx="119" cy="235" r="14" fill="#c8dcf4"/>
+    <rect x="137" y="220" width="26" height="30" rx="2" fill="#c8dcf4"/>
+    <rect x="167" y="220" width="18" height="30" rx="2" fill="#c8dcf4"/>
+    <rect x="189" y="220" width="41" height="30" rx="2" fill="#c8dcf4"/>
+    <circle cx="273" cy="189" r="6" fill="#c8dcf4"/>
+    <circle cx="288" cy="189" r="6"/>
+    <circle cx="273" cy="203" r="6" fill="#bfe8d6"/>
+    <circle cx="288" cy="203" r="6" fill="#bfe8d6"/>
+    <circle cx="273" cy="217" r="6" fill="#bfe8d6"/>
+    <circle cx="288" cy="217" r="6" fill="#bfe8d6"/>
   </g>
   <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea" transform="translate(4 0)">
     <!-- table 1 (côté viennoiseries) : plateaux PDJ, cuillères -->
-    <rect x="344" y="59" width="34" height="34" rx="3"/>
-    <rect x="382" y="61" width="24" height="16" rx="2"/>
-    <rect x="382" y="81" width="24" height="16" rx="2"/>
-    <rect x="345" y="100" width="14" height="14" rx="1"/>
-    <rect x="362" y="100" width="14" height="14" rx="1"/>
+    <rect x="344" y="59" width="34" height="34" rx="2"/>
+    <rect x="382" y="59" width="24" height="15" rx="2"/>
+    <rect x="382" y="78" width="24" height="15" rx="2"/>
+    <rect x="344" y="99" width="16" height="16" rx="2"/>
+    <rect x="364" y="99" width="16" height="16" rx="2"/>
     <!-- table 2 (milieu) : assiettes, œufs -->
-    <circle cx="357" cy="141" r="11"/>
-    <circle cx="357" cy="166" r="11"/>
-    <rect x="376" y="130" width="28" height="14" rx="2" fill="#f4c7c7"/>
-    <rect x="376" y="147" width="18" height="11" rx="1" fill="#f4c7c7"/>
-    <rect x="396" y="146" width="11" height="13" rx="1"/>
-    <rect x="376" y="163" width="28" height="22" rx="2"/>
+    <circle cx="356" cy="144" r="12"/>
+    <circle cx="356" cy="174" r="12"/>
+    <rect x="374" y="131" width="32" height="14" rx="2" fill="#f4c7c7"/>
+    <rect x="374" y="149" width="18" height="11" rx="2" fill="#f4c7c7"/>
+    <rect x="396" y="149" width="10" height="11" rx="2"/>
+    <rect x="374" y="164" width="32" height="24" rx="2"/>
     <!-- table 3 (côté produits frais) : bols, céréales, sucre -->
-    <circle cx="352" cy="209" r="8"/>
-    <rect x="344" y="221" width="16" height="40" rx="2" fill="#f7e7b0"/>
-    <circle cx="395" cy="212" r="7" fill="#f7e7b0"/>
-    <circle cx="395" cy="230" r="7" fill="#f7e7b0"/>
-    <circle cx="395" cy="248" r="7" fill="#f7e7b0"/>
-    <circle cx="368" cy="202" r="4" fill="#f7e7b0"/>
-    <circle cx="378" cy="202" r="4" fill="#f7e7b0"/>
+    <circle cx="352" cy="207" r="7"/>
+    <rect x="344" y="218" width="16" height="42" rx="2" fill="#f7e7b0"/>
+    <circle cx="370" cy="205" r="4" fill="#f7e7b0"/>
+    <circle cx="380" cy="205" r="4" fill="#f7e7b0"/>
+    <circle cx="397" cy="212" r="7" fill="#f7e7b0"/>
+    <circle cx="397" cy="230" r="7" fill="#f7e7b0"/>
+    <circle cx="397" cy="248" r="7" fill="#f7e7b0"/>
   </g>
 
-  <!-- numéros (repris dans la légende) -->
+  <!-- numéros (repris dans la légende), centrés sur leur élément -->
   <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48">
-    <text x="71" y="84">1</text><text x="71" y="121">2</text><text x="71" y="159">3</text>
-    <text x="71" y="205">4</text><text x="71" y="244">5</text>
-    <text x="119" y="82">6</text><text x="155" y="82">7</text><text x="192" y="107">8</text>
-    <text x="234" y="82">9</text><text x="280" y="82">10</text><text x="319" y="81">11</text>
-    <text x="117" y="116">12</text><text x="152" y="122">13</text>
-    <text x="229" y="123">14</text><text x="272" y="123">15</text><text x="319" y="112">16</text>
+    <text x="72" y="84">1</text><text x="72" y="120">2</text><text x="72" y="156">3</text>
+    <text x="72" y="201">4</text><text x="72" y="242">5</text>
+    <text x="119" y="85">6</text><text x="153" y="85">7</text><text x="190" y="105">8</text>
+    <text x="232" y="85">9</text><text x="276" y="85">10</text><text x="318" y="84">11</text>
+    <text x="119" y="122">12</text><text x="153" y="122">13</text>
+    <text x="225" y="122">14</text><text x="269" y="122">15</text><text x="318" y="114">16</text>
     <text x="318" y="162">17</text>
-    <text x="115" y="196">18</text><text x="145" y="196">19</text><text x="205" y="199">23</text><text x="253" y="214">25</text>
-    <text x="115" y="238">20</text><text x="141.5" y="238">21</text><text x="165" y="237">22</text><text x="205" y="233">24</text>
-    <text x="284.5" y="237">26</text><text x="318" y="236">27</text>
+    <text x="119" y="199">18</text><text x="151" y="199">19</text><text x="200" y="199">23</text><text x="248" y="217">25</text>
+    <text x="119" y="237">20</text><text x="150" y="237">21</text><text x="176" y="237">22</text><text x="209.5" y="237">24</text>
+    <text x="280.5" y="238">26</text><text x="318" y="237">27</text>
   </g>
   <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48" transform="translate(4 0)">
-    <text x="361" y="78">36</text><text x="394" y="72">37</text><text x="394" y="92">37</text><text x="360" y="122">37</text>
-    <text x="357" y="143">35</text><text x="357" y="168">35</text>
-    <text x="390" y="140">33</text><text x="385" y="155" font-size="5">33</text><text x="401.5" y="154.5" font-size="4.5">34</text><text x="390" y="177">32</text>
-    <text x="352" y="243">28</text><text x="352" y="211">31</text><text x="395" y="232">29</text><text x="373" y="214" font-size="5">30</text>
+    <text x="361" y="78">36</text><text x="394" y="68.5">37</text><text x="394" y="87.5">37</text><text x="352" y="109">37</text><text x="372" y="109">37</text>
+    <text x="356" y="146">35</text><text x="356" y="176">35</text>
+    <text x="390" y="140">33</text><text x="383" y="156.5" font-size="5">33</text><text x="401" y="156.5" font-size="4.5">34</text><text x="390" y="178">32</text>
+    <text x="352" y="241">28</text><text x="352" y="209">31</text><text x="397" y="232">29</text><text x="375" y="215" font-size="5">30</text>
   </g>
 
   <!-- familles de produits : une couleur par famille -->
