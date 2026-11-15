@@ -230,6 +230,30 @@
     window.scrollTo(0, 0);
   }
 
+  /* ---------- Sauvegarde .json ----------
+     Dans le sous-dossier « save » du dossier de l'appli quand il a été choisi (Chrome / Edge, 10 dernières gardées),
+     sinon téléchargée. demander : true pendant un clic (le navigateur peut redemander l'accès au dossier). */
+  async function sauverEtat(suffixe, demander) {
+    let ou = null;
+    try { ou = await RDJ.dossierSauv.ecrire(etat, suffixe, demander); } catch (e) { ou = null; }
+    if (ou) return ou;
+    RDJ.store.exporter(etat, suffixe);
+    return 'dossier Téléchargements';
+  }
+
+  async function choisirDossierSauv() {
+    const ok = await dialogue({
+      titre: 'Dossier des sauvegardes',
+      message: "Choisissez le dossier de l'application, celui qui contient index.html.\nLes sauvegardes iront dans son sous-dossier « save » (créé s'il n'existe pas) ; seules les " + RDJ.dossierSauv.GARDER + ' dernières sont gardées.',
+      ok: 'Choisir le dossier',
+    });
+    if (!ok) return false;
+    try { await RDJ.dossierSauv.choisir(); return true; } catch (e) {
+      notice("Aucun dossier choisi : rien n'a été sauvegardé.", 'alerte');
+      return false;
+    }
+  }
+
   let minuterie = null;
   function notice(texte, type) {
     const n = $('#notice');
@@ -237,7 +261,8 @@
     n.innerHTML = RDJ.vues.esc(texte).replace(/\n/g, '<br>') + '<button class="fermer" aria-label="Fermer">×</button>';
     n.hidden = false;
     clearTimeout(minuterie);
-    if (type !== 'erreur') minuterie = setTimeout(() => { n.hidden = true; }, 9000);
+    // les messages (dont le bilan d'import) s'effacent après 5 s ; les erreurs restent jusqu'au clic sur ×
+    if (type !== 'erreur') minuterie = setTimeout(() => { n.hidden = true; }, 5000);
   }
 
   /* ---------- Boîte de dialogue ----------
@@ -918,30 +943,34 @@
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     },
 
-    sauvegarder: () => {
+    sauvegarder: async () => {
+      if (RDJ.dossierSauv.possible && !RDJ.dossierSauv.nom && !await choisirDossierSauv()) return;
       etat.derniereSauvegarde = RDJ.maintenantLocal();
-      RDJ.store.exporter(etat);
+      const ou = await sauverEtat(null, true);
       enregistrer();
       afficher();
-      notice('Sauvegarde téléchargée (dossier Téléchargements).', 'ok');
+      notice('Sauvegarde enregistrée (' + ou + ').', 'ok');
+    },
+    'dossier-sauv': async () => {
+      if (await choisirDossierSauv()) { afficher(); notice('Dossier des sauvegardes : ' + RDJ.dossierSauv.nom + '/save', 'ok'); }
     },
     restaurer: () => $('#fichier-restaurer').click(),
 
     'tout-supprimer': async () => {
       const rep = await dialogue({
         titre: 'Supprimer toutes les données',
-        message: 'Toutes les données vont être supprimées (import, historique des nuits, corrections).\nUne sauvegarde sera téléchargée avant.\n\nTapez SUPPRIMER pour confirmer :',
+        message: 'Toutes les données vont être supprimées (import, historique des nuits, corrections).\nUne sauvegarde sera faite juste avant.\n\nTapez SUPPRIMER pour confirmer :',
         saisie: '', ok: 'Supprimer', danger: true,
       });
       if (rep === null) return;
       if (rep.trim().toUpperCase() !== 'SUPPRIMER') return notice("Confirmation incorrecte : rien n'a été supprimé.", 'alerte');
-      RDJ.store.exporter(etat, 'avant_suppression_' + RDJ.maintenantLocal().replace('T', '_').replace(':', 'h'));
+      const ou = await sauverEtat('avant_suppression_' + RDJ.maintenantLocal().replace('T', '_').replace(':', 'h'), true);
       const reglages = etat.reglages;
       etat = RDJ.etatVide();
       etat.reglages = reglages;
       enregistrer();
       aller('accueil');
-      notice('Toutes les données ont été supprimées (une sauvegarde a été téléchargée juste avant).', 'ok');
+      notice('Toutes les données ont été supprimées (sauvegarde faite juste avant : ' + ou + ').', 'ok');
     },
   };
 
@@ -1130,17 +1159,18 @@
   afficher();
 
   // Sauvegarde hebdomadaire (Réglages, désactivée par défaut) : à l'ouverture, si la dernière date de 7 jours ou plus
-  function sauvegardeHebdo() {
+  async function sauvegardeHebdo() {
     if (!etat.reglages.sauvegardeHebdo || !RDJ.store.disponible) return;
     if (!etat.recap.length && !etat.import) return;
     const sauv = etat.derniereSauvegarde;
     if (sauv && RDJ.ecartJours(RDJ.aujourdhui(), sauv.slice(0, 10)) < 7) return;
     etat.derniereSauvegarde = RDJ.maintenantLocal();
-    RDJ.store.exporter(etat);
+    const ou = await sauverEtat(null, false);
     enregistrer();
     afficher();
-    notice('Sauvegarde hebdomadaire téléchargée (dossier Téléchargements).', 'ok');
+    notice('Sauvegarde hebdomadaire enregistrée (' + ou + ').', 'ok');
   }
-  sauvegardeHebdo();
+  // le nom du dossier des sauvegardes (Réglages) est lu dans IndexedDB, puis la sauvegarde hebdomadaire
+  RDJ.dossierSauv.init().then(() => { if (vue === 'reglages') afficher(); }).finally(sauvegardeHebdo);
   if (!RDJ.store.disponible) notice('Le stockage du navigateur est désactivé : les données ne seront pas conservées.', 'erreur');
 })();

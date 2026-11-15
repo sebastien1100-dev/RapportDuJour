@@ -11,6 +11,7 @@ tests/fixtures/*.csv
 # Sauvegardes de l'application (contiennent aussi les données des clients)
 RapportDuJour_sauvegarde_*.json
 *.json
+save/
 
 # Paquets de l'application à déployer (refaits à la demande)
 *.zip

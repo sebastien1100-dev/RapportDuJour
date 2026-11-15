@@ -699,7 +699,7 @@
       </section>
 
       ${alerteSauv ? `<div class="bandeau-sauv">Les données sont gardées dans ce navigateur. ${sauv ? 'Dernière sauvegarde il y a ' + joursSansSauv + ' jours.' : 'Aucune sauvegarde faite pour l\'instant.'}
-        <button class="btn" data-action="sauvegarder">Télécharger une sauvegarde</button></div>` : ''}
+        <button class="btn" data-action="sauvegarder">Sauvegarder (.json)</button></div>` : ''}
 
       <details class="me-bloc"${V.modeEmploiReduit ? '' : ' open'}>
         <summary><h3>Mode d'emploi</h3><span class="me-bascule"></span></summary>
@@ -720,7 +720,7 @@
               <li><b>Feuille de chambre</b><span>sur la case d'une chambre : vide → B → R → BR → HS → vide ; sur NV pour cocher.</span></li>
               <li><b>Plan de chambre</b><span>sur une chambre libre : libre → sale → hors service → libre.</span></li>
             </ul>
-            <p class="me-sauv"><b>Sauvegarde</b> Les données restent dans ce navigateur, sur ce poste : téléchargez régulièrement une sauvegarde (onglet Réglages).</p>
+            <p class="me-sauv"><b>Sauvegarde</b> Les données restent dans ce navigateur, sur ce poste : faites régulièrement une sauvegarde (Réglages → « Sauvegarder (.json) », rangée dans le dossier « save » de l'appli).</p>
           </div>
         </div>
       </details>
@@ -872,6 +872,35 @@
         </div>
       </div>` : '';
 
+    // graphique des sources : barres empilées des chambres par source (mêmes nuits), couleur fixe par source
+    const COULEURS_SOURCES = { DIR: '#119a8d', BKG: '#4a5fd0', EXP: '#e0a43a', AGO: '#d9604f', GRP: '#a35bc4' };
+    const couleurSource = (code) => COULEURS_SOURCES[code] || '#9aa5b1';
+    const recentesSrc = recentes.filter((l) => l.sources);
+    const totSrc = (code) => recentesSrc.reduce((s, l) => s + (l.sources[code] || 0), 0);
+    const totChSrc = recentesSrc.reduce((s, l) => s + sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0), 0);
+    const maxCh = Math.max(1, ...recentesSrc.map((l) => sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0)));
+    const sourcesVues = sources.filter((s) => totSrc(s.code));
+    const grapheSources = recentesSrc.length && totChSrc ? `
+      <ul class="hi-legende">
+        ${sourcesVues.map((s) => `<li><i style="background:${couleurSource(s.code)}"></i>${esc(s.nom)}<b>${pct(totSrc(s.code) / totChSrc)}</b><small>${totSrc(s.code)} ch.</small></li>`).join('')}
+      </ul>
+      <div class="hi-graphe hi-graphe-src" role="img" aria-label="Chambres par source de réservation, ${recentesSrc.length} dernières nuits">
+        <div class="hi-axe"><span>${maxCh}</span><span>${Math.round(maxCh / 2)}</span><span>0</span></div>
+        <div class="hi-barres" style="--n:${recentesSrc.length}">
+          ${recentesSrc.map((l) => {
+            const tot = sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0);
+            const detail = sourcesVues.filter((s) => l.sources[s.code]).map((s) => s.nom + ' ' + l.sources[s.code]).join(' · ');
+            return `<div class="hi-barre" title="${esc(maj(l.jour))} ${esc(RDJ.dateFr(l.date))} : ${tot} ch. — ${esc(detail)}">
+              <div class="hi-pile" style="height:${Math.round((tot / maxCh) * 100)}%">
+                ${sourcesVues.slice().reverse().filter((s) => l.sources[s.code]).map((s) => `<i style="flex:${l.sources[s.code]};background:${couleurSource(s.code)}"></i>`).join('')}
+                <em>${tot}</em>
+              </div>
+              <span>${esc(l.date.slice(8, 10))}<small>${esc(l.jour.slice(0, 3))}</small></span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : '';
+
     const total = (cle) => lignes.reduce((s, l) => s + (l[cle] || 0), 0);
     return `
     <section class="ecran historique">
@@ -893,6 +922,11 @@
         <h3>Taux d'occupation ${recentes.length < n ? `<small>${recentes.length} dernières nuits</small>` : ''}</h3>
         ${graphe}
       </section>
+
+      ${grapheSources ? `<section class="hi-bloc">
+        <h3>Sources des chambres ${recentesSrc.length < avecSources.length ? `<small>${recentesSrc.length} dernières nuits</small>` : ''}</h3>
+        ${grapheSources}
+      </section>` : ''}
 
       <section class="hi-bloc">
         <h3>Détail des nuits <small>la plus récente en haut</small></h3>
@@ -1010,12 +1044,18 @@
           <h3>Sauvegarde</h3>
           <p>Les données sont enregistrées dans ce navigateur, sur ce poste${RDJ.store.disponible ? '' : ' — <b class="rouge">stockage indisponible : les données seront perdues à la fermeture</b>'}.</p>
           <p class="rg-etat">Dernière sauvegarde : <b>${sauv ? esc(RDJ.dateFr(sauv.slice(0, 10)) + ' à ' + sauv.slice(11, 16)) : 'jamais'}</b></p>
+          <p class="rg-etat">Dossier : ${!RDJ.dossierSauv.possible
+            ? '<b>Téléchargements</b><small class="rg-note">Ce navigateur ne permet pas de choisir un dossier : pour enregistrer dans le dossier « save » de l\'appli, ouvrez-la avec Chrome ou Edge.</small>'
+            : RDJ.dossierSauv.nom
+              ? `<b>${esc(RDJ.dossierSauv.nom.toLowerCase() === 'save' ? RDJ.dossierSauv.nom : RDJ.dossierSauv.nom + '/save')}</b> <small>(${RDJ.dossierSauv.GARDER} dernières gardées)</small>`
+              : '<b>pas encore choisi</b> <small>(demandé à la première sauvegarde)</small>'}</p>
           <div class="boutons">
-            <button class="btn primaire" data-action="sauvegarder">Télécharger une sauvegarde (.json)</button>
+            <button class="btn primaire" data-action="sauvegarder">Sauvegarder (.json)</button>
             <button class="btn" data-action="restaurer">Restaurer une sauvegarde…</button>
+            ${RDJ.dossierSauv.possible ? '<button class="btn" data-action="dossier-sauv">Changer de dossier…</button>' : ''}
           </div>
           <label class="rg-case"><input type="checkbox" data-reglage="sauvegardeHebdo"${ctx.etat.reglages.sauvegardeHebdo ? ' checked' : ''}>
-            <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est téléchargée si la dernière date de 7 jours ou plus.</small></span></label>
+            <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est faite si la dernière date de 7 jours ou plus.</small></span></label>
         </section>
       </div>
 
@@ -1074,7 +1114,7 @@
 
       <section class="carte rg-carte danger">
         <h3>Supprimer toutes les données</h3>
-        <p>Efface les données importées, tout l'historique des nuits, les corrections et les saisies. Une sauvegarde est téléchargée juste avant.</p>
+        <p>Efface les données importées, tout l'historique des nuits, les corrections et les saisies. Une sauvegarde est faite juste avant.</p>
         <button class="btn danger" data-action="tout-supprimer">Supprimer toutes les données…</button>
       </section>
     </section>`;

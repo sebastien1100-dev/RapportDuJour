@@ -7,6 +7,15 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.22', date: '2026-11-15', titre: 'Historique : sources des chambres en graphique ; sauvegarde dans le dossier « save »',
+      changements: [
+        ['nouveau', "Historique : graphique « Sources des chambres », une barre par nuit (31 dernières) découpée par source de réservation (Direct, Booking, Expedia, Agoda, Groupe, Autre), avec une légende qui donne la part et le nombre de chambres de chaque source. Le détail de la nuit s'affiche au survol."],
+        ['nouveau', "Sauvegarde : le bouton s'appelle « Sauvegarder (.json) ». À la première sauvegarde, on choisit une fois le dossier de l'application (celui d'index.html) : les sauvegardes vont dans son sous-dossier « save », et seules les 10 dernières sont gardées. Réglages indique le dossier et permet d'en changer."],
+        ['amelioration', "Dans Safari et Firefox, qui ne permettent pas de choisir un dossier, la sauvegarde reste téléchargée (Réglages le signale) : utiliser Chrome ou Edge pour le dossier « save »."],
+        ['amelioration', "Le bandeau du résultat de l'import (et les autres messages) s'efface au bout de 5 secondes. Les messages d'erreur restent affichés jusqu'au clic sur ×."],
+      ],
+    },
+    {
       version: '3.21', date: '2026-11-15', titre: 'Cuisson PDJ : viennoiseries au besoin réel',
       changements: [
         ['correction', "Cuisson PDJ : croissants et pains au chocolat ne sont plus arrondis à la plaque entière. Avec peu de couverts, la feuille demandait une plaque complète coupée en trois fournées (6 couverts business : 19 croissants, 12 / 6 / 1). Elle donne maintenant le besoin calculé, réparti en fournées : 5 croissants, 3 à 6h30 et 2 à 7h30."],

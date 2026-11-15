@@ -58,9 +58,14 @@
       }
     },
 
+    /** Nom du fichier de sauvegarde : RapportDuJour_sauvegarde_2026-11-15_23h20.json (triable par date). */
+    nomSauvegarde(suffixe) {
+      return 'RapportDuJour_sauvegarde_' + (suffixe || RDJ.maintenantLocal().replace('T', '_').replace(':', 'h')) + '.json';
+    },
+
     /** Télécharge l'état complet dans un fichier .json. */
     exporter(etat, suffixe) {
-      const nom = 'RapportDuJour_sauvegarde_' + (suffixe || RDJ.maintenantLocal().replace('T', '_').replace(':', 'h')) + '.json';
+      const nom = this.nomSauvegarde(suffixe);
       const blob = new Blob([JSON.stringify(etat, null, 1)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -79,6 +84,81 @@
         throw new Error("Ce fichier n'est pas une sauvegarde du Rapport du jour.");
       }
       return completer(e);
+    },
+  };
+
+  /* ---------- Dossier de sauvegarde ----------
+     Le navigateur ne peut pas écrire seul à côté d'index.html : on choisit une fois le dossier de l'appli
+     (Chrome / Edge : showDirectoryPicker), son accès est retenu dans IndexedDB, et les sauvegardes vont
+     dans son sous-dossier « save ». Seules les GARDER dernières sauvegardes datées sont gardées.
+     Sans cette possibilité (Safari, Firefox), la sauvegarde est téléchargée comme avant. */
+  const GARDER = 10;
+  const MOTIF_SAUV = /^RapportDuJour_sauvegarde_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json$/;
+
+  function base(mode, action) {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('rapportDuJour.fichiers', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('poignees');
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction('poignees', mode);
+        const r = action(tx.objectStore('poignees'));
+        tx.oncomplete = () => { db.close(); resolve(r && r.result); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      };
+    });
+  }
+
+  RDJ.dossierSauv = {
+    GARDER,
+    possible: typeof window.showDirectoryPicker === 'function',
+    nom: null,  // nom du dossier choisi (affiché dans Réglages), chargé par init()
+
+    async poignee() {
+      if (!this.possible) return null;
+      try { return (await base('readonly', (st) => st.get('dossier'))) || null; } catch (e) { return null; }
+    },
+
+    async init() {
+      const h = await this.poignee();
+      this.nom = h ? h.name : null;
+      return this.nom;
+    },
+
+    /** Demande le dossier de l'appli (celui d'index.html). Lève AbortError si l'utilisateur annule. */
+    async choisir() {
+      const h = await window.showDirectoryPicker({ id: 'rapportDuJour', mode: 'readwrite' });
+      await base('readwrite', (st) => st.put(h, 'dossier'));
+      this.nom = h.name;
+      return h;
+    },
+
+    async oublier() {
+      try { await base('readwrite', (st) => st.delete('dossier')); } catch (e) { /* sans importance */ }
+      this.nom = null;
+    },
+
+    /** Écrit la sauvegarde dans <dossier>/save et ne garde que les GARDER dernières.
+        demander : true pendant un clic (le navigateur peut redemander l'accès). Renvoie le chemin, ou null. */
+    async ecrire(etat, suffixe, demander) {
+      const h = await this.poignee();
+      if (!h) return null;
+      const opts = { mode: 'readwrite' };
+      let perm = await h.queryPermission(opts);
+      if (perm !== 'granted' && demander) perm = await h.requestPermission(opts);
+      if (perm !== 'granted') return null;
+      const save = h.name.toLowerCase() === 'save' ? h : await h.getDirectoryHandle('save', { create: true });
+      const nom = RDJ.store.nomSauvegarde(suffixe);
+      const f = await save.getFileHandle(nom, { create: true });
+      const w = await f.createWritable();
+      await w.write(JSON.stringify(etat, null, 1));
+      await w.close();
+      const datees = [];
+      for await (const [n, e] of save.entries()) if (e.kind === 'file' && MOTIF_SAUV.test(n)) datees.push(n);
+      datees.sort().reverse();
+      for (const n of datees.slice(GARDER)) { try { await save.removeEntry(n); } catch (e) { /* fichier verrouillé : tant pis */ } }
+      return (save === h ? h.name : h.name + '/save') + '/' + nom;
     },
   };
 })();

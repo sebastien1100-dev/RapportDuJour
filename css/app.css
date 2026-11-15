@@ -286,6 +286,8 @@ button, input, select { font: inherit; }
 .rg-ligne label { margin-bottom: 0; }
 .rg-carte p { margin: 0 0 10px; line-height: 1.5; }
 .rg-etat b { color: var(--marine); }
+.rg-etat small { color: var(--doux); }
+.rg-etat .rg-note { display: block; margin-top: 4px; }
 .rg-carte > label.rg-case {
   display: flex; flex-direction: row; align-items: flex-start; gap: 10px; margin: 14px 0 0; padding: 10px 12px;
   border: 1px solid var(--bord, #e5e7eb); border-radius: 10px; background: #f8fafb; cursor: pointer;
@@ -325,6 +327,15 @@ button, input, select { font: inherit; }
 .hi-barre.haut, .hi-jauge.haut { --anneau-taux: #7fe3cf; }
 .hi-barre.moyen, .hi-jauge.moyen { --anneau-taux: #ffd27a; }
 .hi-barre.bas, .hi-jauge.bas { --anneau-taux: #ff9f8f; }
+.hi-legende { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; color: var(--marine); }
+.hi-legende li { display: flex; align-items: center; gap: 6px; }
+.hi-legende i { width: 12px; height: 12px; border-radius: 3px; }
+.hi-legende b { font-variant-numeric: tabular-nums; }
+.hi-legende small { color: var(--doux); }
+.hi-pile { position: relative; display: flex; flex-direction: column; gap: 2px; width: 100%; min-height: 2px; }
+.hi-pile i { display: block; min-height: 2px; }
+.hi-pile i:first-of-type { border-radius: 6px 6px 0 0; }
+.hi-pile em { position: absolute; top: -16px; left: 0; right: 0; text-align: center; font-style: normal; font-size: 10px; font-weight: 700; color: var(--marine); }
 .hi-table-conteneur { overflow-x: auto; }
 .hi-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
 .hi-table th { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--doux); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--bord); white-space: nowrap; }
