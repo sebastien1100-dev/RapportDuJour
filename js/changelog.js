@@ -9,7 +9,7 @@
     {
       version: '3.22', date: '2026-11-15', titre: 'Historique : sources des chambres en graphique ; sauvegarde dans le dossier « save »',
       changements: [
-        ['nouveau', "Historique : graphique « Sources des chambres », une barre par nuit (31 dernières) découpée par source de réservation (Direct, Booking, Expedia, Agoda, Groupe, Autre), avec une légende qui donne la part et le nombre de chambres de chaque source. Le détail de la nuit s'affiche au survol."],
+        ['nouveau', "Historique : graphique « Sources des chambres », une courbe lissée par source de réservation (Direct, Booking, Expedia, Agoda, Groupe, Autre) sur les 31 dernières nuits, avec une légende qui donne la part et le nombre de chambres de chaque source. Le détail de la nuit s'affiche au survol."],
         ['nouveau', "Sauvegarde : le bouton s'appelle « Sauvegarder (.json) ». À la première sauvegarde, on choisit une fois le dossier de l'application (celui d'index.html) : les sauvegardes vont dans son sous-dossier « save », et seules les 10 dernières sont gardées. Réglages indique le dossier et permet d'en changer."],
         ['amelioration', "Dans Safari et Firefox, qui ne permettent pas de choisir un dossier, la sauvegarde reste téléchargée (Réglages le signale) : utiliser Chrome ou Edge pour le dossier « save »."],
         ['amelioration', "Le bandeau du résultat de l'import (et les autres messages) s'efface au bout de 5 secondes. Les messages d'erreur restent affichés jusqu'au clic sur ×."],

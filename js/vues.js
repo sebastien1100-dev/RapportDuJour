@@ -843,6 +843,29 @@
 
   /* Écran Historique : moyennes, graphique du taux d'occupation, tableau des nuits (le plus récent en haut).
      La feuille imprimable (feuilleRecap) reste celle de l'aperçu. */
+  /** Chemin SVG lissé passant par les points [[x, y], …] (cubique monotone : pas de cassure,
+      et la courbe ne dépasse jamais les valeurs réelles entre deux nuits). */
+  function courbeLisse(p) {
+    const n = p.length;
+    if (!n) return '';
+    if (n === 1) return `M0 ${p[0][1]}H1000`;
+    const f = (v) => Math.round(v * 10) / 10;
+    const pente = [];
+    for (let i = 0; i < n - 1; i++) pente.push((p[i + 1][1] - p[i][1]) / (p[i + 1][0] - p[i][0]));
+    const t = p.map((_, i) => {
+      if (i === 0) return pente[0];
+      if (i === n - 1) return pente[n - 2];
+      const a = pente[i - 1], b = pente[i];
+      return a * b <= 0 ? 0 : (2 * a * b) / (a + b);  // moyenne harmonique : pas de bosse entre deux points
+    });
+    let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+    for (let i = 0; i < n - 1; i++) {
+      const h = (p[i + 1][0] - p[i][0]) / 3;
+      d += `C${f(p[i][0] + h)} ${f(p[i][1] + h * t[i])} ${f(p[i + 1][0] - h)} ${f(p[i + 1][1] - h * t[i + 1])} ${f(p[i + 1][0])} ${f(p[i + 1][1])}`;
+    }
+    return d;
+  }
+
   V.ecranRecap = (ctx) => {
     const lignes = ctx.etat.recap;
     const n = lignes.length;
@@ -872,32 +895,35 @@
         </div>
       </div>` : '';
 
-    // graphique des sources : barres empilées des chambres par source (mêmes nuits), couleur fixe par source
+    // graphique des sources : une courbe lissée par source (chambres par nuit, mêmes nuits), couleur fixe par source
     const COULEURS_SOURCES = { DIR: '#119a8d', BKG: '#4a5fd0', EXP: '#e0a43a', AGO: '#d9604f', GRP: '#a35bc4' };
     const couleurSource = (code) => COULEURS_SOURCES[code] || '#9aa5b1';
     const recentesSrc = recentes.filter((l) => l.sources);
     const totSrc = (code) => recentesSrc.reduce((s, l) => s + (l.sources[code] || 0), 0);
     const totChSrc = recentesSrc.reduce((s, l) => s + sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0), 0);
-    const maxCh = Math.max(1, ...recentesSrc.map((l) => sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0)));
     const sourcesVues = sources.filter((s) => totSrc(s.code));
+    const maxSrc = Math.max(10, Math.ceil(Math.max(0, ...recentesSrc.flatMap((l) => sourcesVues.map((s) => l.sources[s.code] || 0))) / 10) * 10);
+    const LG = 1000, HT = 160;  // repère du SVG (étiré en largeur, traits d'épaisseur constante)
+    const ptsSource = (code) => recentesSrc.map((l, i) => [((i + 0.5) / recentesSrc.length) * LG, HT - 4 - ((l.sources[code] || 0) / maxSrc) * (HT - 8)]);
     const grapheSources = recentesSrc.length && totChSrc ? `
       <ul class="hi-legende">
         ${sourcesVues.map((s) => `<li><i style="background:${couleurSource(s.code)}"></i>${esc(s.nom)}<b>${pct(totSrc(s.code) / totChSrc)}</b><small>${totSrc(s.code)} ch.</small></li>`).join('')}
       </ul>
       <div class="hi-graphe hi-graphe-src" role="img" aria-label="Chambres par source de réservation, ${recentesSrc.length} dernières nuits">
-        <div class="hi-axe"><span>${maxCh}</span><span>${Math.round(maxCh / 2)}</span><span>0</span></div>
-        <div class="hi-barres" style="--n:${recentesSrc.length}">
-          ${recentesSrc.map((l) => {
-            const tot = sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0);
-            const detail = sourcesVues.filter((s) => l.sources[s.code]).map((s) => s.nom + ' ' + l.sources[s.code]).join(' · ');
-            return `<div class="hi-barre" title="${esc(maj(l.jour))} ${esc(RDJ.dateFr(l.date))} : ${tot} ch. — ${esc(detail)}">
-              <div class="hi-pile" style="height:${Math.round((tot / maxCh) * 100)}%">
-                ${sourcesVues.slice().reverse().filter((s) => l.sources[s.code]).map((s) => `<i style="flex:${l.sources[s.code]};background:${couleurSource(s.code)}"></i>`).join('')}
-                <em>${tot}</em>
-              </div>
-              <span>${esc(l.date.slice(8, 10))}<small>${esc(l.jour.slice(0, 3))}</small></span>
-            </div>`;
-          }).join('')}
+        <div class="hi-axe"><span>${maxSrc}</span><span>${maxSrc / 2}</span><span>0</span></div>
+        <div class="hi-courbes">
+          <svg viewBox="0 0 ${LG} ${HT}" preserveAspectRatio="none" aria-hidden="true">
+            ${[0.5, 1].map((f) => `<line x1="0" x2="${LG}" y1="${HT - 4 - f * (HT - 8)}" y2="${HT - 4 - f * (HT - 8)}" class="grille"/>`).join('')}
+            <line x1="0" x2="${LG}" y1="${HT - 4}" y2="${HT - 4}" class="base"/>
+            ${sourcesVues.slice().reverse().map((s) => `<path d="${courbeLisse(ptsSource(s.code))}" stroke="${couleurSource(s.code)}"/>`).join('')}
+          </svg>
+          <div class="hi-colonnes" style="--n:${recentesSrc.length}">
+            ${recentesSrc.map((l) => {
+              const tot = sources.reduce((t, so) => t + (l.sources[so.code] || 0), 0);
+              const detail = sourcesVues.map((s) => s.nom + ' ' + (l.sources[s.code] || 0)).join(' · ');
+              return `<div title="${esc(maj(l.jour))} ${esc(RDJ.dateFr(l.date))} : ${tot} ch.\n${esc(detail)}"><span>${esc(l.date.slice(8, 10))}<small>${esc(l.jour.slice(0, 3))}</small></span></div>`;
+            }).join('')}
+          </div>
         </div>
       </div>` : '';
 
