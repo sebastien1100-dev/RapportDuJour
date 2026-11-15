@@ -86,12 +86,13 @@
     <circle cx="288" cy="217" r="6" fill="#bfe8d6"/>
   </g>
   <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea" transform="translate(4 0)">
-    <!-- table 1 (côté viennoiseries) : plateaux PDJ, cuillères -->
+    <!-- table 1 (côté viennoiseries) : plateaux PDJ, couverts (couteaux et fourchettes), serviettes, cuillères -->
     <rect x="344" y="59" width="34" height="34" rx="2"/>
     <rect x="382" y="59" width="24" height="15" rx="2"/>
     <rect x="382" y="78" width="24" height="15" rx="2"/>
     <rect x="344" y="99" width="16" height="16" rx="2"/>
     <rect x="364" y="99" width="16" height="16" rx="2"/>
+    <rect x="384" y="99" width="16" height="16" rx="2"/>
     <!-- table 2 (milieu) : assiettes, œufs -->
     <circle cx="356" cy="144" r="12"/>
     <circle cx="356" cy="174" r="12"/>
@@ -123,7 +124,7 @@
     <text x="280.5" y="238">26</text><text x="318" y="237">27</text>
   </g>
   <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48" transform="translate(4 0)">
-    <text x="361" y="78">36</text><text x="394" y="68.5">37</text><text x="394" y="87.5">37</text><text x="352" y="109">37</text><text x="372" y="109">37</text>
+    <text x="361" y="78">36</text><text x="394" y="68.5">39</text><text x="394" y="87.5">39</text><text x="352" y="109">38</text><text x="372" y="109">37</text><text x="392" y="109">37</text>
     <text x="356" y="146">35</text><text x="356" y="176">35</text>
     <text x="390" y="140">33</text><text x="383" y="156.5" font-size="5">33</text><text x="401" y="156.5" font-size="4.5">34</text><text x="390" y="178">32</text>
     <text x="352" y="241">28</text><text x="352" y="209">31</text><text x="397" y="232">29</text><text x="375" y="215" font-size="5">30</text>
@@ -165,7 +166,8 @@
           [25, 'l', 'Yaourts'], [26, 'f', 'Lait, eau, jus (2 pomme, 2 orange)'], [27, 'v', 'Crêpes']] },
         { titre: 'Trois tables collées au buffet', fond: '#e8d3b6', bord: '#9c7a52', items: [[28, 'c', 'Distributeurs de céréales'],
           [29, 'c', 'Bocaux (granola, fruits secs)'], [30, 'c', 'Sucre'], [31, 'm', 'Bols'], [32, 'm', 'Cuiseur à œufs'], [33, 'o', 'Œufs et coquetiers'],
-          [34, 'm', 'Sel et poivre'], [35, 'm', 'Assiettes'], [36, 'm', 'Plateaux PDJ'], [37, 'm', 'Petites et grandes cuillères']] },
+          [34, 'm', 'Sel et poivre'], [35, 'm', 'Assiettes'], [36, 'm', 'Plateaux PDJ'], [37, 'm', 'Petites et grandes cuillères'],
+          [38, 'm', 'Serviettes en papier'], [39, 'm', 'Couteaux et fourchettes']] },
       ],
     ];
     const LIGNE = 8.6;

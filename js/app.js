@@ -7,7 +7,7 @@
   let etat = RDJ.store.charger();
   let vue = 'accueil';
   try { vue = sessionStorage.getItem('rdj.vue') || 'accueil'; } catch (e) { /* sans importance */ }
-  // sous-onglet de l'onglet PDJ : 'cuisson' ou 'buffet' (retenu pendant la session)
+  // sous-onglet de l'onglet PDJ : 'cuisson', 'buffet' ou 'commande' (retenu pendant la session)
   let pdjSous = 'cuisson';
   try { pdjSous = sessionStorage.getItem('rdj.pdjSous') || 'cuisson'; } catch (e) { /* sans importance */ }
   function choisirPdj(s) {
@@ -816,6 +816,7 @@
     'apercu-buffet': () => apercu('Buffet PDJ', RDJ.vues.feuilleBuffet(contexte()), 1),
     'pdj-cuisson': () => choisirPdj('cuisson'),
     'pdj-buffet': () => choisirPdj('buffet'),
+    'pdj-commande': () => choisirPdj('commande'),
     'reglages-parametres': () => choisirReglages('parametres'),
     'reglages-changelog': () => choisirReglages('changelog'),
 

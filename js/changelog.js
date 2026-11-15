@@ -7,6 +7,16 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.23', date: '2026-11-16', titre: 'Buffet PDJ : serviettes et couverts ; accueil : chiffres alignés, arrivées en tableau',
+      changements: [
+        ['correction', "Buffet PDJ : sur la table des plateaux, les deux cases à droite des plateaux sont les couteaux et fourchettes (39), la petite case en bas à gauche les serviettes en papier (38), et les cuillères (37) ont maintenant deux cases côte à côte. La légende ajoute 38 et 39."],
+        ['amelioration', "Accueil : dans les cartes Occupation, Mouvements, Petits déjeuners et Paiements, chaque chiffre a une colonne de même largeur et les chiffres sont alignés en bas de carte. Libellés raccourcis sur une ligne (« Occupées », « Groupes ») ; le libellé complet s'affiche au survol."],
+        ['amelioration', "Accueil : la carte Arrivées devient un petit tableau, une ligne par type de chambre avec le nombre d'arrivées et de chambres disponibles. Le total est dans le titre (« Arrivées du 17/11 · 12 chambres ») ; un type qui manque de chambres reste en rouge (« 3 · manque 2 »)."],
+        ['nouveau', "PDJ : troisième sous-onglet « Commande », à côté de Cuisson PDJ et Buffet PDJ. Son contenu reste à définir."],
+        ['nouveau', "Feuille de chambre : s'il manque des chambres d'un type pour les arrivées, le tableau « Arrivées du … » ajoute une ligne MANQUE (hachurée, visible en noir et blanc) avec le nombre de chambres manquantes sous chaque type concerné."],
+      ],
+    },
+    {
       version: '3.22', date: '2026-11-15', titre: 'Historique : sources des chambres en graphique ; sauvegarde dans le dossier « save »',
       changements: [
         ['nouveau', "Historique : graphique « Sources des chambres », une courbe lissée par source de réservation (Direct, Booking, Expedia, Agoda, Groupe, Autre) sur les 31 dernières nuits, avec une légende qui donne la part et le nombre de chambres de chaque source. Le détail de la nuit s'affiche au survol."],

@@ -394,12 +394,17 @@
     // même présentation que le tableau des totaux en haut de la feuille ; les quatre types toujours présents (0 en grisé)
     const types = ctx.cfg.typesChambre;
     const nbAutres = Object.values(a.autres).reduce((s, n) => s + n, 0);
+    const dispo = ctx.disponibles || {};
+    // manque : arrivées d'un type au-delà de ses chambres disponibles (même calcul que la carte de l'accueil)
+    const manque = (code) => (code === 'Autre' ? 0 : Math.max(0, (a.parType[code] || 0) - (dispo[code] || 0)));
     const cols = [...types.map((t) => [t.code, a.parType[t.code] || 0]), ...(nbAutres ? [['Autre', nbAutres]] : [])];
+    const totalManque = cols.reduce((s, [c]) => s + manque(c), 0);
     return `<div class="f-besoins">
         <div class="f-besoins-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))}</div>
         <table class="f-cpt f-arr">
           <tr><th>À PRÉPARER</th>${cols.map(([c]) => `<th>${esc(c)}</th>`).join('')}</tr>
           <tr><td>${a.total}</td>${cols.map(([, n]) => `<td${n ? '' : ' class="zero"'}>${n}</td>`).join('')}</tr>
+          ${totalManque ? `<tr class="manque"><td>MANQUE</td>${cols.map(([c]) => (manque(c) ? `<td class="oui">${manque(c)}</td>` : '<td></td>')).join('')}</tr>` : ''}
         </table>
       </div>`;
   }
@@ -602,19 +607,20 @@
     if (!a) return '';
     const types = ctx.cfg.typesChambre;
     const dispo = ctx.disponibles || {};
+    // petit tableau : une ligne par type (arrivées / chambres disponibles), en rouge s'il en manque
     const lignes = [
       ...types.filter((t) => a.parType[t.code]).map((t) => {
         const n = a.parType[t.code], d = dispo[t.code] || 0;
-        return `<span class="acc-valeur arr-type${n > d ? ' manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
-          <b>${n}</b><small>${esc(t.code)} · ${n > d ? 'manque ' + (n - d) : d + ' dispo'}</small></span>`;
+        return `<tr class="${n > d ? 'manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
+          <th>${esc(t.code)}</th><td>${n}</td><td>${d}${n > d ? ' · manque ' + (n - d) : ''}</td></tr>`;
       }),
-      ...Object.keys(a.autres).map((desc) => `<span class="acc-valeur arr-type inconnu" title="Type non reconnu : ${esc(desc)}"><b>${a.autres[desc]}</b><small>? ${esc(desc)}</small></span>`),
+      ...Object.keys(a.autres).map((desc) => `<tr class="inconnu" title="Type non reconnu : ${esc(desc)}"><th>? ${esc(desc)}</th><td>${a.autres[desc]}</td><td>—</td></tr>`),
     ];
-    // même forme que les cartes Occupation, Mouvements… : 5e carte de la rangée des chiffres
+    // 5e carte de la rangée des chiffres
     return `
       <section class="acc-groupe g-arrivees" aria-label="Arrivées par type de chambre" title="Arrivées du ${esc(titreJour(a.date))}">
-        <span class="acc-groupe-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))}</span>
-        <span class="acc-valeurs"><span class="acc-valeur"><b>${a.total}</b><small>Chambres</small></span>${lignes.join('')}</span>
+        <span class="acc-groupe-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))} · ${a.total} chambre${a.total > 1 ? 's' : ''}</span>
+        <table class="acc-arr"><thead><tr><th></th><th>Arrivées</th><th>Dispo</th></tr></thead><tbody>${lignes.join('')}</tbody></table>
       </section>`;
   }
 
@@ -651,7 +657,7 @@
     const groupe = (titre, vue, valeurs) => `
       <button class="acc-groupe g-${vue}" data-vue-aller="${vue}" title="Ouvrir l'onglet">
         <span class="acc-groupe-titre">${esc(titre)}</span>
-        <span class="acc-valeurs">${valeurs.map(([l, v, cls]) => `<span class="acc-valeur ${cls || ''}"><b>${v}</b><small>${esc(l)}</small></span>`).join('')}</span>
+        <span class="acc-valeurs">${valeurs.map(([l, v, cls, info]) => `<span class="acc-valeur ${cls || ''}"${info ? ` title="${esc(info)}"` : ''}><b>${v}</b><small>${esc(l)}</small></span>`).join('')}</span>
       </button>`;
 
     return `
@@ -682,10 +688,10 @@
       ${zoneImport}
 
       <div class="acc-chiffres${ctx.arrivees ? ' avec-arrivees' : ''}">
-        ${groupe('Occupation', 'plan', [['Chambres occupées', c.chambres], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length]])}
+        ${groupe('Occupation', 'plan', [['Occupées', c.chambres, '', 'Chambres occupées'], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length, '', 'Chambres bloquées (maintenance)']])}
         ${groupe('Mouvements', 'fdc', [['Départs', c.departs], ['Recouches', c.recouches]])}
         ${groupe('Petits déjeuners', 'pdj', [['Couverts', c.pdj]])}
-        ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok'], ['Groupes non payés', c.groupeNonPayees.length]])}
+        ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok', 'Chambres non payées'], ['Groupes', c.groupeNonPayees.length, '', 'Chambres de groupe non payées']])}
         ${carteArrivees(ctx)}
       </div>
 
@@ -792,14 +798,24 @@
       <div class="b-plan">${RDJ.SVG_BUFFET || ''}</div>
     </div>`;
 
-  /** Onglet PDJ : deux sous-onglets, Cuisson PDJ (quantités) et Buffet PDJ (croquis). */
+  /** Onglet PDJ : trois sous-onglets, Cuisson PDJ (quantités), Buffet PDJ (croquis) et Commande (à définir). */
   V.ecranPdj = (ctx) => {
-    const sous = ctx.pdjSous === 'buffet' ? 'buffet' : 'cuisson';
+    const sous = ['buffet', 'commande'].includes(ctx.pdjSous) ? ctx.pdjSous : 'cuisson';
     const sousOnglets = `
       <nav class="sous-onglets" role="tablist" aria-label="PDJ">
         <button type="button" role="tab" class="${sous === 'cuisson' ? 'actif' : ''}" aria-selected="${sous === 'cuisson'}" data-action="pdj-cuisson">Cuisson PDJ</button>
         <button type="button" role="tab" class="${sous === 'buffet' ? 'actif' : ''}" aria-selected="${sous === 'buffet'}" data-action="pdj-buffet">Buffet PDJ</button>
+        <button type="button" role="tab" class="${sous === 'commande' ? 'actif' : ''}" aria-selected="${sous === 'commande'}" data-action="pdj-commande">Commande</button>
       </nav>`;
+    if (sous === 'commande') {
+      return `
+    <section class="ecran">
+      ${sousOnglets}
+      ${teteEcran('pdj', 'Commande', 'Commande des produits du petit déjeuner',
+        'Le contenu de cet onglet reste à définir.', '')}
+      <div class="hi-vide"><b>Commande PDJ : à venir.</b><span>Cet onglet accueillera la commande des produits du petit déjeuner.</span></div>
+    </section>`;
+    }
     if (sous === 'buffet') {
       return `
     <section class="ecran">
