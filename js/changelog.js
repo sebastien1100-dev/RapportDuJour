@@ -10,7 +10,7 @@
       version: '3.21', date: '2026-11-15', titre: 'Cuisson PDJ : viennoiseries au besoin réel',
       changements: [
         ['correction', "Cuisson PDJ : croissants et pains au chocolat ne sont plus arrondis à la plaque entière. Avec peu de couverts, la feuille demandait une plaque complète coupée en trois fournées (6 couverts business : 19 croissants, 12 / 6 / 1). Elle donne maintenant le besoin calculé, réparti en fournées : 5 croissants, 3 à 6h30 et 2 à 7h30."],
-        ['amelioration', "Sous le total, le nombre de plaques est la somme des plaques de chaque fournée."],
+        ['amelioration', "La colonne Total n'indique plus de plaques : seulement le nombre de pièces. Les plaques restent indiquées sous chaque fournée."],
       ],
     },
     {

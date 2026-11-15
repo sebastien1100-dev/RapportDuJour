@@ -425,8 +425,7 @@
     const lignesCuisson = cuisson.map((p) => {
       if (!p.viennoiserie) return { p, total: cellule(q(p)), parts: cfg.fournees.map((f, i) => (i === 0 ? cellule(q(p)) : '<em>—</em>')) };
       const parts = RDJ.fournees(q(p), cfg.fournees.map((f) => f.part));
-      const nbPlaques = parts.reduce((s, n) => s + RDJ.plaques(n, parPlaque), 0);
-      return { p, total: cellule(q(p), nbPlaques ? pl(nbPlaques) : ''), parts: parts.map((n) => cellule(n, enPlaques(n))) };
+      return { p, total: cellule(q(p)), parts: parts.map((n) => cellule(n, enPlaques(n))) };
     });
     return `
     <div class="feuille portrait pdj">
