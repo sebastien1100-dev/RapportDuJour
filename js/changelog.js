@@ -7,6 +7,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.21', date: '2026-11-15', titre: 'Cuisson PDJ : viennoiseries au besoin réel',
+      changements: [
+        ['correction', "Cuisson PDJ : croissants et pains au chocolat ne sont plus arrondis à la plaque entière. Avec peu de couverts, la feuille demandait une plaque complète coupée en trois fournées (6 couverts business : 19 croissants, 12 / 6 / 1). Elle donne maintenant le besoin calculé, réparti en fournées : 5 croissants, 3 à 6h30 et 2 à 7h30."],
+        ['amelioration', "Sous le total, le nombre de plaques est la somme des plaques de chaque fournée."],
+      ],
+    },
+    {
       version: '3.20', date: '2026-11-11', titre: 'Réglages réservés par un code, Change log rangé dans les Réglages',
       changements: [
         ['nouveau', "Réglages → carte « Code d'accès » : un code de 4 à 8 chiffres réserve les Réglages et le Change log sur ce poste. Sans le code, l'onglet Réglages affiche un écran de verrouillage ; le reste de l'appli reste accessible à tous."],

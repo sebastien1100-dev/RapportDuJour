@@ -421,11 +421,12 @@
       const pleines = Math.floor(n / parPlaque), reste = n % parPlaque;
       return pleines === 0 ? pl(1) : pl(pleines) + (reste ? ' + ' + reste : '');
     };
-    // viennoiseries : total arrondi à la plaque entière, pièces réparties en fournées ; autres produits : tout pour la 1re fournée
+    // viennoiseries : besoin réel réparti en fournées (chaque fournée a ses plaques) ; autres produits : tout pour la 1re fournée
     const lignesCuisson = cuisson.map((p) => {
       if (!p.viennoiserie) return { p, total: cellule(q(p)), parts: cfg.fournees.map((f, i) => (i === 0 ? cellule(q(p)) : '<em>—</em>')) };
-      const nb = RDJ.plaques(q(p), parPlaque);
-      return { p, total: cellule(nb * parPlaque, pl(nb)), parts: RDJ.fournees(nb * parPlaque, cfg.fournees.map((f) => f.part)).map((n) => cellule(n, enPlaques(n))) };
+      const parts = RDJ.fournees(q(p), cfg.fournees.map((f) => f.part));
+      const nbPlaques = parts.reduce((s, n) => s + RDJ.plaques(n, parPlaque), 0);
+      return { p, total: cellule(q(p), nbPlaques ? pl(nbPlaques) : ''), parts: parts.map((n) => cellule(n, enPlaques(n))) };
     });
     return `
     <div class="feuille portrait pdj">
@@ -453,7 +454,7 @@
           ${l.parts.map((c, i) => `<td class="q fo${i === l.parts.length - 1 ? ' res' : ''}">${c}</td>`).join('')}
         </tr>`).join('')}</tbody>
       </table>
-      <p class="p-fournees">Viennoiseries : total arrondi à la plaque de ${parPlaque}, puis ${cfg.fournees.slice(0, -1).map((f) => `${f.part} % à ${esc(f.heure)}`).join(', ')} ;
+      <p class="p-fournees">Viennoiseries (plaque de ${parPlaque}) : ${cfg.fournees.slice(0, -1).map((f) => `${f.part} % à ${esc(f.heure)}`).join(', ')} ;
         <b>réserve (${cfg.fournees[cfg.fournees.length - 1].part} %) à cuire seulement si le buffet baisse.</b></p>
 
       <h2 class="p-section"><i>2</i>Autres produits</h2>
