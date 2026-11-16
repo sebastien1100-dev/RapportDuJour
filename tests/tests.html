@@ -145,7 +145,7 @@
       egal('petits déjeuners', c.pdj, 55);
       egal("taux d'occupation", Math.round(c.taux * 10000) / 10000, 0.8519);
       egal('non payées (indiv. + groupe) = 16', c.nonPayees.length + c.groupeNonPayees.length, 16);
-      egal('à encaisser (départs) + autres = individuels non payés', c.aEncaisser.length + c.nonPayeesRestent.length, c.nonPayees.length);
+      egal('à encaisser (départs) + départs à 0 € + autres = individuels non payés', c.aEncaisser.length + c.departsSoldes.length + c.nonPayeesRestent.length, c.nonPayees.length);
       egal('à encaisser : départs seulement, sans montant (export sans solde)',
         [c.aEncaisser.every((e) => res.find((r) => r.chambre === e.chambre).depart <= RDJ.jours(nuit, 1)), c.totalDu], [true, null]);
       egal('groupes non payés regroupés par ID', c.groupes.reduce((s, g) => s + g.chambres.length, 0), c.groupeNonPayees.length);
@@ -156,7 +156,10 @@
       const cS = RDJ.chiffres(resS, nuit, 81);
       egal('solde lu dans l\'export', cS.aEncaisser[0].montant, 120.5);
       egal('total dû = départs individuels seulement', cS.totalDu, 120.5 * cS.aEncaisser.length);
-      egal('lireMontant', [RDJ.lireMontant('1 234,5 €'), RDJ.lireMontant(''), RDJ.lireMontant(80)], [1234.5, null, 80]);
+      const resZ = RDJ.lireExport(lignes.map((l, i) => [...l, i === 0 ? 'Solde' : '0,00 €'])).reservations;
+      const cZ = RDJ.chiffres(resZ, nuit, 81);
+      egal('départ à 0 € : hors « À encaisser »', [cZ.aEncaisser.length, cZ.departsSoldes.length, cZ.totalDu], [0, cS.aEncaisser.length, null]);
+      egal('lireMontant',[RDJ.lireMontant('1 234,5 €'), RDJ.lireMontant(''), RDJ.lireMontant(80)], [1234.5, null, 80]);
 
       // Source de la réservation (colonne « Client »)
       egal('sources : répartition de l\'export', c.parSource.filter((s) => s.chambres).map((s) => s.code + ' ' + s.chambres),

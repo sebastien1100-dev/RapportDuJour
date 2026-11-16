@@ -7,6 +7,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.24', date: '2026-11-17', titre: 'À encaisser : sans les départs à 0 €',
+      changements: [
+        ['amelioration', "Rapport du jour, encadré « À encaisser » : une chambre en départ dont le montant dû est de 0 € n'y figure plus, puisqu'il n'y a rien à encaisser. Elle ne compte pas non plus dans le nombre de départs non payés ni dans le total dû."],
+      ],
+    },
+    {
       version: '3.23', date: '2026-11-16', titre: 'Buffet PDJ : serviettes et couverts ; accueil : chiffres alignés, arrivées en tableau',
       changements: [
         ['correction', "Buffet PDJ : sur la table des plateaux, les deux cases à droite des plateaux sont les couteaux et fourchettes (39), la petite case en bas à gauche les serviettes en papier (38), et les cuillères (37) ont maintenant deux cases côte à côte. La légende ajoute 38 et 39."],

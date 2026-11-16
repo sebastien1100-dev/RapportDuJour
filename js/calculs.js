@@ -461,7 +461,7 @@
       chambres: reservations.length, clients: 0, departs: 0, recouches: 0, pdj: 0, nonPayees: [], groupeNonPayees: [],
       // détail pour le rapport : individuels qui partent demain avec montant dû (à encaisser),
       // autres individuels en simple liste, groupes réglés en une fois, sans montant
-      aEncaisser: [], nonPayeesRestent: [], groupes: [], totalDu: null,
+      aEncaisser: [], departsSoldes: [], nonPayeesRestent: [], groupes: [], totalDu: null,
     };
     const parGroupe = new Map();
     for (const r of reservations) {
@@ -477,6 +477,8 @@
         c.nonPayees.push(r.chambre);
         if (!(r.depart && r.depart <= demain)) { c.nonPayeesRestent.push(r.chambre); continue; }
         const montant = r.montantDu ?? null;
+        // départ dont le solde est à 0 € : rien à encaisser, il ne va pas dans l'encadré
+        if (montant !== null && Math.abs(montant) < 0.005) { c.departsSoldes.push(r.chambre); continue; }
         c.aEncaisser.push({ chambre: r.chambre, nom: r.nomClient || '', montant, source: RDJ.sourceReservation(r.canal) });
         if (montant !== null) c.totalDu = (c.totalDu || 0) + montant;
       }
