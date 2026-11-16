@@ -7,6 +7,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.25', date: '2026-11-17', titre: 'Accueil : zone d\'import vidée à 23 h ; Historique : courbes des sources sur toute la largeur',
+      changements: [
+        ['correction', "Historique, graphique « Sources des chambres » : les courbes partaient du milieu de la première nuit et s'arrêtaient au milieu de la dernière. Elles vont maintenant d'un bord à l'autre du graphique (prolongées à plat avant la première nuit et après la dernière)."],
+        ['amelioration', "Accueil : à partir de 23 h, la zone où l'on dépose les 4 rapports n'affiche plus les fichiers importés avant 23 h. Les pastilles reviennent à « à importer » / « facultatif » pour la nouvelle nuit ; les données importées restent dans l'application. L'accueil se met à jour tout seul à 23 h."],
+      ],
+    },
+    {
       version: '3.24', date: '2026-11-17', titre: 'À encaisser : sans les départs à 0 €',
       changements: [
         ['amelioration', "Rapport du jour, encadré « À encaisser » : une chambre en départ dont le montant dû est de 0 € n'y figure plus, puisqu'il n'y a rien à encaisser. Elle ne compte pas non plus dans le nombre de départs non payés ni dans le total dû."],

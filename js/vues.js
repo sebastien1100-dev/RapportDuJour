@@ -641,16 +641,19 @@
     const heure = (r) => `${esc(RDJ.dateFr(r.importeLe.slice(0, 10)))} à ${esc(r.importeLe.slice(11, 16))}`;
     const nbBloquees = chambresBloquees(ctx).length;
     const pastilleImport = (fait, nom, detail, titre, obligatoire) => `<span class="dz-pastille ${fait ? 'fait' : obligatoire ? 'manque' : 'option'}"${titre ? ` title="${titre}"` : ''}>${fait ? '✓ ' : ''}${esc(nom)} · ${detail}</span>`;
+    // à partir de 23 h, les rapports importés avant ne s'affichent plus dans la zone (nouveau service de nuit)
+    const duService = (r) => (RDJ.importDuService(r) ? r : null);
+    const zImp = duService(imp), zSoldes = duService(ctx.soldes), zMaint = duService(ctx.maintenance), zArr = duService(ctx.arrivees);
     const zoneImport = `
-      <button type="button" class="acc-depot-zone${imp ? ' rempli' : ''}" data-action="importer">
+      <button type="button" class="acc-depot-zone${zImp ? ' rempli' : ''}" data-action="importer">
         <span class="dz-icone" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
-        <b class="dz-titre">${imp ? 'Déposez de nouveaux rapports ici pour mettre à jour, ou cliquez pour les choisir' : 'Déposez les rapports de la nuit ici, ou cliquez pour les choisir'}</b>
+        <b class="dz-titre">${zImp ? 'Déposez de nouveaux rapports ici pour mettre à jour, ou cliquez pour les choisir' : 'Déposez les rapports de la nuit ici, ou cliquez pour les choisir'}</b>
         <span class="dz-aide">Rapport clients présents, des départs, de maintenance et des arrivées, exportés en français ou en anglais : un seul ou plusieurs à la fois, ils sont reconnus tout seuls.</span>
         <span class="dz-pastilles">
-          ${pastilleImport(imp, 'Clients présents', imp ? `${imp.reservations.length} ch. · ${heure(imp)}` : 'à importer', imp ? esc(imp.fichier) : '', true)}
-          ${pastilleImport(ctx.soldes, 'Départs', ctx.soldes ? (c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) + ' dus' : 'importé ' + heure(ctx.soldes)) : 'facultatif', ctx.soldes ? esc(ctx.soldes.fichier) : '')}
-          ${pastilleImport(ctx.maintenance, 'Maintenance', ctx.maintenance ? `${nbBloquees} bloquée${nbBloquees > 1 ? 's' : ''}` : 'facultatif', ctx.maintenance ? esc(ctx.maintenance.fichier) : '')}
-          ${pastilleImport(ctx.arrivees, 'Arrivées', ctx.arrivees ? `${ctx.arrivees.total} le ${esc(RDJ.dateFr(ctx.arrivees.date))}` : 'facultatif', ctx.arrivees ? esc(ctx.arrivees.fichier) : '')}
+          ${pastilleImport(zImp, 'Clients présents', zImp ? `${zImp.reservations.length} ch. · ${heure(zImp)}` : 'à importer', zImp ? esc(zImp.fichier) : '', true)}
+          ${pastilleImport(zSoldes, 'Départs', zSoldes ? (c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) + ' dus' : 'importé ' + heure(zSoldes)) : 'facultatif', zSoldes ? esc(zSoldes.fichier) : '')}
+          ${pastilleImport(zMaint, 'Maintenance', zMaint ? `${nbBloquees} bloquée${nbBloquees > 1 ? 's' : ''}` : 'facultatif', zMaint ? esc(zMaint.fichier) : '')}
+          ${pastilleImport(zArr, 'Arrivées', zArr ? `${zArr.total} le ${esc(RDJ.dateFr(zArr.date))}` : 'facultatif', zArr ? esc(zArr.fichier) : '')}
         </span>
       </button>`;
     // groupe de chiffres ; clic -> onglet correspondant
@@ -920,7 +923,11 @@
     const sourcesVues = sources.filter((s) => totSrc(s.code));
     const maxSrc = Math.max(10, Math.ceil(Math.max(0, ...recentesSrc.flatMap((l) => sourcesVues.map((s) => l.sources[s.code] || 0))) / 10) * 10);
     const LG = 1000, HT = 160;  // repère du SVG (étiré en largeur, traits d'épaisseur constante)
-    const ptsSource = (code) => recentesSrc.map((l, i) => [((i + 0.5) / recentesSrc.length) * LG, HT - 4 - ((l.sources[code] || 0) / maxSrc) * (HT - 8)]);
+    // un point au milieu de chaque nuit, et la courbe prolongée à plat jusqu'aux deux bords du graphique
+    const ptsSource = (code) => {
+      const p = recentesSrc.map((l, i) => [((i + 0.5) / recentesSrc.length) * LG, HT - 4 - ((l.sources[code] || 0) / maxSrc) * (HT - 8)]);
+      return p.length > 1 ? [[0, p[0][1]], ...p, [LG, p[p.length - 1][1]]] : p;
+    };
     const grapheSources = recentesSrc.length && totChSrc ? `
       <ul class="hi-legende">
         ${sourcesVues.map((s) => `<li><i style="background:${couleurSource(s.code)}"></i>${esc(s.nom)}<b>${pct(totSrc(s.code) / totChSrc)}</b><small>${totSrc(s.code)} ch.</small></li>`).join('')}

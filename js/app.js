@@ -989,6 +989,14 @@
     else if (ev.target.id === 'pin-confirme') { ev.preventDefault(); ACTIONS['pin-definir'](); }
   });
   setInterval(() => { if (vue === 'reglages' && pinInfo() && !reglagesOuverts() && !$('#pin-saisie')) afficher(); }, 30000);
+  // à 23 h, la zone d'import de l'accueil se vide : on réaffiche l'accueil quand le service de nuit change
+  let serviceAffiche = RDJ.debutService();
+  setInterval(() => {
+    const s = RDJ.debutService();
+    if (s === serviceAffiche) return;
+    serviceAffiche = s;
+    if (vue === 'accueil') afficher();
+  }, 30000);
 
   /* ---------- Événements ---------- */
 

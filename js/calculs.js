@@ -30,6 +30,16 @@
     return RDJ.aujourdhui(d) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   };
 
+  /** Début du service de nuit en cours : 23 h du jour, ou de la veille avant 23 h ("AAAA-MM-JJTHH:MM"). */
+  RDJ.debutService = function (d) {
+    d = d || new Date();
+    const b = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 0);
+    if (d < b) b.setDate(b.getDate() - 1);
+    return RDJ.maintenantLocal(b);
+  };
+  /** Rapport importé pendant le service de nuit en cours (depuis la dernière 23 h). */
+  RDJ.importDuService = (rapport, d) => !!(rapport && rapport.importeLe && rapport.importeLe >= RDJ.debutService(d));
+
   /** Valeur de l'export -> "AAAA-MM-JJ" (numéro de série Excel, texte JJ/MM/AAAA ou AAAA-MM-JJ). */
   RDJ.versISO = function (v) {
     if (v === null || v === undefined || v === '') return null;

@@ -50,6 +50,12 @@
     egal('dateMep import 22h -> lendemain', RDJ.dateMep('2025-11-25T22:10', '2025-11-25'), '2025-11-26');
     egal('dateMep import 1h -> jour même', RDJ.dateMep('2025-11-26T01:05', '2025-11-25'), '2025-11-26');
     egal('dateMep sans import -> nuit + 1', RDJ.dateMep(null, '2025-11-25'), '2025-11-26');
+    egal('debutService : 23h du jour, ou de la veille avant 23h',
+      [RDJ.debutService(new Date(2025, 10, 25, 23, 0)), RDJ.debutService(new Date(2025, 10, 26, 2, 30)), RDJ.debutService(new Date(2025, 10, 25, 22, 59))],
+      ['2025-11-25T23:00', '2025-11-25T23:00', '2025-11-24T23:00']);
+    egal('importDuService : import de 22h50 caché à 23h05, celui de 23h02 affiché',
+      [RDJ.importDuService({ importeLe: '2025-11-25T22:50' }, new Date(2025, 10, 25, 23, 5)), RDJ.importDuService({ importeLe: '2025-11-25T23:02' }, new Date(2025, 10, 26, 3, 0))],
+      [false, true]);
     const croissant = RDJ.CONFIG_DEFAUT.produitsPdj[0];
     egal('PDJ croissants business 55', RDJ.quantitePdj(croissant, 55, 'business'), 38);
     egal('PDJ croissants loisir 55', RDJ.quantitePdj(croissant, 55, 'loisir'), 52);
