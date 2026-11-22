@@ -6,7 +6,7 @@ Rien à installer, aucune connexion Internet ni macro nécessaire. Fonctionne su
 
 ## Utilisation
 
-1. Double-cliquer sur **`index.html`** (ou faire un raccourci vers ce fichier sur le bureau).
+1. Double-cliquer sur **`index.html`**, ou mieux, l'ouvrir comme une application (voir ci-dessous).
 2. **Importer le rapport du jour** : choisir l'export du logiciel hôtelier (.xlsx ou .csv), ou le glisser dans la fenêtre.
 3. Le rapport, la feuille de chambre, la cuisson PDJ et l'historique se mettent à jour et sont enregistrés automatiquement.
 4. Imprimer depuis chaque onglet, ou toutes les feuilles de la nuit d'un clic sur le bandeau **Impressions de la nuit** de l'accueil
@@ -14,6 +14,21 @@ Rien à installer, aucune connexion Internet ni macro nécessaire. Fonctionne su
    Si l'imprimante est en recto verso, cocher l'option dans Réglages : les feuilles de chambre restent seules
    sur leur feuille (page blanche derrière), le rapport et la cuisson partagent une feuille.
    Pour un PDF, choisir l'imprimante « Enregistrer au format PDF ».
+
+## Ouvrir comme une application (icône, fenêtre à part)
+
+Le même code s'ouvre dans sa propre fenêtre, sans onglets ni barre d'adresse (mode application de Edge,
+Chrome ou Brave), avec l'icône « RJ ». À faire une fois par poste, et à refaire si le dossier change de place.
+
+- **Windows** : clic droit sur `outils\creer-raccourci.ps1` → *Exécuter avec PowerShell*
+  (ou `powershell -ExecutionPolicy Bypass -File outils\creer-raccourci.ps1`). Le raccourci est créé sur le
+  Bureau et dans le menu Démarrer ; l'épingler ensuite à la barre des tâches.
+- **Mac** : double-clic sur `outils/creer-app-mac.command`. « Rapport du jour.app » est créé dans Applications ;
+  le glisser dans le Dock.
+
+**Choisir le navigateur qui sert déjà au Rapport du jour** : les données sont rangées dans le navigateur.
+Pour en changer (ou venir de Safari, qui n'a pas de mode application) : Réglages → *Télécharger une sauvegarde*
+dans l'ancien, puis *Restaurer une sauvegarde* dans la fenêtre de l'application.
 
 Corrections à la main, comme dans Excel :
 - **Rapport** : double-clic sur *Statut* (départ ↔ recouche), *PDJ* (ajout) ou *Payé*.

@@ -116,6 +116,18 @@
     egal('chambres disponibles par type : ni recouche ni HS',
       RDJ.disponiblesParType({ '001': { etat: 'B' }, '002': { etat: 'R' }, '003': { etat: '' }, '004': { etat: 'HS' }, '005': { etat: 'BR' } }, { '001': 'PMR', '002': 'PMR', '003': '1Q', '004': '1Q', '005': '1Q' }),
       { PMR: 1, '1Q': 1 });
+    {
+      // 1Q : 2 libres, 3 départs, 1 recouche, 1 HS ; 1K : 1 départ ; PMR : rien
+      const ef = { '001': { etat: '' }, '002': { etat: '' }, '003': { etat: 'B' }, '004': { etat: 'B' }, '005': { etat: 'B' }, '006': { etat: 'R' }, '007': { etat: 'HS' }, '008': { etat: 'B' } };
+      const ty = { '001': '1Q', '002': '1Q', '003': '1Q', '004': '1Q', '005': '1Q', '006': '1Q', '007': '1Q', '008': '1K' };
+      egal('à préparer : libres d\'abord, puis départs ; manque au-delà',
+        RDJ.aPreparerParType(ef, ty, { '1Q': 4, '1K': 3, PMR: 1 }),
+        { '1Q': { arrivees: 4, libres: 2, departs: 3, aPreparer: 2, manque: 0 },
+          '1K': { arrivees: 3, libres: 0, departs: 1, aPreparer: 1, manque: 2 },
+          PMR: { arrivees: 1, libres: 0, departs: 0, aPreparer: 0, manque: 1 } });
+      egal('à préparer : assez de chambres libres, aucun départ à préparer',
+        RDJ.aPreparerParType(ef, ty, { '1Q': 2 })['1Q'], { arrivees: 2, libres: 2, departs: 3, aPreparer: 0, manque: 0 });
+    }
     const dep = { nuit: '2026-11-10', importeLe: '2026-11-10T01:50' };
     egal('départs importés 10 min avant le rapport clients : rattachés à sa nuit', RDJ.rattacherNuit(dep, '2026-11-09', '2026-11-10T02:00').nuit, '2026-11-09');
     egal('départs de la veille (plus de 12 h) : laissés sur leur nuit', RDJ.rattacherNuit({ nuit: '2026-11-08', importeLe: '2026-11-09T02:00' }, '2026-11-09', '2026-11-10T02:00').nuit, '2026-11-08');

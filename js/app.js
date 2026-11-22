@@ -98,6 +98,7 @@
     return {
       etat, cfg, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
       disponibles: RDJ.disponiblesParType(etatsFdc, cfg.types),
+      aPreparer: arrivees ? RDJ.aPreparerParType(etatsFdc, cfg.types, arrivees.parType) : {},
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
       grille: RDJ.grilleRapport(eff, nuit),

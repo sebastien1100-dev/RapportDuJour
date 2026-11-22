@@ -7,6 +7,21 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.27', date: '2026-11-18', titre: 'Arrivées : départs à préparer par type de chambre',
+      changements: [
+        ['amelioration', "Feuille de chambre, tableau « Arrivées du … » : la première ligne donne les arrivées par type, une nouvelle ligne « À PRÉPARER » le nombre de départs du jour à préparer pour les loger. Les arrivées prennent d'abord les chambres libres (déjà prêtes), puis les départs ; la ligne MANQUE n'apparaît que si les chambres libres et les départs du type ne suffisent pas."],
+        ['amelioration', "Accueil, carte Arrivées : la colonne « Dispo » devient « À préparer » (départs du jour à faire pour chaque type) ; le détail des chambres libres et des départs s'affiche au survol. « Manque » suit le même calcul que la feuille de chambre."],
+      ],
+    },
+    {
+      version: '3.26', date: '2026-11-17', titre: 'Rapport du jour en application (raccourci Windows, appli Mac)',
+      changements: [
+        ['nouveau', "Raccourci « Rapport du jour » sur le Bureau et dans le menu Démarrer (script outils\\creer-raccourci.ps1) : l'appli s'ouvre dans sa propre fenêtre Edge ou Chrome, sans onglets ni barre d'adresse, toujours hors ligne."],
+        ['nouveau', "Mac : le script outils/creer-app-mac.command crée « Rapport du jour.app » dans Applications (fenêtre Chrome, Edge ou Brave en mode application), à glisser dans le Dock."],
+        ['amelioration', "Nouvelle icône « RJ » aux couleurs Campanile, aussi affichée dans l'onglet du navigateur."],
+      ],
+    },
+    {
       version: '3.25', date: '2026-11-17', titre: 'Accueil : zone d\'import vidée à 23 h ; Historique : courbes des sources sur toute la largeur',
       changements: [
         ['correction', "Historique, graphique « Sources des chambres » : les courbes partaient du milieu de la première nuit et s'arrêtaient au milieu de la dernière. Elles vont maintenant d'un bord à l'autre du graphique (prolongées à plat avant la première nuit et après la dernière)."],

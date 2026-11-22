@@ -232,6 +232,29 @@
     return res;
   };
 
+  /** Chambres à préparer pour les arrivées, par type. Les arrivées prennent d'abord les chambres libres
+      (déjà prêtes), puis les départs du jour (B) : à préparer = départs nécessaires, manque = le reste.
+      Recouches (R, BR) et hors service (HS) ne comptent pas.
+      -> { code: { arrivees, libres, departs, aPreparer, manque } } pour chaque type de parType. */
+  RDJ.aPreparerParType = function (etatsFdc, typesParChambre, parType) {
+    const stock = {};
+    for (const k in etatsFdc) {
+      const e = etatsFdc[k].etat;
+      if (e !== '' && e !== 'B') continue;
+      const code = (typesParChambre || {})[k] || '';
+      stock[code] = stock[code] || { libres: 0, departs: 0 };
+      stock[code][e === 'B' ? 'departs' : 'libres']++;
+    }
+    const res = {};
+    for (const code in parType || {}) {
+      const n = parType[code] || 0;
+      const { libres, departs } = stock[code] || { libres: 0, departs: 0 };
+      const reste = Math.max(0, n - libres);
+      res[code] = { arrivees: n, libres, departs, aPreparer: Math.min(departs, reste), manque: Math.max(0, reste - departs) };
+    }
+    return res;
+  };
+
   /** Lignes du tableur -> { date, total, parType: {code: n}, autres: {description: n}, lignes }.
       date = jour d'arrivée le plus fréquent ; seules les lignes de ce jour sont comptées. */
   RDJ.lireArrivees = function (lignes, types) {

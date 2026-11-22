@@ -1198,6 +1198,8 @@ body.depot .voile-depot { display: grid; }
 .f-arr td.zero { color: #b5b5b5; }
 /* ligne MANQUE (seulement s'il manque des chambres) : hachurée pour ressortir en noir et blanc */
 .f-arr tr.manque td { font-size: 13pt; }
+.f-arr tr.prep td { font-size: 13pt; }
+.f-arr tr.prep td:first-child { font-size: 8pt; letter-spacing: .04em; white-space: nowrap; }
 .f-arr tr.manque td.oui { background: repeating-linear-gradient(45deg, #fff 0 1.2mm, #d4d4d4 1.2mm 2.4mm); }
 .f-arr tr.manque td:first-child { font-size: 8pt; letter-spacing: .04em; background: #000; }
 

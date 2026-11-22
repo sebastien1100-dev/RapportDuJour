@@ -394,17 +394,20 @@
     // même présentation que le tableau des totaux en haut de la feuille ; les quatre types toujours présents (0 en grisé)
     const types = ctx.cfg.typesChambre;
     const nbAutres = Object.values(a.autres).reduce((s, n) => s + n, 0);
-    const dispo = ctx.disponibles || {};
-    // manque : arrivées d'un type au-delà de ses chambres disponibles (même calcul que la carte de l'accueil)
-    const manque = (code) => (code === 'Autre' ? 0 : Math.max(0, (a.parType[code] || 0) - (dispo[code] || 0)));
+    // à préparer : départs du jour à faire pour loger les arrivées, une fois les chambres libres attribuées ;
+    // manque : arrivées au-delà des libres et des départs (même calcul que la carte de l'accueil)
+    const prep = ctx.aPreparer || {};
+    const val = (code, cle) => (prep[code] ? prep[code][cle] : 0);
     const cols = [...types.map((t) => [t.code, a.parType[t.code] || 0]), ...(nbAutres ? [['Autre', nbAutres]] : [])];
-    const totalManque = cols.reduce((s, [c]) => s + manque(c), 0);
+    const totalPrep = cols.reduce((s, [c]) => s + val(c, 'aPreparer'), 0);
+    const totalManque = cols.reduce((s, [c]) => s + val(c, 'manque'), 0);
     return `<div class="f-besoins">
         <div class="f-besoins-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))}</div>
         <table class="f-cpt f-arr">
-          <tr><th>À PRÉPARER</th>${cols.map(([c]) => `<th>${esc(c)}</th>`).join('')}</tr>
+          <tr><th>ARRIVÉES</th>${cols.map(([c]) => `<th>${esc(c)}</th>`).join('')}</tr>
           <tr><td>${a.total}</td>${cols.map(([, n]) => `<td${n ? '' : ' class="zero"'}>${n}</td>`).join('')}</tr>
-          ${totalManque ? `<tr class="manque"><td>MANQUE</td>${cols.map(([c]) => (manque(c) ? `<td class="oui">${manque(c)}</td>` : '<td></td>')).join('')}</tr>` : ''}
+          <tr class="prep" title="Départs du jour à préparer, une fois les chambres libres attribuées"><td>À PRÉPARER ${totalPrep}</td>${cols.map(([c]) => { const n = val(c, 'aPreparer'); return `<td${n ? '' : ' class="zero"'}>${c === 'Autre' ? '' : n}</td>`; }).join('')}</tr>
+          ${totalManque ? `<tr class="manque"><td>MANQUE</td>${cols.map(([c]) => (val(c, 'manque') ? `<td class="oui">${val(c, 'manque')}</td>` : '<td></td>')).join('')}</tr>` : ''}
         </table>
       </div>`;
   }
@@ -600,19 +603,20 @@
     return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
-  /** Accueil : arrivées par type de chambre (rapport des arrivées), comparées aux chambres disponibles du type
-      (départs du jour, libres et sales ; ni recouche ni hors service). Rien si le rapport n'est pas importé. */
+  /** Accueil : arrivées par type de chambre (rapport des arrivées) et départs du jour à préparer pour les loger,
+      une fois les chambres libres attribuées (RDJ.aPreparerParType). Rien si le rapport n'est pas importé. */
   function carteArrivees(ctx) {
     const a = ctx.arrivees;
     if (!a) return '';
     const types = ctx.cfg.typesChambre;
-    const dispo = ctx.disponibles || {};
-    // petit tableau : une ligne par type (arrivées / chambres disponibles), en rouge s'il en manque
+    const prep = ctx.aPreparer || {};
+    const pl = (n, mot) => `${n} ${n > 1 ? mot.split(' ').map((m) => m + 's').join(' ') : mot}`;
+    // petit tableau : une ligne par type (arrivées / départs à préparer), en rouge s'il en manque
     const lignes = [
       ...types.filter((t) => a.parType[t.code]).map((t) => {
-        const n = a.parType[t.code], d = dispo[t.code] || 0;
-        return `<tr class="${n > d ? 'manque' : ''}" title="${esc(t.nom)} : ${n} arrivée${n > 1 ? 's' : ''}, ${d} chambre${d > 1 ? 's' : ''} disponible${d > 1 ? 's' : ''}">
-          <th>${esc(t.code)}</th><td>${n}</td><td>${d}${n > d ? ' · manque ' + (n - d) : ''}</td></tr>`;
+        const p = prep[t.code] || { arrivees: a.parType[t.code], libres: 0, departs: 0, aPreparer: 0, manque: 0 };
+        return `<tr class="${p.manque ? 'manque' : ''}" title="${esc(t.nom)} : ${pl(p.arrivees, 'arrivée')} ; ${pl(p.libres, 'chambre libre')} et ${pl(p.departs, 'départ')} du jour ; ${pl(p.aPreparer, 'départ')} à préparer${p.manque ? ', manque ' + p.manque : ''}">
+          <th>${esc(t.code)}</th><td>${p.arrivees}</td><td>${p.aPreparer}${p.manque ? ' · manque ' + p.manque : ''}</td></tr>`;
       }),
       ...Object.keys(a.autres).map((desc) => `<tr class="inconnu" title="Type non reconnu : ${esc(desc)}"><th>? ${esc(desc)}</th><td>${a.autres[desc]}</td><td>—</td></tr>`),
     ];
@@ -620,7 +624,7 @@
     return `
       <section class="acc-groupe g-arrivees" aria-label="Arrivées par type de chambre" title="Arrivées du ${esc(titreJour(a.date))}">
         <span class="acc-groupe-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))} · ${a.total} chambre${a.total > 1 ? 's' : ''}</span>
-        <table class="acc-arr"><thead><tr><th></th><th>Arrivées</th><th>Dispo</th></tr></thead><tbody>${lignes.join('')}</tbody></table>
+        <table class="acc-arr"><thead><tr><th></th><th>Arrivées</th><th title="Départs du jour à préparer, une fois les chambres libres attribuées">À préparer</th></tr></thead><tbody>${lignes.join('')}</tbody></table>
       </section>`;
   }
 
