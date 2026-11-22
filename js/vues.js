@@ -604,29 +604,34 @@
     return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
-  /** Accueil, au-dessus du pied de page : résultat de « Mettre à jour » (js/maj.js). Rien tant qu'on n'a pas cherché. */
-  function bandeauMaj(ctx) {
+  /** Accueil, sous l'en-tête : carte « Nouvelle version disponible » (js/maj.js), ouverte par la pastille de la
+      barre du haut ou par « Mettre à jour ». Une ligne par version, avec le type de ses changements ;
+      le détail du Change log se déplie. */
+  const TYPES_MAJ = { correction: 'Correction', nouveau: 'Nouveau', amelioration: 'Amélioration' };
+  function carteMaj(ctx) {
     const m = ctx.maj;
-    if (!m) return '';
-    let titre = '', detail = '', boutons = '';
-    if (m.etat === 'verif') titre = 'Recherche d\'une mise à jour…';
-    else if (m.etat === 'install') titre = m.message || 'Installation…';
-    else if (m.etat === 'ajour') {
-      titre = 'L\'application est à jour';
-      detail = `<small>Version ${esc(RDJ.VERSION || '')} installée, dernière version publiée : ${esc(m.version)}.</small>`;
-    } else if (m.etat === 'erreur') {
-      titre = m.message;
-    } else if (m.etat === 'dispo') {
-      titre = `Version ${esc(m.version)} disponible`;
-      detail = `<ul class="maj-liste">${m.nouveautes.map((v) => `<li><b>${esc(v.version)}</b> ${esc(v.titre)}</li>`).join('')}</ul>
-        <small>Vos données et le dossier « save » ne sont pas touchés ; la version ${esc(RDJ.VERSION || '')} est gardée dans « ${esc(RDJ.maj.ANCIENNES)} ».</small>`;
-      boutons = `<button class="btn primaire" data-action="maj-installer">Installer la version ${esc(m.version)}</button>`;
-    }
-    const occupe = m.etat === 'verif' || m.etat === 'install';
-    if (!occupe) boutons += '<button class="btn" data-action="maj-revenir">Revenir à la version précédente</button><button class="btn" data-action="maj-fermer">Fermer</button>';
-    return `<section class="carte maj-bandeau maj-${esc(m.etat)}" aria-live="polite">
-        <div class="maj-texte"><b>${m.etat === 'dispo' ? titre : esc(titre)}</b>${detail}</div>
-        ${boutons ? `<div class="boutons">${boutons}</div>` : ''}
+    if (!m || m.etat !== 'dispo' || !m.ouvert) return '';
+    const etiquette = (t) => `<span class="mc-tag mc-${esc(t)}">${esc(TYPES_MAJ[t] || t)}</span>`;
+    const lignes = m.nouveautes.map((v) => {
+      const types = Object.keys(TYPES_MAJ).filter((t) => (v.changements || []).some(([x]) => x === t));
+      return `<li>
+          <div class="mc-ligne"><b class="mc-version">${esc(v.version)}</b>${types.map(etiquette).join('')}<span>${esc(v.titre)}</span></div>
+          ${(v.changements || []).length ? `<details><summary>Détail</summary><ul>${v.changements.map(([t, x]) => `<li>${etiquette(t)}${esc(x)}</li>`).join('')}</ul></details>` : ''}
+        </li>`;
+    }).join('');
+    return `
+      <section class="maj-carte" aria-label="Nouvelle version disponible">
+        <header class="mc-tete">
+          <span class="mc-etoile" aria-hidden="true">✦</span>
+          <h2>Nouvelle version disponible</h2>
+          <span class="mc-versions">${esc(RDJ.VERSION || '')} → ${esc(m.version)}</span>
+        </header>
+        <ol class="mc-liste">${lignes}</ol>
+        <footer class="mc-pied">
+          <span class="mc-rassure">Vos données et le dossier « save » ne sont pas touchés · retour en arrière possible</span>
+          <button class="btn" data-action="maj-plus-tard">Plus tard</button>
+          <button class="btn primaire" data-action="maj-installer">Installer la ${esc(m.version)}</button>
+        </footer>
       </section>`;
   }
 
@@ -719,6 +724,8 @@
         </div>
       </header>
 
+      ${carteMaj(ctx)}
+
       ${zoneImport}
 
       <div class="acc-chiffres${ctx.arrivees ? ' avec-arrivees' : ''}">
@@ -765,8 +772,6 @@
         </div>
       </details>
 
-      ${bandeauMaj(ctx)}
-
       <footer class="acc-pied">
         <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
         <ul class="acc-horaires" aria-label="Horaires clés">
@@ -774,7 +779,8 @@
             <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
         </ul>
         <span class="acc-pied-version"><span title="Reproduction, modification ou diffusion interdites sans autorisation (fichier LICENSE)">© 2026 · tous droits réservés</span> · version ${esc(RDJ.VERSION || '')}${RDJ.maj && RDJ.maj.possible()
-          ? ` <button class="acc-pied-maj" data-action="maj-verifier"${ctx.maj && (ctx.maj.etat === 'verif' || ctx.maj.etat === 'install') ? ' disabled' : ''} title="Chercher sur GitHub si une nouvelle version existe (Internet nécessaire)">Mettre à jour</button>` : ''}</span>
+          ? ` <button class="acc-pied-maj" data-action="maj-verifier"${ctx.maj && ctx.maj.etat === 'verif' ? ' disabled' : ''} title="Chercher sur GitHub si une nouvelle version existe (Internet nécessaire)">${ctx.maj && ctx.maj.etat === 'verif' ? 'Recherche…' : 'Mettre à jour'}</button>
+             <button class="acc-pied-retour" data-action="maj-revenir" title="Remettre la version gardée avant la dernière mise à jour">Version précédente</button>` : ''}</span>
       </footer>
     </section>`;
   };

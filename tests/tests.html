@@ -42,11 +42,11 @@
       ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md', 'LICENSE']);
     egal('maj : versions et titres lus dans le Change log (apostrophes échappées)',
       RDJ.maj.versionsDuChangelog("{ version: '3.28', date: 'x', titre: 'Accueil : l\\'heure',\n changements: [] },\n{ version: '3.27', date: 'x', titre: 'B' }"),
-      [{ version: '3.28', titre: "Accueil : l'heure" }, { version: '3.27', titre: 'B' }]);
+      [{ version: '3.28', titre: "Accueil : l'heure", changements: [] }, { version: '3.27', titre: 'B', changements: [] }]);
     try {
       const lus = RDJ.maj.versionsDuChangelog(await (await fetch('../js/changelog.js', { cache: 'no-store' })).text());
-      egal('maj : js/changelog.js entièrement lu (mêmes versions et titres que l\'appli)',
-        lus, RDJ.CHANGELOG.map((v) => ({ version: v.version, titre: v.titre })));
+      egal('maj : js/changelog.js entièrement lu (versions, titres et changements identiques à l\'appli)',
+        lus, RDJ.CHANGELOG.map((v) => ({ version: v.version, titre: v.titre, changements: v.changements })));
     } catch (e) { egal('maj : lecture de js/changelog.js', e.message, ''); }
     egal('normTitre accents/ponctuation', RDJ.normTitre("Statut d'enrg."), 'statutdenrg');
     egal('normTitre Arrivée', RDJ.normTitre(' Arrivée '), 'arrivee');

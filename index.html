@@ -21,6 +21,7 @@
       <button data-vue="recap">Historique</button>
       <button data-vue="reglages">Réglages</button>
     </nav>
+    <button id="pastille-maj" class="pastille-maj" data-action="maj-ouvrir" hidden><span></span></button>
     <div class="menu-import">
       <button class="btn primaire" data-action="menu-import" aria-haspopup="true" aria-expanded="false">Importer ▾</button>
       <div class="menu-import-liste" id="menu-import" hidden>
@@ -37,6 +38,7 @@
   <main id="vue"></main>
   <div id="impression" class="nb"></div>
   <dialog id="dialogue"></dialog>
+  <dialog id="maj-fenetre" aria-label="Installation d'une mise à jour"></dialog>
   <div id="apercu" hidden role="dialog" aria-modal="true" aria-label="Aperçu avant impression"></div>
   <div class="voile-depot">Déposez les rapports exportés (en français ou en anglais) pour les importer</div>
 

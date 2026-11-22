@@ -8,6 +8,16 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.30', date: '2026-11-22', titre: 'Icône sans fond blanc ; annonce des mises à jour redessinée',
+      changements: [
+        ['nouveau', "Barre du haut : quand une nouvelle version existe, une pastille (par exemple « 3.31 disponible ») apparaît à côté d'« Importer », sur tous les onglets. Un clic ouvre la carte « Nouvelle version » en haut de l'accueil."],
+        ['amelioration', "Accueil : la carte « Nouvelle version disponible » (version actuelle → nouvelle) liste chaque version avec le type de ses changements (Nouveau, Amélioration, Correction) ; « Détail » déplie le Change log. « Plus tard » la referme, la pastille reste."],
+        ['amelioration', "Installation guidée : une fenêtre coche les étapes une à une (sauvegarde, téléchargement, copie de la version actuelle, installation) avec une barre de progression, puis l'appli redémarre. En cas de problème, elle dit ce qui s'est passé et si l'appli reste utilisable."],
+        ['amelioration', "Pied de page de l'accueil : « Mettre à jour » affiche « Recherche… » pendant la recherche, puis « À jour » ou l'erreur dans un message ; lien « Version précédente » à côté."],
+        ['correction', "Icône « hôtel de nuit » : les coins arrondis s'affichaient sur un carré blanc (Bureau, barre des tâches, Dock). Ils sont maintenant transparents. Relancer outils\\creer-raccourci.ps1 (Windows) ou outils/creer-app-mac.command (Mac) pour voir la nouvelle icône."],
+      ],
+    },
+    {
       version: '3.29', date: '2026-11-22', titre: 'Code protégé : tous droits réservés',
       changements: [
         ['nouveau', "Le dépôt GitHub devient public pour les mises à jour, mais le code reste protégé : fichier LICENSE « tous droits réservés » (reproduction, modification et diffusion interdites sans autorisation), mention en tête de chaque fichier et du README."],

@@ -257,24 +257,75 @@
     }
   }
 
-  /* ---------- Mise à jour depuis GitHub (Réglages) ----------
-     maj : null (pas encore vérifié) ou { etat: 'verif' | 'ajour' | 'dispo' | 'install' | 'erreur', version, nouveautes, message } */
+  /* ---------- Mise à jour depuis GitHub ----------
+     Pastille « 3.30 disponible » dans la barre du haut (tous les onglets) ; un clic ouvre la carte
+     « Nouvelle version » en haut de l'accueil ; « Installer » ouvre la fenêtre d'installation guidée.
+     maj : null, { etat: 'verif' } pendant la recherche, ou { etat: 'dispo', version, nouveautes, ouvert } */
   let maj = null;
+
+  /** Pastille de la barre du haut : visible tant qu'une nouvelle version attend d'être installée. */
+  function majPastille() {
+    const p = $('#pastille-maj');
+    if (!p) return;
+    const dispo = !!(maj && maj.etat === 'dispo');
+    p.hidden = !dispo;
+    if (dispo) {
+      p.querySelector('span').textContent = maj.version + ' disponible';
+      p.title = 'Nouvelle version ' + maj.version + ' : voir les nouveautés et installer';
+      p.classList.toggle('vue', !!maj.ouvert);
+    }
+  }
 
   async function majVerifier(silencieux) {
     if (!silencieux) { maj = { etat: 'verif' }; if (vue === 'accueil') afficher(); }
     try {
       const r = await RDJ.maj.verifier();
       try { localStorage.setItem('rapportDuJour.majVerifiee', RDJ.aujourdhui()); } catch (e) { /* sans importance */ }
-      // vérification automatique : on ne dit rien si l'appli est à jour
-      if (silencieux && !r.nouveautes.length) return;
-      maj = { etat: r.nouveautes.length ? 'dispo' : 'ajour', version: r.version, nouveautes: r.nouveautes };
-      if (silencieux && vue !== 'accueil') notice('Nouvelle version ' + r.version + ' disponible : voir l\'accueil.', 'info');
+      if (r.nouveautes.length) {
+        // recherche à la main : la carte s'ouvre ; vérification automatique : seulement la pastille
+        maj = { etat: 'dispo', version: r.version, nouveautes: r.nouveautes, ouvert: !silencieux };
+      } else {
+        maj = null;
+        if (!silencieux) notice("L'application est à jour (version " + RDJ.VERSION + ').', 'ok');
+      }
     } catch (e) {
-      if (silencieux) return;
-      maj = { etat: 'erreur', message: e.message };
+      maj = null;
+      if (!silencieux) notice(e.message, 'erreur');
     }
+    majPastille();
     if (vue === 'accueil') afficher();
+  }
+
+  /* Fenêtre d'installation guidée : étapes cochées une à une et barre de progression. */
+  const ETAPES_MAJ = [
+    ['sauvegarde', 'Sauvegarde des données'],
+    ['telechargement', 'Téléchargement de la nouvelle version'],
+    ['copie', 'Copie de la version actuelle'],
+    ['installation', 'Installation et redémarrage'],
+  ];
+  function fenetreMaj(version, phase, i, n, erreur) {
+    const d = $('#maj-fenetre');
+    const esc = RDJ.vues.esc;
+    const rang = ETAPES_MAJ.findIndex(([p]) => p === phase);
+    // progression : chaque étape compte pour un quart, au prorata des fichiers traités
+    const pct = Math.round(((rang + (n ? i / n : 0)) / ETAPES_MAJ.length) * 100);
+    d.innerHTML = `
+      <div class="mf">
+        <h2>Installation de la version ${esc(version)}</h2>
+        <ol class="mf-etapes">${ETAPES_MAJ.map(([p, lib], k) => {
+          const etat = k < rang ? 'faite' : k === rang ? (erreur ? 'erreur' : 'encours') : 'attente';
+          const detail = k === rang && n && !erreur ? ` · ${Math.min(i + 1, n)} / ${n} fichiers` : '';
+          return `<li class="${etat}"><i aria-hidden="true"></i>${esc(lib)}${detail}</li>`;
+        }).join('')}</ol>
+        ${erreur
+          ? `<p class="mf-erreur">${esc(erreur)}</p><p class="mf-note">${phase === 'installation'
+              ? "Installation incomplète : rechargez l'application, puis, si elle ne s'ouvre plus correctement, « Revenir à la version précédente » (pied de page de l'accueil)."
+              : "Aucun fichier de l'application n'a été remplacé : elle reste utilisable telle quelle."}</p>
+             <div class="boutons"><button class="btn primaire" data-action="maj-fenetre-fermer">Fermer</button></div>`
+          : `<div class="mf-barre"><div style="width:${pct}%"></div></div>
+             <p class="mf-note">Ne fermez pas l'application pendant l'installation.</p>`}
+      </div>`;
+    if (!d.open) d.showModal();
   }
 
   /** Dossier de l'appli pour la mise à jour : celui des sauvegardes, s'il contient index.html ; sinon on le redemande. */
@@ -1005,31 +1056,37 @@
     restaurer: () => $('#fichier-restaurer').click(),
 
     'maj-verifier': () => majVerifier(false),
-    'maj-fermer': () => { maj = null; afficher(); },
+    'maj-ouvrir': () => {
+      if (!maj || maj.etat !== 'dispo') return;
+      maj.ouvert = true;
+      majPastille();
+      aller('accueil');
+    },
+    'maj-plus-tard': () => {
+      if (maj) maj.ouvert = false;
+      majPastille();
+      afficher();
+    },
+    'maj-fenetre-fermer': () => $('#maj-fenetre').close(),
     'maj-installer': async () => {
       if (!maj || maj.etat !== 'dispo') return;
-      const ok = await dialogue({
-        titre: 'Installer la version ' + maj.version,
-        message: "Les fichiers de l'application vont être remplacés par la version " + maj.version + ".\nVos données et le dossier « save » ne sont pas touchés ; la version " + RDJ.VERSION + " est d'abord copiée dans « " + RDJ.maj.ANCIENNES + " ».\nL'application se recharge ensuite.",
-        ok: 'Installer',
-      });
-      if (!ok) return;
       const racine = await majRacine();
       if (!racine) return notice("Mise à jour annulée : pas d'accès au dossier de l'application.", 'alerte');
       const version = maj.version;
+      let phase = 'sauvegarde';
       try {
+        fenetreMaj(version, phase, 0, 0);
         // sauvegarde des données juste avant, par prudence
         etat.derniereSauvegarde = RDJ.maintenantLocal();
         await sauverEtat(null, true);
         enregistrer();
-        await RDJ.maj.installer(racine, (texte) => { maj = { ...maj, etat: 'install', message: texte }; if (vue === 'accueil') afficher(); });
+        await RDJ.maj.installer(racine, (p, i, n) => { phase = p; fenetreMaj(version, p, i, n); });
       } catch (e) {
-        maj = { etat: 'erreur', message: 'Mise à jour interrompue : ' + e.message };
-        afficher();
+        fenetreMaj(version, phase, 0, 0, 'Mise à jour interrompue : ' + e.message);
         return;
       }
       try { sessionStorage.setItem('rdj.majFaite', version); } catch (e) { /* sans importance */ }
-      location.reload();
+      setTimeout(() => location.reload(), 600);
     },
     'maj-revenir': async () => {
       const ok = await dialogue({
@@ -1272,6 +1329,9 @@
   // le nom du dossier des sauvegardes (Réglages) est lu dans IndexedDB, puis la sauvegarde hebdomadaire
   RDJ.dossierSauv.init().then(() => { if (vue === 'reglages') afficher(); }).finally(sauvegardeHebdo);
   if (!RDJ.store.disponible) notice('Le stockage du navigateur est désactivé : les données ne seront pas conservées.', 'erreur');
+
+  // fenêtre d'installation : Échap ne la ferme pas tant que l'installation tourne (seulement après une erreur)
+  $('#maj-fenetre').addEventListener('cancel', (ev) => { if (!$('#maj-fenetre .mf-erreur')) ev.preventDefault(); });
 
   // après une mise à jour (ou un retour en arrière), l'appli vient d'être rechargée
   let majFaite = null;

@@ -33,14 +33,24 @@
     return /^(js|css|img|outils)\/[^/]+$/.test(c);
   }
 
-  /** Texte de js/changelog.js -> [{ version, titre }] dans l'ordre du fichier (la plus récente d'abord). */
+  /** Texte de js/changelog.js -> [{ version, titre, changements: [[type, texte]] }] dans l'ordre du fichier
+      (la plus récente d'abord). Textes entre apostrophes ('…l\'heure…') ou entre guillemets ("…l'heure…"). */
+  const CHAINE = `(?:'((?:[^'\\\\]|\\\\.)*)'|"((?:[^"\\\\]|\\\\.)*)")`;
+  const lireChaine = (m, i) => (m[i] !== undefined ? m[i] : m[i + 1]).replace(/\\(.)/g, '$1');
   function versionsDuChangelog(texte) {
-    const res = [];
-    // titre entre apostrophes ('…l\'heure…') ou entre guillemets ("…l'heure…")
-    const re = /version:\s*'([\d.]+)'[^\n]*?titre:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g;
+    const t = String(texte || '');
+    const re = new RegExp(`version:\\s*'([\\d.]+)'[^\\n]*?titre:\\s*${CHAINE}`, 'g');
+    const trouvees = [];
     let m;
-    while ((m = re.exec(String(texte || '')))) res.push({ version: m[1], titre: (m[2] !== undefined ? m[2] : m[3]).replace(/\\(.)/g, '$1') });
-    return res;
+    while ((m = re.exec(t))) trouvees.push({ debut: m.index, fin: re.lastIndex, version: m[1], titre: lireChaine(m, 2) });
+    return trouvees.map((v, i) => {
+      const bloc = t.slice(v.fin, i + 1 < trouvees.length ? trouvees[i + 1].debut : t.length);
+      const reC = new RegExp(`\\[\\s*'(nouveau|amelioration|correction)'\\s*,\\s*${CHAINE}\\s*\\]`, 'g');
+      const changements = [];
+      let c;
+      while ((c = reC.exec(bloc))) changements.push([c[1], lireChaine(c, 2)]);
+      return { version: v.version, titre: v.titre, changements };
+    });
   }
 
   /* ---------- Accès à GitHub ---------- */
@@ -49,7 +59,10 @@
 
   async function telecharger(chemin, type) {
     // paramètre « t » : évite une ancienne copie gardée en cache
-    const rep = await fetch(urlBrute(chemin) + '?t=' + Date.now(), { cache: 'no-store' });
+    let rep;
+    try { rep = await fetch(urlBrute(chemin) + '?t=' + Date.now(), { cache: 'no-store' }); } catch (e) {
+      throw new Error('connexion à GitHub perdue (' + chemin + '). Vérifiez Internet, puis réessayez.');
+    }
     if (!rep.ok) throw new Error(chemin + ' : HTTP ' + rep.status);
     return type === 'texte' ? rep.text() : new Uint8Array(await rep.arrayBuffer());
   }
@@ -124,30 +137,34 @@
   }
 
   /** Télécharge tous les fichiers, copie l'ancienne version, puis écrit la nouvelle.
-      etape(texte) : progression affichée. Renvoie { fichiers, copie }. */
+      etape(phase, i, n) : progression ('telechargement' | 'copie' | 'installation', fichier i sur n).
+      Renvoie { fichiers, copie }. */
   async function installer(racine, etape) {
-    etape('Liste des fichiers…');
+    etape('telechargement', 0, 0);
     const chemins = await listeFichiers();
     if (!chemins.includes('index.html') || !chemins.includes('js/app.js')) throw new Error('Version en ligne incomplète.');
+    const n = chemins.length;
     // 1. tout télécharger avant d'écrire quoi que ce soit : une coupure ne laisse pas l'appli à moitié à jour
     const nouveaux = {};
-    for (let i = 0; i < chemins.length; i++) {
-      etape(`Téléchargement ${i + 1} / ${chemins.length}…`);
+    for (let i = 0; i < n; i++) {
+      etape('telechargement', i, n);
       nouveaux[chemins[i]] = await telecharger(chemins[i]);
     }
     // 2. copie de la version installée (fichiers remplacés seulement)
     const copie = ANCIENNES + '/' + RDJ.VERSION + '_' + RDJ.maintenantLocal().replace('T', '_').replace(':', 'h');
     const copieDir = await racine.getDirectoryHandle(ANCIENNES, { create: true });
     const ici = await copieDir.getDirectoryHandle(copie.split('/')[1], { create: true });
-    for (const c of chemins) {
-      const actuel = await lireLocal(racine, c);
-      if (actuel) { etape('Copie de la version ' + RDJ.VERSION + '…'); await ecrireLocal(ici, c, actuel); }
+    for (let i = 0; i < n; i++) {
+      etape('copie', i, n);
+      const actuel = await lireLocal(racine, chemins[i]);
+      if (actuel) await ecrireLocal(ici, chemins[i], actuel);
     }
     // 3. nouvelle version
-    for (let i = 0; i < chemins.length; i++) {
-      etape(`Installation ${i + 1} / ${chemins.length}…`);
+    for (let i = 0; i < n; i++) {
+      etape('installation', i, n);
       await ecrireLocal(racine, chemins[i], nouveaux[chemins[i]]);
     }
+    etape('installation', n, n);
     // seules les GARDER dernières copies sont gardées
     for (const n of (await ancienneVersions(racine)).slice(GARDER)) {
       try { await copieDir.removeEntry(n, { recursive: true }); } catch (e) { /* fichier verrouillé : tant pis */ }
