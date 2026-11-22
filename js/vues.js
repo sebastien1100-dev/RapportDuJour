@@ -62,8 +62,9 @@
       <table class="r-table${petite ? ' petite' : ''}">
         <thead><tr><th>Ch.</th><th>Client</th><th>Src</th><th>Pers.</th><th>Nuit</th><th>Départ</th><th>Statut</th><th>PDJ</th><th>Payé</th></tr></thead>
         <tbody>${lignes.map((l) => {
-          // une seule information par signal : fond de ligne = départ, case « Payé » inversée = non payée
-          const cls = [l.partDemain ? 'dep' : '', l.manuel ? 'ajout' : ''].join(' ').trim();
+          // une seule information par signal : fond de ligne = départ à l'écran, petit déjeuner (hachures) sur papier ;
+          // case « Payé » inversée = non payée
+          const cls = [l.partDemain ? 'dep' : '', l.pdj ? 'pdj' : '', l.manuel ? 'ajout' : ''].join(' ').trim();
           const mod = (t) => (l.modifs.includes(t) ? ' modifie' : '');
           return `<tr class="${cls}" style="height:${hLigne}mm"${l.manuel ? ` data-modif="fiche" data-ch="${esc(l.chambre)}" title="Chambre ajoutée à la main : double-clic pour la modifier"` : ''}>
             <td class="ch">${esc(l.chambre)}</td>
@@ -72,7 +73,7 @@
             <td class="c">${esc(l.pers)}</td>
             <td class="c">${esc(l.nuitNo)}</td>
             <td class="c">${esc(RDJ.dateCourte(l.depart))}</td>
-            <td class="c clic${mod('RECOUCHE')}${mod('DEPART')}" data-modif="demain" data-ch="${esc(l.chambre)}">${l.depart ? (l.partDemain ? 'DÉPART' : 'Recouche') : ''}</td>
+            <td class="c statut clic${mod('RECOUCHE')}${mod('DEPART')}" data-modif="demain" data-ch="${esc(l.chambre)}">${l.depart ? (l.partDemain ? 'DÉPART' : 'Recouche') : ''}</td>
             <td class="c clic${mod('PDJ')}" data-modif="pdj" data-ch="${esc(l.chambre)}">${l.pdj ? 'Oui' : ''}</td>
             <td class="c clic${l.paye ? '' : l.groupe ? ' npg' : ' np'}${mod('PAYE')}" data-modif="paye" data-ch="${esc(l.chambre)}">${l.paye ? 'Oui' : l.groupe ? 'GRP' : 'NON'}</td>
           </tr>`;
@@ -133,8 +134,10 @@
       <div class="r-modifs">${esc(modifs)}</div>
       <footer class="r-legende">
         <b>Légende :</b>
-        <span><i class="ech"></i>Recouche</span>
-        <span><i class="ech dep"></i>Départ du jour</span>
+        <span class="leg-ecran"><i class="ech"></i>Recouche</span>
+        <span class="leg-ecran"><i class="ech dep"></i>Départ du jour</span>
+        <span class="leg-papier"><i class="ech pdj"></i>Petit déjeuner</span>
+        <span class="leg-papier"><b class="leg-dep">DÉPART</b>Départ du jour</span>
         <span><i class="ech np">NON</i>Non payée, à encaisser</span>
         <span><i class="ech npg">GRP</i>Groupe non payé, réglé en une fois</span>
         <span><i class="ech mod">Oui</i>Modifié à la main</span>
@@ -635,29 +638,135 @@
       </section>`;
   }
 
-  /** Accueil : arrivées par type de chambre (rapport des arrivées) et départs du jour à préparer pour les loger,
-      une fois les chambres libres attribuées (RDJ.aPreparerParType). Rien si le rapport n'est pas importé. */
-  function carteArrivees(ctx) {
-    const a = ctx.arrivees;
-    if (!a) return '';
-    const types = ctx.cfg.typesChambre;
-    const prep = ctx.aPreparer || {};
-    const pl = (n, mot) => `${n} ${n > 1 ? mot.split(' ').map((m) => m + 's').join(' ') : mot}`;
-    // petit tableau : une ligne par type (arrivées / départs à préparer), en rouge s'il en manque
-    const lignes = [
-      ...types.filter((t) => a.parType[t.code]).map((t) => {
-        const p = prep[t.code] || { arrivees: a.parType[t.code], libres: 0, departs: 0, aPreparer: 0, manque: 0 };
-        return `<tr class="${p.manque ? 'manque' : ''}" title="${esc(t.nom)} : ${pl(p.arrivees, 'arrivée')} ; ${pl(p.libres, 'chambre libre')} et ${pl(p.departs, 'départ')} du jour ; ${pl(p.aPreparer, 'départ')} à préparer${p.manque ? ', manque ' + p.manque : ''}">
-          <th>${esc(t.code)}</th><td>${p.arrivees}</td><td>${p.aPreparer}${p.manque ? ' · manque ' + p.manque : ''}</td></tr>`;
-      }),
-      ...Object.keys(a.autres).map((desc) => `<tr class="inconnu" title="Type non reconnu : ${esc(desc)}"><th>? ${esc(desc)}</th><td>${a.autres[desc]}</td><td>—</td></tr>`),
-    ];
-    // 5e carte de la rangée des chiffres
+  /* ---------- Accueil : les six cartes des chiffres (deux rangées de trois) ----------
+     Même squelette partout : bandeau de couleur (titre + repère), grand chiffre et contexte, barre de
+     répartition, petit tableau de quatre lignes aligné en bas. Rangée du haut : les chambres (Occupation,
+     Disponibles après départ, Arrivées) ; rangée du bas : Mouvements, Petits déjeuners, Paiements.
+     Un clic sur une carte ouvre l'onglet correspondant. */
+  const plur = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+  const pctBarre = (n, total) => (total > 0 ? Math.max(0, Math.min(100, (n / total) * 100)).toFixed(1) : 0);
+
+  /** Une carte. o : { cle, vue, titre, repere, info, nombre, nombreCls, texte, barre, legende, entetes, lignes }
+      lignes : [{ cellules: [html…], cls, titre }] ; barre : [[pourcentage, n° de teinte 1 à 4]]. */
+  function carteAccueil(o) {
+    const lien = o.vue ? ` role="link" tabindex="0" data-vue-aller="${o.vue}"` : '';
     return `
-      <section class="acc-groupe g-arrivees" aria-label="Arrivées par type de chambre" title="Arrivées du ${esc(titreJour(a.date))}">
-        <span class="acc-groupe-titre">Arrivées du ${esc(RDJ.dateFr(a.date).slice(0, 5))} · ${a.total} chambre${a.total > 1 ? 's' : ''}</span>
-        <table class="acc-arr"><thead><tr><th></th><th>Arrivées</th><th title="Départs du jour à préparer, une fois les chambres libres attribuées">À préparer</th></tr></thead><tbody>${lignes.join('')}</tbody></table>
+      <section class="ac ac-${o.cle}"${lien} title="${esc(o.info || '')}">
+        <header class="ac-tete"><span>${esc(o.titre)}</span>${o.repere ? `<em>${o.repere}</em>` : ''}</header>
+        <div class="ac-corps">
+          <div class="ac-hero"><b class="${o.nombreCls || ''}">${o.nombre}</b><span>${o.texte || ''}</span></div>
+          ${o.legende ? `<div class="ac-legende">${o.legende}</div>` : ''}
+          <div class="ac-barre">${(o.barre || []).map(([p, t]) => `<i class="t${t}" style="width:${p}%"></i>`).join('')}</div>
+          <table class="ac-tab">
+            ${o.entetes ? `<thead><tr>${o.entetes.map((e) => `<th>${e}</th>`).join('')}</tr></thead>` : ''}
+            <tbody>${o.lignes.map((l) => `<tr${l.cls ? ` class="${l.cls}"` : ''}${l.titre ? ` title="${esc(l.titre)}"` : ''}>${l.cellules.map((x) => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>
       </section>`;
+  }
+
+  function cartesAccueil(ctx) {
+    const c = ctx.chiffres;
+    const imp = !!ctx.etat.import;
+    const types = ctx.cfg.typesChambre;
+    const pt = ctx.parType || {};
+    const T = (code) => pt[code] || { total: 0, occupees: 0, departs: 0, recouches: 0, libres: 0, aFaire: 0, dispo: 0 };
+    const somme = (cle) => types.reduce((s, t) => s + T(t.code)[cle], 0) + (pt[''] ? pt[''][cle] : 0);
+    const d = (n) => `<span class="d">${n}</span>`;
+    const nb = (n) => (imp ? n : '—');
+    const totalPlan = ctx.cfg.nbChambres;
+
+    // 1. Occupation
+    const occupation = carteAccueil({
+      cle: 'occ', vue: 'plan', titre: 'Occupation', repere: imp ? Math.round(c.taux * 100) + ' %' : 'en attente',
+      info: 'Chambres occupées cette nuit, par type — ouvrir le plan de chambre',
+      nombre: nb(c.chambres),
+      texte: `/ ${totalPlan} chambres${imp ? ` · ${plur(c.clients, 'client')} · ${plur(chambresBloquees(ctx).length, 'bloquée')}` : ''}`,
+      barre: types.map((t, i) => [pctBarre(T(t.code).occupees, totalPlan), i + 1]),
+      entetes: ['Type', 'Occupées', 'Libres'],
+      lignes: types.map((t) => ({ titre: t.nom, cellules: [esc(t.code), imp ? `${T(t.code).occupees} ${d('/ ' + T(t.code).total)}` : d('— / ' + T(t.code).total), d(nb(T(t.code).libres))] })),
+    });
+
+    // 2. Disponibles après départ : chambres libres + départs (et chambres sales), par type
+    const dispo = somme('dispo'), libres = somme('libres'), aFaire = somme('aFaire');
+    const disponibles = carteAccueil({
+      cle: 'dispo', vue: 'fdc', titre: 'Disponibles après départ', repere: imp ? dispo + ' ch.' : '',
+      info: 'Chambres disponibles une fois les départs faits : libres + départs du jour (et chambres sales), sans recouches ni hors service — ouvrir la feuille de chambre',
+      nombre: nb(dispo), texte: 'chambres libres une fois les départs faits',
+      legende: '<span><i class="t4"></i>déjà libres</span><span><i class="t1"></i>départs</span>',
+      barre: [[pctBarre(libres, dispo), 4], [pctBarre(aFaire, dispo), 1]],
+      entetes: ['Type', 'Libres', 'Départs', 'Dispo'],
+      lignes: types.map((t) => ({ titre: t.nom, cellules: [esc(t.code), d(nb(T(t.code).libres)), d(nb(T(t.code).aFaire)), nb(T(t.code).dispo)] })),
+    });
+
+    // 3. Arrivées (rapport des arrivées) : arrivées, disponibles et départs à préparer par type
+    const a = ctx.arrivees, prep = ctx.aPreparer || {};
+    const manqueTotal = a ? types.reduce((s, t) => s + (prep[t.code] ? prep[t.code].manque : 0), 0) : 0;
+    const prepTotal = a ? types.reduce((s, t) => s + (prep[t.code] ? prep[t.code].aPreparer : 0), 0) : 0;
+    const typesManque = a ? types.filter((t) => prep[t.code] && prep[t.code].manque).map((t) => `${prep[t.code].manque} en ${t.code}`) : [];
+    const nbAutres = a ? Object.values(a.autres).reduce((s, n) => s + n, 0) : 0;
+    const arrivees = carteAccueil({
+      cle: 'arr', vue: 'fdc', titre: a ? `Arrivées du ${RDJ.dateFr(a.date).slice(0, 5)}` : 'Arrivées',
+      repere: a ? `${prepTotal} à préparer` : 'à importer',
+      info: a ? `Arrivées du ${titreJour(a.date)} : les chambres libres d'abord, puis les départs à préparer — ouvrir la feuille de chambre` : 'Importer le rapport des arrivées pour voir les chambres à préparer',
+      nombre: a ? a.total : '—', texte: a
+        ? `${a.total > 1 ? 'chambres' : 'chambre'}${typesManque.length ? ` · <b class="rouge">manque ${esc(typesManque.join(', '))}</b>` : ''}${nbAutres ? ` · ${nbAutres} de type inconnu` : ''}`
+        : 'rapport des arrivées non importé',
+      barre: a ? [[pctBarre(a.total - nbAutres - manqueTotal, dispo || 1), 2], [pctBarre(manqueTotal, dispo || 1), 'r']] : [],
+      entetes: ['Type', 'Arrivées', 'Dispo', 'À préparer'],
+      lignes: types.map((t) => {
+        const p = prep[t.code];
+        if (!a) return { titre: t.nom, cellules: [esc(t.code), d('—'), d(nb(T(t.code).dispo)), d('—')] };
+        const n = a.parType[t.code] || 0;
+        return {
+          cls: p && p.manque ? 'manque' : '',
+          titre: `${t.nom} : ${plur(n, 'arrivée')}, ${plur(T(t.code).dispo, 'chambre')} disponible${T(t.code).dispo > 1 ? 's' : ''}${p ? `, ${p.aPreparer} départ${p.aPreparer > 1 ? 's' : ''} à préparer${p.manque ? ', manque ' + p.manque : ''}` : ''}`,
+          cellules: [esc(t.code), String(n), d(T(t.code).dispo), p ? (p.manque ? `${p.aPreparer} · manque ${p.manque}` : String(p.aPreparer)) : '0'],
+        };
+      }),
+    });
+
+    // 4. Mouvements : départs du jour et recouches par type
+    const mouvements = carteAccueil({
+      cle: 'mvt', vue: 'fdc', titre: 'Mouvements', repere: imp ? plur(c.recouches, 'recouche') : '',
+      info: 'Départs du jour et recouches, par type — ouvrir la feuille de chambre',
+      nombre: nb(c.departs), texte: imp ? `départ${c.departs > 1 ? 's' : ''} · ${plur(c.recouches, 'recouche')}` : 'départs',
+      barre: [[pctBarre(c.departs, c.chambres), 1], [pctBarre(c.recouches, c.chambres), 4]],
+      entetes: ['Type', 'Départs', 'Recouches'],
+      lignes: types.map((t) => ({ titre: t.nom, cellules: [esc(t.code), nb(T(t.code).departs), d(nb(T(t.code).recouches))] })),
+    });
+
+    // 5. Petits déjeuners : couverts, viennoiseries et pains à cuire
+    const cfg = ctx.cfg;
+    const q = (id) => { const p = cfg.produitsPdj.find((x) => x.id === id); return p ? RDJ.quantitePdj(p, ctx.pdjNombre, ctx.pdjType, cfg.coefLoisir) : 0; };
+    const plaques = cfg.produitsPdj.filter((p) => p.viennoiserie).reduce((s, p) => s + RDJ.plaques(RDJ.quantitePdj(p, ctx.pdjNombre, ctx.pdjType, cfg.coefLoisir), cfg.piecesParPlaque), 0);
+    const nomType = { business: 'Business', loisir: 'Loisir', mixte: 'Mixte' }[ctx.pdjType] || '';
+    const pdj = carteAccueil({
+      cle: 'pdj', vue: 'pdj', titre: 'Petits déjeuners', repere: esc(nomType),
+      info: 'Couverts du petit déjeuner et quantités à cuire — ouvrir la cuisson PDJ',
+      nombre: nb(ctx.pdjNombre), texte: `couvert${ctx.pdjNombre > 1 ? 's' : ''}${ctx.pdjManuel ? ' (saisis à la main)' : ''} · ${plur(plaques, 'plaque')} de viennoiseries`,
+      barre: cfg.fournees.map((f, i) => [f.part, i + 1]),
+      lignes: [['Croissants', q('croissant')], ['Pains au chocolat', q('painchoc')], ['Baguettes signature', q('baguette')], ['Mini-crêpes', q('crepes')]]
+        .map(([lib, n]) => ({ cellules: [esc(lib), nb(n)] })),
+    });
+
+    // 6. Paiements : chambres non payées et montants à encaisser
+    const nonPayees = c.nonPayees.length + c.groupeNonPayees.length;
+    const paiements = carteAccueil({
+      cle: 'pay', vue: 'rapport', titre: 'Paiements', repere: c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) + ' dus' : '',
+      info: 'Chambres non payées et départs à encaisser — ouvrir le rapport du jour',
+      nombre: nb(nonPayees), nombreCls: imp ? (nonPayees ? 'rouge' : 'vert') : '',
+      texte: `chambre${nonPayees > 1 ? 's' : ''} non payée${nonPayees > 1 ? 's' : ''}`,
+      barre: [[pctBarre(nonPayees, c.chambres), 'r']],
+      lignes: [
+        ['Départs à encaisser', c.aEncaisser.length],
+        ['Restent (recouches)', c.nonPayeesRestent.length],
+        [`Groupes (${plur(c.groupeNonPayees.length, 'chambre')})`, c.groupes.length],
+        ['Total dû', c.totalDu !== null ? esc(RDJ.formatMontant(c.totalDu)) : (imp ? '<span class="d">rapport des départs</span>' : '—')],
+      ].map(([lib, n]) => ({ cellules: [esc(lib), imp ? n : '—'] })),
+    });
+
+    return `<div class="acc-cartes">${occupation}${disponibles}${arrivees}${mouvements}${pdj}${paiements}</div>`;
   }
 
   V.ecranAccueil = function (ctx) {
@@ -692,13 +801,6 @@
           ${pastilleImport(zArr, 'Arrivées', zArr ? `${zArr.total} le ${esc(RDJ.dateFr(zArr.date))}` : 'facultatif', zArr ? esc(zArr.fichier) : '')}
         </span>
       </button>`;
-    // groupe de chiffres ; clic -> onglet correspondant
-    const groupe = (titre, vue, valeurs) => `
-      <button class="acc-groupe g-${vue}" data-vue-aller="${vue}" title="Ouvrir l'onglet">
-        <span class="acc-groupe-titre">${esc(titre)}</span>
-        <span class="acc-valeurs">${valeurs.map(([l, v, cls, info]) => `<span class="acc-valeur ${cls || ''}"${info ? ` title="${esc(info)}"` : ''}><b>${v}</b><small>${esc(l)}</small></span>`).join('')}</span>
-      </button>`;
-
     return `
     <section class="ecran accueil">
       <header class="hero ${imp ? niveauTaux(c.taux) : 'attente'}">
@@ -728,13 +830,7 @@
 
       ${zoneImport}
 
-      <div class="acc-chiffres${ctx.arrivees ? ' avec-arrivees' : ''}">
-        ${groupe('Occupation', 'plan', [['Occupées', c.chambres, '', 'Chambres occupées'], ['Clients', c.clients], ['Bloquées', chambresBloquees(ctx).length, '', 'Chambres bloquées (maintenance)']])}
-        ${groupe('Mouvements', 'fdc', [['Départs', c.departs], ['Recouches', c.recouches]])}
-        ${groupe('Petits déjeuners', 'pdj', [['Couverts', c.pdj]])}
-        ${groupe('Paiements', 'rapport', [['Non payées', c.nonPayees.length, c.nonPayees.length ? 'alerte' : 'ok', 'Chambres non payées'], ['Groupes', c.groupeNonPayees.length, '', 'Chambres de groupe non payées']])}
-        ${carteArrivees(ctx)}
-      </div>
+      ${cartesAccueil(ctx)}
 
       <section class="acc-impr" aria-label="Impressions de la nuit">
         <div class="acc-impr-pastilles">

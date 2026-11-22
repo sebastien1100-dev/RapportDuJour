@@ -131,6 +131,16 @@
       RDJ.disponiblesParType({ '001': { etat: 'B' }, '002': { etat: 'R' }, '003': { etat: '' }, '004': { etat: 'HS' }, '005': { etat: 'BR' } }, { '001': 'PMR', '002': 'PMR', '003': '1Q', '004': '1Q', '005': '1Q' }),
       { PMR: 1, '1Q': 1 });
     {
+      // nuit du 10 : 001 part le 11 (départ), 002 reste (recouche, deux lignes dans l'export), 003 libre, 004 sale, 005 HS
+      const ef = { '001': { etat: 'B' }, '002': { etat: 'R' }, '003': { etat: '' }, '004': { etat: 'B' }, '005': { etat: 'HS' }, '099': { etat: '' } };
+      const ty = { '001': '1Q', '002': '1Q', '003': '1Q', '004': '1Q', '005': '1Q' };
+      const res = [{ chambre: '001', depart: '2026-11-11' }, { chambre: '002', depart: '2026-11-13' }, { chambre: '2', depart: '2026-11-13' }];
+      egal('cartes de l\'accueil par type : occupées, départs, recouches, libres, à faire, dispo (chambre sans type à part)',
+        RDJ.tableauParType(ef, ty, res, '2026-11-10'),
+        { '1Q': { total: 5, occupees: 2, departs: 1, recouches: 1, libres: 1, aFaire: 2, dispo: 3 },
+          '': { total: 1, occupees: 0, departs: 0, recouches: 0, libres: 1, aFaire: 0, dispo: 1 } });
+    }
+    {
       // 1Q : 2 libres, 3 départs, 1 recouche, 1 HS ; 1K : 1 départ ; PMR : rien
       const ef = { '001': { etat: '' }, '002': { etat: '' }, '003': { etat: 'B' }, '004': { etat: 'B' }, '005': { etat: 'B' }, '006': { etat: 'R' }, '007': { etat: 'HS' }, '008': { etat: 'B' } };
       const ty = { '001': '1Q', '002': '1Q', '003': '1Q', '004': '1Q', '005': '1Q', '006': '1Q', '007': '1Q', '008': '1K' };

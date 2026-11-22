@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). -->
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essai des gris</title>
+<style>
+/* Page d'essai : à imprimer sur l'imprimante de la réception pour choisir les gris du rapport (A4 paysage, une page) */
+@page { size: A4 landscape; margin: 8mm; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; padding: 16px; background: #f2f2f2; font-family: Arial, Helvetica, sans-serif; color: #000; }
+.page { width: 281mm; min-height: 194mm; margin: 0 auto; background: #fff; padding: 6mm 7mm; }
+@media print { body { padding: 0; background: #fff; } .page { margin: 0; padding: 0; min-height: 0; } .ecran { display: none; } }
+h1 { font-size: 16pt; margin: 0 0 1mm; }
+.sous { font-size: 8.5pt; margin: 0 0 4mm; }
+.ecran { max-width: 281mm; margin: 0 auto 10px; font-size: 13px; color: #333; }
+.ecran button { font: inherit; padding: 6px 14px; border-radius: 8px; border: 0; background: #157f77; color: #fff; cursor: pointer; }
+.grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm 5mm; }
+.v h2 { font-size: 10pt; margin: 0 0 1mm; }
+.v p { font-size: 7.5pt; margin: 0 0 1.5mm; min-height: 6mm; }
+table { width: 100%; border-collapse: collapse; font-size: 7.5pt; }
+th { border: .25mm solid #000; border-bottom-width: .6mm; padding: .6mm 1mm; text-align: left; font-size: 7pt; }
+td { border: .25mm solid var(--trait); padding: .6mm 1mm; height: 4.6mm; }
+tr.dep td { background: var(--dep); }
+.v tr td.np { background: #000; color: #fff; font-weight: 700; text-align: center; }
+.v tr td.grp { border: .45mm double #000; font-weight: 800; text-align: center; }
+/* variantes */
+.vA { --trait: #555; --dep: #ebebeb; }
+.vB { --trait: #555; --dep: #d9d9d9; }
+.vC { --trait: #555; --dep: #c4c4c4; }
+.vD { --trait: #000; --dep: #d9d9d9; }
+.vE { --trait: #999; --dep: #fff; }
+.vE tr.dep td { background: repeating-linear-gradient(-45deg, #b0b0b0 0 .35mm, #fff .35mm 1.4mm); }
+.vF { --trait: #555; --dep: #fff; }
+.vF tr.dep td.statut { background: #000; color: #fff; font-weight: 700; }
+.vF tr.dep td { font-weight: 700; }
+.nuancier { display: flex; gap: 2mm; margin-top: 5mm; align-items: flex-end; }
+.nuancier div { flex: 1; height: 10mm; border: .25mm solid #000; display: flex; align-items: flex-end; justify-content: center; font-size: 7pt; padding-bottom: .5mm; }
+.nuancier div.fonce { color: #fff; }
+.pied { font-size: 7.5pt; margin-top: 3mm; }
+</style></head><body>
+<div class="ecran">Page d'essai des gris du rapport : imprimez-la sur l'imprimante de la réception (A4 paysage, noir et blanc), puis dites quelle variante est la plus lisible. <button onclick="window.print()">Imprimer cette page</button></div>
+<div class="page">
+  <h1>Essai des gris — Rapport du jour</h1>
+  <p class="sous">Même extrait de grille dans six variantes. Lignes grises = départs du jour ; blanc = recouche ; NON noir = non payé ; GRP = groupe. Données fictives.</p>
+  <div class="grille" id="grille"></div>
+  <div class="nuancier">
+    <div style="background:#f2f2f2">f2</div><div style="background:#ebebeb">eb (actuel)</div><div style="background:#e0e0e0">e0</div><div style="background:#d9d9d9">d9</div>
+    <div style="background:#cfcfcf">cf</div><div style="background:#c4c4c4">c4</div><div style="background:#b0b0b0">b0</div><div style="background:#999">99</div>
+    <div style="background:#777" class="fonce">77</div><div style="background:#555" class="fonce">55</div><div style="background:#333" class="fonce">33</div><div style="background:#000" class="fonce">00</div>
+  </div>
+  <p class="pied">Nuancier : valeur du gris (de très clair à noir). Notez la lettre de la variante choisie, ou le gris du nuancier qui vous convient pour les départs.</p>
+</div>
+<script>
+  // même extrait pour les six variantes
+  const variantes = [
+    ['A', 'Actuel', 'Départ gris très clair (eb), traits gris foncés.'],
+    ['B', 'Gris moyen', 'Départ un cran plus foncé (d9).'],
+    ['C', 'Gris soutenu', 'Départ nettement gris (c4).'],
+    ['D', 'Gris moyen + traits noirs', 'Comme B, quadrillage noir plus net.'],
+    ['E', 'Hachures', 'Départ hachuré : se distingue même si l\'imprimante pâlit les gris.'],
+    ['F', 'Sans gris', 'Départ en gras, case « DÉPART » en noir.'],
+  ];
+  const lignes = [
+    ['001', 'M. MARTIN', 'DIR', '26/11', 'Recouche', 'Oui', '<td class="np">NON</td>', ''],
+    ['002', 'M. DUBOIS', 'EXP', '24/11', 'DÉPART', 'Oui', '<td class="np">NON</td>', 'dep'],
+    ['003', 'M. THOMAS', 'BKG', '24/11', 'DÉPART', '', '<td>Oui</td>', 'dep'],
+    ['004', 'M. ROBERT', 'AUT', '27/11', 'Recouche', 'Oui', '<td>Oui</td>', ''],
+    ['005', 'M. RICHARD', 'DIR', '24/11', 'DÉPART', 'Oui', '<td class="grp">GRP</td>', 'dep'],
+    ['006', 'M. PETIT', 'BKG', '25/11', 'Recouche', '', '<td class="grp">GRP</td>', ''],
+  ];
+  document.getElementById('grille').innerHTML = variantes.map(([l, t, d]) => `
+    <section class="v v${l}"><h2>${l} · ${t}</h2><p>${d}</p>
+      <table><tr><th>Ch.</th><th>Client</th><th>Src</th><th>Départ</th><th>Statut</th><th>PDJ</th><th>Payé</th></tr>
+      ${lignes.map(([ch, nom, src, dep, st, pdj, paye, cls]) => `<tr class="${cls}"><td>${ch}</td><td>${nom}</td><td>${src}</td><td>${dep}</td><td class="statut">${st}</td><td>${pdj}</td>${paye}</tr>`).join('')}
+      </table></section>`).join('');
+</script>
+</body></html>

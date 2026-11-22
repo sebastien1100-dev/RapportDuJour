@@ -8,6 +8,22 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.32', date: '2026-11-23', titre: 'Rapport imprimé : petits déjeuners en valeur',
+      changements: [
+        ['amelioration', "Rapport imprimé : ce sont maintenant les petits déjeuners qui ressortent. Les lignes des chambres avec petit déjeuner sont hachurées en traits fins (visible même si l'imprimante pâlit les gris) ; les lignes de départ ne sont plus grises, « DÉPART » s'écrit en gras dans la colonne Statut. Légende du papier mise à jour ; l'écran garde ses couleurs."],
+        ['nouveau', "Page d'essai outils/essai-gris.html : six variantes de gris et un nuancier sur une page A4, à imprimer sur l'imprimante de la réception pour régler les impressions."],
+      ],
+    },
+    {
+      version: '3.31', date: '2026-11-23', titre: 'Accueil : six cartes redessinées, détail par type de chambre',
+      changements: [
+        ['amelioration', "Accueil : les cartes des chiffres sont redessinées sur le même modèle, en deux rangées de trois : bandeau de couleur avec le titre et un repère (taux, recouches, montant dû…), grand chiffre, barre de répartition et petit tableau de quatre lignes aligné en bas. Un clic sur une carte ouvre l'onglet correspondant."],
+        ['nouveau', "Carte « Disponibles après départ » : par type, les chambres déjà libres, les départs du jour (et chambres sales) et le total disponible une fois les départs faits, sans recouches ni hors service."],
+        ['amelioration', "Rangée du haut, les chambres : Occupation (occupées sur le total et libres, par type), Disponibles après départ, Arrivées (arrivées, disponibles et départs à préparer par type ; « manque » en rouge). La carte Arrivées reste visible sans le rapport des arrivées, avec les disponibles."],
+        ['amelioration', "Rangée du bas : Mouvements (départs et recouches par type), Petits déjeuners (couverts, plaques, croissants, pains au chocolat, baguettes, mini-crêpes) et Paiements (non payées, départs à encaisser, restent, groupes, total dû)."],
+      ],
+    },
+    {
       version: '3.30', date: '2026-11-22', titre: 'Icône sans fond blanc ; annonce des mises à jour redessinée',
       changements: [
         ['nouveau', "Barre du haut : quand une nouvelle version existe, une pastille (par exemple « 3.31 disponible ») apparaît à côté d'« Importer », sur tous les onglets. Un clic ouvre la carte « Nouvelle version » en haut de l'accueil."],

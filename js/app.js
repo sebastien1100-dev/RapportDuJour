@@ -99,6 +99,8 @@
     return {
       etat, cfg, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
       disponibles: RDJ.disponiblesParType(etatsFdc, cfg.types),
+      // cartes de l'accueil : occupées, libres, départs, recouches et disponibles par type de chambre
+      parType: RDJ.tableauParType(etatsFdc, cfg.types, eff, nuit),
       aPreparer: arrivees ? RDJ.aPreparerParType(etatsFdc, cfg.types, arrivees.parType) : {},
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
@@ -1129,6 +1131,11 @@
   // clic ailleurs ou Échap : le menu se ferme
   document.addEventListener('click', (ev) => { if (!ev.target.closest('.menu-import')) fermerMenuImport(); }, true);
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermerMenuImport(); });
+  // cartes de l'accueil (role="link") : Entrée ou Espace ouvre l'onglet, comme un clic
+  document.addEventListener('keydown', (ev) => {
+    const carte = ev.target.closest && ev.target.closest('[role="link"][data-vue-aller]');
+    if (carte && ev.target === carte && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); aller(carte.dataset.vueAller); }
+  });
   // code d'accès : Entrée valide le code ; Réglages ouverts mais inactifs depuis 10 minutes -> écran de verrouillage
   document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Enter' || !ev.target) return;
@@ -1151,7 +1158,8 @@
     const onglet = ev.target.closest('#onglets button');
     if (onglet) return aller(onglet.dataset.vue);
     const raccourci = ev.target.closest('[data-vue-aller]');
-    if (raccourci) return aller(raccourci.dataset.vueAller);
+    // un lien dans une carte (ex. détail) garde son propre comportement
+    if (raccourci && !ev.target.closest('a, button:not([data-vue-aller]), summary')) return aller(raccourci.dataset.vueAller);
     if (ev.target.closest('#notice .fermer')) { $('#notice').hidden = true; return; }
     // boutons − / + des compteurs (cuisson PDJ)
     const pas = ev.target.closest('[data-pas]');

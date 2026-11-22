@@ -233,6 +233,37 @@
     return res;
   };
 
+  /** Cartes de l'accueil : chiffres de chaque type de chambre ('' = chambre sans type).
+      -> { code: { total, occupees, departs, recouches, libres, aFaire, dispo } }
+      total : chambres du plan · occupees / departs / recouches : chambres de l'export (une fois chacune ;
+      départ = le jour du rapport, lendemain de la nuit) · libres : libres et prêtes (état vide sur la feuille
+      de chambre) · aFaire : à blanc (B : départs, chambres sales) · dispo = libres + aFaire, comme pour les
+      arrivées (ni recouche ni hors service). typesParChambre : { no: code }. */
+  RDJ.tableauParType = function (etatsFdc, typesParChambre, reservations, nuit) {
+    const res = {};
+    const ligne = (k) => {
+      const code = (typesParChambre || {})[k] || '';
+      return (res[code] = res[code] || { total: 0, occupees: 0, departs: 0, recouches: 0, libres: 0, aFaire: 0, dispo: 0 });
+    };
+    for (const k in etatsFdc || {}) {
+      const l = ligne(k), e = etatsFdc[k].etat;
+      l.total++;
+      if (e === '') { l.libres++; l.dispo++; }
+      if (e === 'B') { l.aFaire++; l.dispo++; }
+    }
+    const demain = RDJ.jours(nuit, 1);
+    const vues = new Set();
+    for (const r of reservations || []) {
+      const k = RDJ.normChambre(r.chambre);
+      if (!k || vues.has(k)) continue;
+      vues.add(k);
+      const l = ligne(k);
+      l.occupees++;
+      if (r.depart && r.depart <= demain) l.departs++; else l.recouches++;
+    }
+    return res;
+  };
+
   /** Chambres à préparer pour les arrivées, par type. Les arrivées prennent d'abord les chambres libres
       (déjà prêtes), puis les départs du jour (B) : à préparer = départs nécessaires, manque = le reste.
       Recouches (R, BR) et hors service (HS) ne comptent pas.
