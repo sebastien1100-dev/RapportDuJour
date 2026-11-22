@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Règles métier : fonctions pures, sans accès à l'écran ni au stockage (testées dans tests/).
    Les dates sont des chaînes "AAAA-MM-JJ" ; N = nuit du rapport. */
 (function () {

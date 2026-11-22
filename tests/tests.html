@@ -38,8 +38,8 @@
     // mise à jour depuis GitHub
     egal('maj : comparaison des versions', [RDJ.maj.comparerVersions('3.27', '3.3') > 0, RDJ.maj.comparerVersions('3.9', '3.10') < 0, RDJ.maj.comparerVersions('3.27', '3.27')], [true, true, 0]);
     egal('maj : seuls les fichiers de l\'appli sont remplacés',
-      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md', 'save/a.json', 'tests/fixtures/x.xlsx', '.claude/launch.json', '.gitignore', 'CLAUDE.md', 'js/sous/x.js'].filter(RDJ.maj.fichierAppli),
-      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md']);
+      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md', 'LICENSE', 'save/a.json', 'tests/fixtures/x.xlsx', '.claude/launch.json', '.gitignore', 'CLAUDE.md', 'js/sous/x.js'].filter(RDJ.maj.fichierAppli),
+      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md', 'LICENSE']);
     egal('maj : versions et titres lus dans le Change log (apostrophes échappées)',
       RDJ.maj.versionsDuChangelog("{ version: '3.28', date: 'x', titre: 'Accueil : l\\'heure',\n changements: [] },\n{ version: '3.27', date: 'x', titre: 'B' }"),
       [{ version: '3.28', titre: "Accueil : l'heure" }, { version: '3.27', titre: 'B' }]);

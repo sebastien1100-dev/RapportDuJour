@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* ====== Jetons (tons Campanile : vert canard, bleu nuit ; impression en noir et blanc) ====== */
 :root {
   --fond: #f6f4ef;            /* crème clair, à plat */
@@ -289,9 +290,10 @@ button, input, select { font: inherit; }
 .rg-etat small { color: var(--doux); }
 .rg-etat .rg-note { display: block; margin-top: 4px; }
 /* Accueil : mise à jour depuis GitHub (bouton du pied de page et bandeau de résultat) */
-.acc-pied-maj { margin-left: 8px; font: inherit; font-size: 11px; color: var(--accent); background: none; border: 1px solid currentColor; border-radius: 999px; padding: 1px 9px; cursor: pointer; }
-.acc-pied-maj:hover { background: var(--accent); color: #fff; }
-.acc-pied-maj:disabled { opacity: .5; cursor: default; background: none; color: var(--accent); }
+/* le pied de page est vert : bouton blanc */
+.acc-pied-maj { margin-left: 8px; font: inherit; font-size: 12px; font-weight: 700; color: var(--accent); background: #fff; border: 0; border-radius: 999px; padding: 3px 11px; cursor: pointer; }
+.acc-pied-maj:hover { background: #e6f2f1; }
+.acc-pied-maj:disabled { opacity: .55; cursor: default; }
 .carte.maj-bandeau { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-radius: 14px; padding: 14px 18px; border-left: 5px solid var(--marine); }
 .maj-bandeau.maj-dispo, .maj-bandeau.maj-ajour { border-left-color: var(--accent); }
 .maj-bandeau.maj-erreur { border-left-color: var(--rouge); }

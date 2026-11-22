@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Lecture d'un export .xlsx / .xlsm / .csv sans bibliothèque externe.
    Un .xlsx est une archive zip de fichiers XML : on lit l'archive (DecompressionStream,
    intégré aux navigateurs récents), puis la première feuille du classeur.

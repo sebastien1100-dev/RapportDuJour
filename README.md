@@ -4,6 +4,10 @@ Reprise du classeur Excel `Rapport_du_jour.xlsm` (v7.1) en **application web hor
 Rien à installer, aucune connexion Internet ni macro nécessaire. Fonctionne sur PC et Mac
 (Chrome, Edge, Firefox ou Safari récents).
 
+> **© 2026 — tous droits réservés.** Ce dépôt est public pour permettre la mise à jour des postes,
+> pas pour être réutilisé : toute reproduction, modification ou diffusion est interdite sans
+> autorisation écrite de l'auteur. Voir [LICENSE](LICENSE).
+
 ## Utilisation
 
 1. Double-cliquer sur **`index.html`**, ou mieux, l'ouvrir comme une application (voir ci-dessous).
@@ -52,7 +56,7 @@ La première fois, choisir le dossier de l'application (celui qui contient `inde
 - La version remplacée est copiée dans `anciennes-versions` (3 dernières) ; **Revenir à la version précédente** la remet.
 - À l'ouverture, une fois par jour et seulement avec Internet, l'accueil signale une nouvelle version.
 
-Ne sont mis à jour que `index.html`, `README.md`, `tests/tests.html` et les dossiers `js`, `css`, `img`, `outils`.
+Ne sont mis à jour que `index.html`, `README.md`, `LICENSE`, `tests/tests.html` et les dossiers `js`, `css`, `img`, `outils`.
 
 ## Réglages réservés (code d'accès)
 

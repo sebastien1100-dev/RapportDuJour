@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Configuration de l'hôtel. Les réglages simples (nom, nombre de chambres, exemplaires)
    sont modifiables dans l'onglet Réglages ; le plan et les produits se modifient ici. */
 (function () {

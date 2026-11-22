@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Historique des modifications (onglet « Change log »).
    Ajouter une entrée EN HAUT de la liste à chaque modification de l'application.
    type : 'nouveau' | 'amelioration' | 'correction' */
@@ -6,6 +7,15 @@
   const RDJ = (window.RDJ = window.RDJ || {});
 
   RDJ.CHANGELOG = [
+    {
+      version: '3.29', date: '2026-11-22', titre: 'Code protégé : tous droits réservés',
+      changements: [
+        ['nouveau', "Le dépôt GitHub devient public pour les mises à jour, mais le code reste protégé : fichier LICENSE « tous droits réservés » (reproduction, modification et diffusion interdites sans autorisation), mention en tête de chaque fichier et du README."],
+        ['amelioration', "Accueil, pied de page : « © 2026 · tous droits réservés » à côté du numéro de version."],
+        ['correction', "Accueil : le bouton « Mettre à jour » du pied de page, vert sur fond vert, était presque invisible ; il est maintenant blanc."],
+        ['amelioration', "Nouvelle icône « hôtel de nuit » (hôtel aux fenêtres allumées sous la lune, vert et marine) à la place de « RJ » : onglet du navigateur, raccourci Windows et appli Mac. Pour la voir sur le raccourci ou dans le Dock, relancer outils\\creer-raccourci.ps1 (Windows) ou outils/creer-app-mac.command (Mac)."],
+      ],
+    },
     {
       version: '3.28', date: '2026-11-22', titre: 'Mise à jour de l\'application depuis l\'accueil',
       changements: [

@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Application : état, navigation, actions des boutons, impression. */
 (function () {
   'use strict';

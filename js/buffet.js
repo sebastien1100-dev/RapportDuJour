@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Croquis du buffet du petit déjeuner, vue de dessus (onglet PDJ → Buffet PDJ).
    Dessiné d'après des photos du buffet et les corrections de l'équipe : proportions estimées
    (îlot ≈ 3,0 × 2,0 m, trois tables ≈ 70 × 70 cm collées au bout fruits).

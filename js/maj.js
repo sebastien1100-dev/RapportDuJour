@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Mise à jour de l'application depuis GitHub (dépôt public), sans rien installer.
    La version en ligne est lue dans js/changelog.js ; la liste des fichiers vient de l'API GitHub.
    L'appli réécrit ses propres fichiers dans le dossier choisi pour les sauvegardes (celui d'index.html,
@@ -28,7 +29,7 @@
   /** Fichiers du dépôt qui font partie de l'appli. Jamais : save, exports de test, réglages de Claude, git. */
   function fichierAppli(chemin) {
     const c = String(chemin || '');
-    if (c === 'index.html' || c === 'README.md' || c === 'tests/tests.html') return true;
+    if (c === 'index.html' || c === 'README.md' || c === 'LICENSE' || c === 'tests/tests.html') return true;
     return /^(js|css|img|outils)\/[^/]+$/.test(c);
   }
 

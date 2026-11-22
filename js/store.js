@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Stockage : tout l'état de l'application est gardé dans le navigateur (localStorage)
    et peut être exporté / restauré sous forme de fichier .json (sauvegarde). */
 (function () {

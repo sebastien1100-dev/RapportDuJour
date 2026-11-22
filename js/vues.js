@@ -1,3 +1,4 @@
+/* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Construction du HTML des écrans et des feuilles imprimables.
    Les feuilles (.feuille) servent à la fois à l'affichage et à l'impression. */
 (function () {
@@ -772,7 +773,7 @@
           ${ctx.cfg.horaires.filter((h) => ctx.cfg.horairesValeurs[h.id]).map((h) => `
             <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
         </ul>
-        <span class="acc-pied-version">version ${esc(RDJ.VERSION || '')}${RDJ.maj && RDJ.maj.possible()
+        <span class="acc-pied-version"><span title="Reproduction, modification ou diffusion interdites sans autorisation (fichier LICENSE)">© 2026 · tous droits réservés</span> · version ${esc(RDJ.VERSION || '')}${RDJ.maj && RDJ.maj.possible()
           ? ` <button class="acc-pied-maj" data-action="maj-verifier"${ctx.maj && (ctx.maj.etat === 'verif' || ctx.maj.etat === 'install') ? ' disabled' : ''} title="Chercher sur GitHub si une nouvelle version existe (Internet nécessaire)">Mettre à jour</button>` : ''}</span>
       </footer>
     </section>`;
