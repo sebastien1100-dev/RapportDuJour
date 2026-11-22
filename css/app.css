@@ -288,6 +288,19 @@ button, input, select { font: inherit; }
 .rg-etat b { color: var(--marine); }
 .rg-etat small { color: var(--doux); }
 .rg-etat .rg-note { display: block; margin-top: 4px; }
+/* Accueil : mise à jour depuis GitHub (bouton du pied de page et bandeau de résultat) */
+.acc-pied-maj { margin-left: 8px; font: inherit; font-size: 11px; color: var(--accent); background: none; border: 1px solid currentColor; border-radius: 999px; padding: 1px 9px; cursor: pointer; }
+.acc-pied-maj:hover { background: var(--accent); color: #fff; }
+.acc-pied-maj:disabled { opacity: .5; cursor: default; background: none; color: var(--accent); }
+.carte.maj-bandeau { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-radius: 14px; padding: 14px 18px; border-left: 5px solid var(--marine); }
+.maj-bandeau.maj-dispo, .maj-bandeau.maj-ajour { border-left-color: var(--accent); }
+.maj-bandeau.maj-erreur { border-left-color: var(--rouge); }
+.maj-bandeau.maj-erreur .maj-texte > b { color: var(--rouge); }
+.maj-texte { display: flex; flex-direction: column; gap: 4px; color: var(--marine); min-width: 0; }
+.maj-texte small { color: var(--doux); }
+.maj-liste { margin: 2px 0; padding-left: 18px; font-size: 13px; line-height: 1.5; max-height: 140px; overflow: auto; }
+.maj-liste b { margin-right: 4px; }
+.maj-bandeau .boutons { display: flex; gap: 8px; flex-wrap: wrap; }
 .rg-carte > label.rg-case {
   display: flex; flex-direction: row; align-items: flex-start; gap: 10px; margin: 14px 0 0; padding: 10px 12px;
   border: 1px solid var(--bord, #e5e7eb); border-radius: 10px; background: #f8fafb; cursor: pointer;

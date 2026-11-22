@@ -42,6 +42,18 @@ Corrections à la main, comme dans Excel :
 Affichage : les feuilles s'adaptent à la fenêtre (choix « Affichage » dans la barre d'outils :
 ajuster, toute la largeur ou 100 %). Testé en 1440 × 900 (MacBook Air), 1920 × 1080 et 3440 × 1440.
 
+## Mettre à jour l'application
+
+Accueil, en bas à droite : bouton **Mettre à jour** (Chrome ou Edge, Internet nécessaire à ce moment-là).
+L'appli lit la dernière version publiée sur GitHub (le dépôt doit être **public**), affiche ses nouveautés,
+puis, sur « Installer », télécharge tous les fichiers avant de remplacer les siens et se recharge.
+La première fois, choisir le dossier de l'application (celui qui contient `index.html`).
+- Une sauvegarde des données est faite juste avant, dans `save`. Les données et `save` ne sont jamais touchés.
+- La version remplacée est copiée dans `anciennes-versions` (3 dernières) ; **Revenir à la version précédente** la remet.
+- À l'ouverture, une fois par jour et seulement avec Internet, l'accueil signale une nouvelle version.
+
+Ne sont mis à jour que `index.html`, `README.md`, `tests/tests.html` et les dossiers `js`, `css`, `img`, `outils`.
+
 ## Réglages réservés (code d'accès)
 
 Réglages → *Code d'accès* : un code de 4 à 8 chiffres réserve les Réglages et le Change log sur ce poste
@@ -108,6 +120,7 @@ js/changelog.js       historique des versions (Réglages → Change log) ← ajo
 js/xlsx-reader.js     lecture .xlsx / .csv sans bibliothèque (zip + XML natifs du navigateur)
 js/calculs.js         règles métier (fonctions pures, testées)
 js/store.js           stockage local + sauvegarde/restauration .json
+js/maj.js             mise à jour depuis GitHub (bouton de l'accueil)
 js/vues.js            HTML des écrans et des feuilles imprimables
 js/app.js             état, événements, impression
 tests/tests.html      120 tests, dont l'export réel du 25/11/2025

@@ -7,6 +7,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.28', date: '2026-11-22', titre: 'Mise à jour de l\'application depuis l\'accueil',
+      changements: [
+        ['nouveau', "Accueil, en bas à droite à côté du numéro de version : bouton « Mettre à jour ». Il cherche sur GitHub si une nouvelle version existe et affiche ses nouveautés ; « Installer » télécharge tous les fichiers puis remplace ceux de l'application, et l'appli se recharge. Internet n'est nécessaire qu'à ce moment-là."],
+        ['nouveau', "Avant d'installer : une sauvegarde des données est faite dans « save », et la version installée est copiée dans le dossier « anciennes-versions » (3 dernières gardées). « Revenir à la version précédente » la remet en place. Les données et le dossier « save » ne sont jamais touchés."],
+        ['amelioration', "À l'ouverture, une fois par jour et seulement s'il y a Internet, l'appli regarde si une nouvelle version existe et le signale sur l'accueil. Fonctionne avec Chrome ou Edge ; la première fois, on choisit le dossier de l'application (celui d'index.html)."],
+      ],
+    },
+    {
       version: '3.27', date: '2026-11-18', titre: 'Arrivées : départs à préparer par type de chambre',
       changements: [
         ['amelioration', "Feuille de chambre, tableau « Arrivées du … » : la première ligne donne les arrivées par type, une nouvelle ligne « À PRÉPARER » le nombre de départs du jour à préparer pour les loger. Les arrivées prennent d'abord les chambres libres (déjà prêtes), puis les départs ; la ligne MANQUE n'apparaît que si les chambres libres et les départs du type ne suffisent pas."],

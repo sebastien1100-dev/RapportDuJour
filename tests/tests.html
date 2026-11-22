@@ -19,6 +19,7 @@
   <script src="../js/xlsx-reader.js"></script>
   <script src="../js/calculs.js"></script>
   <script src="../js/changelog.js"></script>
+  <script src="../js/maj.js"></script>
   <script>
   (async function () {
     const resultats = [];
@@ -34,6 +35,19 @@
     egal('change log chargé, versions uniques et dans l\'ordre',
       [cl.length > 0, new Set(cl).size === cl.length, cl.every((v, i) => i === 0 || num(cl[i - 1])[0] > num(v)[0] || (num(cl[i - 1])[0] === num(v)[0] && num(cl[i - 1])[1] > num(v)[1]))],
       [true, true, true]);
+    // mise à jour depuis GitHub
+    egal('maj : comparaison des versions', [RDJ.maj.comparerVersions('3.27', '3.3') > 0, RDJ.maj.comparerVersions('3.9', '3.10') < 0, RDJ.maj.comparerVersions('3.27', '3.27')], [true, true, 0]);
+    egal('maj : seuls les fichiers de l\'appli sont remplacés',
+      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md', 'save/a.json', 'tests/fixtures/x.xlsx', '.claude/launch.json', '.gitignore', 'CLAUDE.md', 'js/sous/x.js'].filter(RDJ.maj.fichierAppli),
+      ['index.html', 'js/app.js', 'img/icone.ico', 'outils/serveur.ps1', 'tests/tests.html', 'README.md']);
+    egal('maj : versions et titres lus dans le Change log (apostrophes échappées)',
+      RDJ.maj.versionsDuChangelog("{ version: '3.28', date: 'x', titre: 'Accueil : l\\'heure',\n changements: [] },\n{ version: '3.27', date: 'x', titre: 'B' }"),
+      [{ version: '3.28', titre: "Accueil : l'heure" }, { version: '3.27', titre: 'B' }]);
+    try {
+      const lus = RDJ.maj.versionsDuChangelog(await (await fetch('../js/changelog.js', { cache: 'no-store' })).text());
+      egal('maj : js/changelog.js entièrement lu (mêmes versions et titres que l\'appli)',
+        lus, RDJ.CHANGELOG.map((v) => ({ version: v.version, titre: v.titre })));
+    } catch (e) { egal('maj : lecture de js/changelog.js', e.message, ''); }
     egal('normTitre accents/ponctuation', RDJ.normTitre("Statut d'enrg."), 'statutdenrg');
     egal('normTitre Arrivée', RDJ.normTitre(' Arrivée '), 'arrivee');
     egal('versISO numéro de série', RDJ.versISO(45986), '2025-11-25');

@@ -112,6 +112,7 @@
       reglagesSous,
       pinDefini: !!pinInfo(),
       reglagesOuverts: reglagesOuverts(),
+      maj,
     };
   }
 
@@ -253,6 +254,50 @@
       notice("Aucun dossier choisi : rien n'a été sauvegardé.", 'alerte');
       return false;
     }
+  }
+
+  /* ---------- Mise à jour depuis GitHub (Réglages) ----------
+     maj : null (pas encore vérifié) ou { etat: 'verif' | 'ajour' | 'dispo' | 'install' | 'erreur', version, nouveautes, message } */
+  let maj = null;
+
+  async function majVerifier(silencieux) {
+    if (!silencieux) { maj = { etat: 'verif' }; if (vue === 'accueil') afficher(); }
+    try {
+      const r = await RDJ.maj.verifier();
+      try { localStorage.setItem('rapportDuJour.majVerifiee', RDJ.aujourdhui()); } catch (e) { /* sans importance */ }
+      // vérification automatique : on ne dit rien si l'appli est à jour
+      if (silencieux && !r.nouveautes.length) return;
+      maj = { etat: r.nouveautes.length ? 'dispo' : 'ajour', version: r.version, nouveautes: r.nouveautes };
+      if (silencieux && vue !== 'accueil') notice('Nouvelle version ' + r.version + ' disponible : voir l\'accueil.', 'info');
+    } catch (e) {
+      if (silencieux) return;
+      maj = { etat: 'erreur', message: e.message };
+    }
+    if (vue === 'accueil') afficher();
+  }
+
+  /** Dossier de l'appli pour la mise à jour : celui des sauvegardes, s'il contient index.html ; sinon on le redemande. */
+  async function majRacine() {
+    let h = await RDJ.maj.racineAppli();
+    if (h) return h;
+    const ok = await dialogue({
+      titre: "Dossier de l'application",
+      message: "Pour se mettre à jour, l'application doit pouvoir écrire dans son dossier.\nChoisissez le dossier qui contient index.html (les sauvegardes iront dans son sous-dossier « save »).",
+      ok: 'Choisir le dossier',
+    });
+    if (!ok) return null;
+    try { await RDJ.dossierSauv.choisir(); } catch (e) { return null; }
+    h = await RDJ.maj.racineAppli();
+    if (!h) notice("Ce dossier ne contient pas index.html : choisissez le dossier de l'application.", 'erreur');
+    return h;
+  }
+
+  /** Vérification automatique à l'ouverture, au plus une fois par jour ; sans Internet, rien n'est signalé. */
+  function majAuto() {
+    if (!RDJ.maj.possible() || !navigator.onLine) return;
+    let deja = null;
+    try { deja = localStorage.getItem('rapportDuJour.majVerifiee'); } catch (e) { /* sans importance */ }
+    if (deja !== RDJ.aujourdhui()) majVerifier(true);
   }
 
   let minuterie = null;
@@ -958,6 +1003,49 @@
     },
     restaurer: () => $('#fichier-restaurer').click(),
 
+    'maj-verifier': () => majVerifier(false),
+    'maj-fermer': () => { maj = null; afficher(); },
+    'maj-installer': async () => {
+      if (!maj || maj.etat !== 'dispo') return;
+      const ok = await dialogue({
+        titre: 'Installer la version ' + maj.version,
+        message: "Les fichiers de l'application vont être remplacés par la version " + maj.version + ".\nVos données et le dossier « save » ne sont pas touchés ; la version " + RDJ.VERSION + " est d'abord copiée dans « " + RDJ.maj.ANCIENNES + " ».\nL'application se recharge ensuite.",
+        ok: 'Installer',
+      });
+      if (!ok) return;
+      const racine = await majRacine();
+      if (!racine) return notice("Mise à jour annulée : pas d'accès au dossier de l'application.", 'alerte');
+      const version = maj.version;
+      try {
+        // sauvegarde des données juste avant, par prudence
+        etat.derniereSauvegarde = RDJ.maintenantLocal();
+        await sauverEtat(null, true);
+        enregistrer();
+        await RDJ.maj.installer(racine, (texte) => { maj = { ...maj, etat: 'install', message: texte }; if (vue === 'accueil') afficher(); });
+      } catch (e) {
+        maj = { etat: 'erreur', message: 'Mise à jour interrompue : ' + e.message };
+        afficher();
+        return;
+      }
+      try { sessionStorage.setItem('rdj.majFaite', version); } catch (e) { /* sans importance */ }
+      location.reload();
+    },
+    'maj-revenir': async () => {
+      const ok = await dialogue({
+        titre: 'Revenir à la version précédente',
+        message: "Les fichiers de l'application vont être remplacés par la dernière copie gardée dans « " + RDJ.maj.ANCIENNES + " ».\nVos données ne sont pas touchées. L'application se recharge ensuite.",
+        ok: 'Revenir', danger: true,
+      });
+      if (!ok) return;
+      const racine = await majRacine();
+      if (!racine) return notice("Pas d'accès au dossier de l'application : rien n'a été changé.", 'alerte');
+      let nom;
+      try { nom = await RDJ.maj.revenir(racine); } catch (e) { return notice('Retour impossible : ' + e.message, 'erreur'); }
+      if (!nom) return notice("Aucune version précédente gardée dans « " + RDJ.maj.ANCIENNES + " ».", 'alerte');
+      try { sessionStorage.setItem('rdj.majFaite', 'retour'); } catch (e) { /* sans importance */ }
+      location.reload();
+    },
+
     'tout-supprimer': async () => {
       const rep = await dialogue({
         titre: 'Supprimer toutes les données',
@@ -1183,4 +1271,10 @@
   // le nom du dossier des sauvegardes (Réglages) est lu dans IndexedDB, puis la sauvegarde hebdomadaire
   RDJ.dossierSauv.init().then(() => { if (vue === 'reglages') afficher(); }).finally(sauvegardeHebdo);
   if (!RDJ.store.disponible) notice('Le stockage du navigateur est désactivé : les données ne seront pas conservées.', 'erreur');
+
+  // après une mise à jour (ou un retour en arrière), l'appli vient d'être rechargée
+  let majFaite = null;
+  try { majFaite = sessionStorage.getItem('rdj.majFaite'); sessionStorage.removeItem('rdj.majFaite'); } catch (e) { /* sans importance */ }
+  if (majFaite) notice(majFaite === 'retour' ? 'Version précédente remise : version ' + RDJ.VERSION + '.' : 'Mise à jour installée : version ' + RDJ.VERSION + '.', 'ok');
+  else setTimeout(majAuto, 3000);
 })();

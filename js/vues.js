@@ -603,6 +603,32 @@
     return texte && cfg.rectoVerso ? texte + ' · recto verso' : texte;
   }
 
+  /** Accueil, au-dessus du pied de page : résultat de « Mettre à jour » (js/maj.js). Rien tant qu'on n'a pas cherché. */
+  function bandeauMaj(ctx) {
+    const m = ctx.maj;
+    if (!m) return '';
+    let titre = '', detail = '', boutons = '';
+    if (m.etat === 'verif') titre = 'Recherche d\'une mise à jour…';
+    else if (m.etat === 'install') titre = m.message || 'Installation…';
+    else if (m.etat === 'ajour') {
+      titre = 'L\'application est à jour';
+      detail = `<small>Version ${esc(RDJ.VERSION || '')} installée, dernière version publiée : ${esc(m.version)}.</small>`;
+    } else if (m.etat === 'erreur') {
+      titre = m.message;
+    } else if (m.etat === 'dispo') {
+      titre = `Version ${esc(m.version)} disponible`;
+      detail = `<ul class="maj-liste">${m.nouveautes.map((v) => `<li><b>${esc(v.version)}</b> ${esc(v.titre)}</li>`).join('')}</ul>
+        <small>Vos données et le dossier « save » ne sont pas touchés ; la version ${esc(RDJ.VERSION || '')} est gardée dans « ${esc(RDJ.maj.ANCIENNES)} ».</small>`;
+      boutons = `<button class="btn primaire" data-action="maj-installer">Installer la version ${esc(m.version)}</button>`;
+    }
+    const occupe = m.etat === 'verif' || m.etat === 'install';
+    if (!occupe) boutons += '<button class="btn" data-action="maj-revenir">Revenir à la version précédente</button><button class="btn" data-action="maj-fermer">Fermer</button>';
+    return `<section class="carte maj-bandeau maj-${esc(m.etat)}" aria-live="polite">
+        <div class="maj-texte"><b>${m.etat === 'dispo' ? titre : esc(titre)}</b>${detail}</div>
+        ${boutons ? `<div class="boutons">${boutons}</div>` : ''}
+      </section>`;
+  }
+
   /** Accueil : arrivées par type de chambre (rapport des arrivées) et départs du jour à préparer pour les loger,
       une fois les chambres libres attribuées (RDJ.aPreparerParType). Rien si le rapport n'est pas importé. */
   function carteArrivees(ctx) {
@@ -738,13 +764,16 @@
         </div>
       </details>
 
+      ${bandeauMaj(ctx)}
+
       <footer class="acc-pied">
         <span class="acc-pied-logo"><img src="img/logo-campanile.png" alt="Campanile"></span>
         <ul class="acc-horaires" aria-label="Horaires clés">
           ${ctx.cfg.horaires.filter((h) => ctx.cfg.horairesValeurs[h.id]).map((h) => `
             <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
         </ul>
-        <span class="acc-pied-version">version ${esc(RDJ.VERSION || '')}</span>
+        <span class="acc-pied-version">version ${esc(RDJ.VERSION || '')}${RDJ.maj && RDJ.maj.possible()
+          ? ` <button class="acc-pied-maj" data-action="maj-verifier"${ctx.maj && (ctx.maj.etat === 'verif' || ctx.maj.etat === 'install') ? ' disabled' : ''} title="Chercher sur GitHub si une nouvelle version existe (Internet nécessaire)">Mettre à jour</button>` : ''}</span>
       </footer>
     </section>`;
   };

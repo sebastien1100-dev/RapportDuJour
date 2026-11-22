@@ -13,6 +13,9 @@ RapportDuJour_sauvegarde_*.json
 *.json
 save/
 
+# Copies de l'application faites avant chaque mise à jour (accueil → « Mettre à jour »)
+anciennes-versions/
+
 # Paquets de l'application à déployer (refaits à la demande)
 *.zip
 
