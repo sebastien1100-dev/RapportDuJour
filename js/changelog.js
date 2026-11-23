@@ -8,6 +8,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.40', date: '2026-11-24', titre: 'Buffet PDJ modifiable',
+      changements: [
+        ['nouveau', "Buffet PDJ : bouton « Modifier le buffet » (avec le code des Réglages s'il y en a un). Tout le buffet se modifie : îlot, fonds de zone, structure centrale, tables, titres et produits. On glisse un élément pour le déplacer, on tire le carré vert du coin pour l'agrandir ; flèches du clavier pour ajuster de 1 cm (Maj : 5 cm), Suppr pour supprimer, Ctrl+Z pour annuler."],
+        ['nouveau', "Panneau de réglages à droite : nom et numéro de légende, forme (rectangle ou rond), famille (couleur), zone, largeur et profondeur en cm, « Figé ». La structure (îlot, fonds, tables, structure centrale) est figée au départ pour ne pas la décaler par erreur. Barre d'outils rangée en groupes (Ajouter, Élément, Historique, Aimant) : ajouter un rectangle, un rond, une table ou un titre de zone, dupliquer, supprimer, annuler, rétablir. Aimant réglable : libre, 1 cm, 5 cm ou 10 cm (choix retenu sur ce poste)."],
+        ['nouveau', "La légende se calcule toute seule à partir des éléments (par zone, triée par numéro). « Remettre le buffet d'origine » (en rouge) remet exactement le croquis de départ après confirmation, et « Annuler » juste après le défait. Le buffet modifié est gardé sur ce poste et dans les sauvegardes ; l'impression reste en noir et blanc sur une page."],
+      ],
+    },
+    {
       version: '3.39', date: '2026-11-24', titre: 'Rapport : no show ; feuille de chambre allégée',
       changements: [
         ['nouveau', "Rapport : double-clic sur le numéro d'une chambre pour la passer en no show (client non venu), après confirmation. La ligne reste dans le rapport, barrée avec « NO SHOW », mais la chambre ne compte plus : chiffres, à encaisser, feuille de chambre (chambre libre), plan, petits déjeuners et historique. Un nouveau double-clic sur le numéro la remet ; « Annuler les modifications du jour » l'annule aussi."],

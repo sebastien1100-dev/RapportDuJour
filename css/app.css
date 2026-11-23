@@ -1332,6 +1332,49 @@ body.depot .voile-depot { display: grid; }
 .p-table td.g { font-size: 11pt; }
 .p-table .q { width: 26mm; }
 .p-table td.q b { display: inline-block; min-width: 14mm; font-size: 17pt; color: var(--marine); }
+/* Buffet PDJ, mode modification : barre d'outils, dessin à gauche, réglages à droite */
+/* barre d'outils : groupes nommés, boutons accolés de même hauteur, icônes au même trait */
+.be-barre { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; margin: 0 0 12px; padding: 10px 12px 12px; background: var(--surface); border: 1px solid var(--bord); border-radius: 14px; }
+.be-groupe { display: flex; flex-direction: column; gap: 5px; }
+.be-lib { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--doux); padding-left: 2px; }
+.be-seg { display: inline-flex; align-items: stretch; border: 1px solid #d5d9df; border-radius: 10px; overflow: hidden; background: #fff; }
+.be-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 9px; border: 0; background: #fff; color: var(--marine);
+  font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .12s; }
+.be-seg > .be-btn + .be-btn { border-left: 1px solid #e4e7eb; }
+.be-btn:hover:not(:disabled) { background: #eef6f5; }
+.be-btn:disabled { color: #b3bac4; cursor: default; }
+.be-btn:disabled .be-ico { opacity: .5; }
+.be-btn[data-danger]:not(:disabled) { color: var(--rouge); }
+.be-btn[data-danger]:hover:not(:disabled) { background: #fdecea; }
+.be-btn.actif, .be-btn.actif:hover { background: var(--accent); color: #fff; }
+.be-ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.be-aimant > .be-ico { align-self: center; margin: 0 4px 0 8px; color: var(--doux); }
+.be-aimant > .be-ico + .be-btn { border-left: 1px solid #e4e7eb; }
+.be-btn.be-reset { border: 1px solid #f0c5bf; border-radius: 10px; color: var(--rouge); background: #fff7f6; }
+.be-btn.be-reset:hover { background: #fdecea; }
+.be-deux-col { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 12px; align-items: start; }
+@media (max-width: 1100px) { .be-deux-col { grid-template-columns: 1fr; } }
+.be-toile { background: #fff; border: 1px solid var(--bord); border-radius: 14px; padding: 8px; touch-action: none; user-select: none;
+  background-image: linear-gradient(#eef1f0 1px, transparent 1px), linear-gradient(90deg, #eef1f0 1px, transparent 1px); background-size: 16px 16px; }
+.be-toile svg { display: block; width: 100%; height: auto; }
+.be-toile .b-el { cursor: grab; }
+.be-toile .b-el:active { cursor: grabbing; }
+.be-toile .b-el.fige { cursor: pointer; }
+.be-toile .b-el:hover .b-zone { stroke: #157f77; stroke-width: .8; stroke-dasharray: 2 1.5; }
+.be-toile .b-poignee { cursor: nwse-resize; }
+.be-panneau { position: sticky; top: 80px; background: var(--surface); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
+.be-panneau h3 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--doux); }
+.be-aide { margin: 0; font-size: 13px; line-height: 1.5; color: var(--doux); }
+.be-champ { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: var(--marine); min-width: 0; }
+.be-champ input, .be-champ select { width: 100%; min-width: 0; font: inherit; font-size: 14px; font-weight: 400; padding: 7px 9px; border: 1px solid var(--bord); border-radius: 8px; background: #fff; }
+.be-deux { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.be-fams { display: flex; flex-wrap: wrap; gap: 6px; }
+.be-fams button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #9aa3ad; cursor: pointer; padding: 0; }
+.be-fams button.sel { outline: 3px solid var(--accent); outline-offset: 1px; }
+.be-fige { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 4px 0 12px; color: var(--marine); }
+.be-seg.be-actions { display: flex; }
+.be-seg.be-actions .be-btn { flex: 1; justify-content: center; }
+
 /* Commande PDJ : liste des produits du buffet par famille, une colonne par jour de livraison */
 .feuille.commande { padding: 11mm 12mm; display: flex; flex-direction: column; gap: 3mm; }
 .c-tete { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; border-bottom: .8mm solid var(--accent); padding-bottom: 2.5mm; }

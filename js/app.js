@@ -101,6 +101,13 @@
     return {
       etat, cfg, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
       disponibles: RDJ.disponiblesParType(etatsFdc, cfg.types),
+      // Buffet PDJ : éléments du croquis (modifiés, sinon d'origine) et état de l'éditeur
+      buffet: buffetElements(),
+      buffetEdition: buf.edition,
+      buffetSel: buf.sel,
+      buffetAimant: buf.aimant,
+      buffetPeutAnnuler: buf.passe.length > 0,
+      buffetPeutRetablir: buf.futur.length > 0,
       // cartes de l'accueil : occupées, libres, départs, recouches et disponibles par type de chambre
       parType: RDJ.tableauParType(etatsFdc, cfg.types, eff, nuit),
       aPreparer: arrivees ? RDJ.aPreparerParType(etatsFdc, cfg.types, arrivees.parType) : {},
@@ -266,6 +273,131 @@
     }
   }
 
+  /* ---------- Buffet PDJ : éditeur ----------
+     etat.buffet = { elements } quand le croquis a été modifié (null = croquis d'origine).
+     buf : état de l'éditeur pendant la session (mode, sélection, aimant, historique pour Annuler / Rétablir). */
+  // aimant : pas d'alignement en cm (0 = libre, au demi-centimètre), retenu sur ce poste
+  let aimantGarde = 5;
+  try { const a = parseInt(localStorage.getItem('rdj.aimant'), 10); if ([0, 1, 5, 10].includes(a)) aimantGarde = a; } catch (e) { /* sans importance */ }
+  const buf = { edition: false, sel: null, aimant: aimantGarde, passe: [], futur: [], glisse: null };
+  const buffetElements = () => (etat.buffet && etat.buffet.elements) || RDJ.buffetParDefaut();
+  const aimanter = (v) => (buf.aimant ? Math.round(v / buf.aimant) * buf.aimant : Math.round(v * 2) / 2);
+  /** Enregistre une nouvelle version des éléments (l'ancienne va dans l'historique d'Annuler). */
+  function buffetChanger(nouveaux, avant) {
+    buf.passe.push(JSON.stringify(avant || buffetElements()));
+    if (buf.passe.length > 80) buf.passe.shift();
+    buf.futur = [];
+    etat.buffet = { elements: nouveaux };
+    enregistrer();
+  }
+  /** Modifie l'élément sélectionné (copie de la liste), puis réaffiche. */
+  function buffetModifierSel(f) {
+    const els = buffetElements().map((e) => ({ ...e }));
+    const e = els.find((x) => x.id === buf.sel);
+    if (!e) return;
+    f(e);
+    buffetChanger(els);
+    afficher();
+  }
+  /** Dessin seul (pendant un glissement : pas de réaffichage complet). */
+  function buffetRedessiner(els) {
+    const t = $('#buffet-toile');
+    if (t) t.innerHTML = RDJ.svgBuffet(els, { edition: true, sel: buf.sel });
+  }
+  // coordonnées de la souris dans le repère du dessin (cm)
+  function pointBuffet(ev) {
+    const svg = $('#buffet-toile svg');
+    if (!svg) return null;
+    const p = svg.createSVGPoint();
+    p.x = ev.clientX; p.y = ev.clientY;
+    return p.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  // le dessin occupe x 26 → 428 (la légende est à droite) et y 42 → 284 (les familles sont en dessous)
+  const ZONE_DESSIN = { x0: 26, x1: 428, y0: 42, y1: 284 };
+  const borner = (e) => {
+    e.x = Math.max(ZONE_DESSIN.x0, Math.min(ZONE_DESSIN.x1 - e.w, e.x));
+    e.y = Math.max(ZONE_DESSIN.y0, Math.min(ZONE_DESSIN.y1 - e.h, e.y));
+  };
+  document.addEventListener('pointerdown', (ev) => {
+    if (!buf.edition) return;
+    const toile = ev.target.closest && ev.target.closest('#buffet-toile');
+    if (!toile) return;
+    const poignee = ev.target.closest('[data-poignee]');
+    const g = ev.target.closest('[data-el]');
+    const id = poignee ? poignee.dataset.poignee : g ? g.dataset.el : null;
+    if (!id) { if (buf.sel) { buf.sel = null; afficher(); } return; }
+    const els = buffetElements().map((e) => ({ ...e }));
+    const e = els.find((x) => x.id === id);
+    if (!e) return;
+    ev.preventDefault();
+    const changeSel = buf.sel !== id;
+    buf.sel = id;
+    const p = pointBuffet(ev);
+    if (!p || (e.v && !poignee)) { if (changeSel) afficher(); return; }
+    buf.glisse = { id, mode: poignee ? 'taille' : 'deplacer', x0: p.x, y0: p.y, orig: { ...e }, els, avant: JSON.stringify(buffetElements()), bouge: false, changeSel };
+    try { toile.setPointerCapture(ev.pointerId); } catch (err) { /* sans importance */ }
+    buffetRedessiner(els);
+  });
+  document.addEventListener('pointermove', (ev) => {
+    const gl = buf.glisse;
+    if (!gl) return;
+    const p = pointBuffet(ev);
+    if (!p) return;
+    const dx = p.x - gl.x0, dy = p.y - gl.y0;
+    if (!gl.bouge && Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    gl.bouge = true;
+    const e = gl.els.find((x) => x.id === gl.id);
+    if (gl.mode === 'deplacer') {
+      e.x = aimanter(gl.orig.x + dx); e.y = aimanter(gl.orig.y + dy);
+      borner(e);
+    } else {
+      e.w = Math.max(4, aimanter(gl.orig.w + dx));
+      e.h = e.t === 'rond' ? e.w : Math.max(4, aimanter(gl.orig.h + dy));
+      e.w = Math.min(e.w, ZONE_DESSIN.x1 - e.x); e.h = Math.min(e.h, ZONE_DESSIN.y1 - e.y);
+    }
+    buffetRedessiner(gl.els);
+  });
+  document.addEventListener('pointerup', () => {
+    const gl = buf.glisse;
+    if (!gl) return;
+    buf.glisse = null;
+    if (gl.bouge) buffetChanger(gl.els, JSON.parse(gl.avant));
+    if (gl.bouge || gl.changeSel) afficher();
+  });
+  // panneau de l'élément : champs data-buf (nom, numéro, forme, zone, taille, texte, sens, figé)
+  document.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (!t.dataset || !t.dataset.buf || !buf.edition) return;
+    const cle = t.dataset.buf;
+    buffetModifierSel((e) => {
+      if (cle === 'v') e.v = t.checked;
+      else if (cle === 'n') { const n = parseInt(t.value, 10); e.n = n > 0 ? n : null; }
+      else if (cle === 'w' || cle === 'h') {
+        const v = Math.max(4, Math.min(400, parseFloat(String(t.value).replace(',', '.')) || e[cle]));
+        e[cle] = v;
+        if (e.t === 'rond') { e.w = v; e.h = v; }
+        borner(e);
+      } else if (cle === 'rot') e.rot = parseInt(t.value, 10) || 0;
+      else if (cle === 't') { e.t = t.value; if (e.t === 'rond') { const d = Math.min(e.w, e.h); e.w = d; e.h = d; } }
+      else e[cle] = t.value;
+    });
+  });
+  // clavier en mode modification : flèches (1 cm, Maj : 5 cm), Suppr, Ctrl+Z / Ctrl+Maj+Z, Échap
+  document.addEventListener('keydown', (ev) => {
+    if (!buf.edition || vue !== 'pdj' || /^(INPUT|SELECT|TEXTAREA)$/.test(ev.target.tagName) || $('#dialogue').open) return;
+    const ctrl = ev.ctrlKey || ev.metaKey;
+    if (ctrl && ev.key.toLowerCase() === 'z') { ev.preventDefault(); return ACTIONS[ev.shiftKey ? 'buf-retablir' : 'buf-annuler'](); }
+    if (ctrl && ev.key.toLowerCase() === 'y') { ev.preventDefault(); return ACTIONS['buf-retablir'](); }
+    if (!buf.sel) return;
+    if (ev.key === 'Escape') { buf.sel = null; return afficher(); }
+    if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); return ACTIONS['buf-supprimer'](); }
+    const fl = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[ev.key];
+    if (!fl) return;
+    ev.preventDefault();
+    const pas = ev.shiftKey ? 5 : 1;
+    buffetModifierSel((e) => { e.x += fl[0] * pas; e.y += fl[1] * pas; borner(e); });
+  });
+
   /** Produits de la feuille Commande (copie modifiable) : liste enregistrée, sinon celle du buffet. */
   const listeCommande = () => ((etat.commande && etat.commande.produits) || RDJ.commandeParDefaut()).map((p) => ({ ...p }));
 
@@ -390,7 +522,7 @@
           <p>${esc(opts.message || '').replace(/\n/g, '<br>')}</p>
           ${opts.saisie !== undefined ? `<input type="${opts.type || 'text'}" value="${esc(opts.saisie)}" ${opts.type === 'number' ? 'min="1" max="50"' : ''} autocomplete="off">` : ''}
           <div class="boutons">
-            ${opts.info ? '' : '<button value="non" class="btn">Annuler</button>'}
+            ${opts.info ? '' : `<button value="non" class="btn">${esc(opts.annuler || 'Annuler')}</button>`}
             <button value="oui" class="btn ${opts.danger ? 'danger-plein' : 'primaire'}">${esc(opts.ok || 'Confirmer')}</button>
           </div>
         </form>`;
@@ -963,6 +1095,102 @@
     'apercu-pdj': () => apercu('Cuisson PDJ', RDJ.vues.feuillePdj(contexte()), 1),
     'apercu-buffet': () => apercu('Buffet PDJ', RDJ.vues.feuilleBuffet(contexte()), 1),
     'apercu-commande': () => apercu('Commande PDJ', RDJ.vues.feuilleCommande(contexte()), 1),
+
+    // Buffet PDJ : éditeur (protégé par le code des Réglages s'il y en a un)
+    'buf-modifier': async () => {
+      const p = pinInfo();
+      if (p && !reglagesOuverts()) {
+        if (Date.now() < bloqueJusqua) return notice('Trop d\'essais : réessayez dans ' + Math.ceil((bloqueJusqua - Date.now()) / 1000) + ' secondes.', 'alerte');
+        const code = await dialogue({ titre: 'Modifier le buffet', message: 'Code d\'accès des Réglages :', saisie: '', type: 'password', ok: 'Ouvrir' });
+        if (code === null) return;
+        if (empreinte(p.sel, code.trim()) !== p.empreinte) {
+          essaisRates++;
+          if (essaisRates >= 5) { bloqueJusqua = Date.now() + 30000; essaisRates = 0; }
+          return notice('Code incorrect.', 'erreur');
+        }
+        essaisRates = 0;
+        prolongerReglages();
+      }
+      buf.edition = true;
+      buf.sel = null;
+      afficher();
+    },
+    'buf-terminer': () => { buf.edition = false; buf.sel = null; afficher(); notice('Buffet enregistré.', 'ok'); },
+    'buf-aimant': (el) => {
+      const v = parseInt(el.dataset.aimant, 10);
+      buf.aimant = [0, 1, 5, 10].includes(v) ? v : 5;
+      try { localStorage.setItem('rdj.aimant', String(buf.aimant)); } catch (e) { /* sans importance */ }
+      afficher();
+    },
+    'buf-ajouter': (el) => {
+      const t = el.dataset.t;
+      const els = buffetElements().map((e) => ({ ...e }));
+      const prochain = Math.max(0, ...els.map((e) => +e.n || 0)) + 1;
+      const id = 'a' + Date.now().toString(36);
+      const base = { id, rx: 2, v: false, n: null, nom: '', z: '', f: null };
+      const nouveau = t === 'table' ? { ...base, t: 'table', x: 180, y: 100, w: 70, h: 70, rx: 3, nom: 'Table' }
+        : t === 'texte' ? { ...base, t: 'texte', x: 140, y: 100, w: 100, h: 8, txt: 'Nouvelle zone', nom: 'Titre' }
+          : { ...base, t, x: 185, y: 110, w: 30, h: 30, n: prochain, nom: 'Nouvel élément', z: RDJ.BUFFET_ZONES[1].titre, f: 'm' };
+      els.push(nouveau);
+      buffetChanger(els);
+      buf.sel = id;
+      afficher();
+    },
+    'buf-dupliquer': () => {
+      const els = buffetElements().map((e) => ({ ...e }));
+      const e = els.find((x) => x.id === buf.sel);
+      if (!e) return;
+      const copie = { ...e, id: 'a' + Date.now().toString(36), x: e.x + 6, y: e.y + 6, v: false };
+      borner(copie);
+      els.push(copie);
+      buffetChanger(els);
+      buf.sel = copie.id;
+      afficher();
+    },
+    'buf-supprimer': () => {
+      const els = buffetElements();
+      const e = els.find((x) => x.id === buf.sel);
+      if (!e) return;
+      buffetChanger(els.filter((x) => x.id !== buf.sel));
+      buf.sel = null;
+      afficher();
+      notice((e.nom || e.txt || 'Élément') + ' supprimé. « Annuler » le remet.', 'ok');
+    },
+    'buf-annuler': () => {
+      if (!buf.passe.length) return;
+      buf.futur.push(JSON.stringify(buffetElements()));
+      etat.buffet = { elements: JSON.parse(buf.passe.pop()) };
+      enregistrer();
+      afficher();
+    },
+    'buf-retablir': () => {
+      if (!buf.futur.length) return;
+      buf.passe.push(JSON.stringify(buffetElements()));
+      etat.buffet = { elements: JSON.parse(buf.futur.pop()) };
+      enregistrer();
+      afficher();
+    },
+    'buf-famille': (el) => buffetModifierSel((e) => { e.f = el.dataset.f; delete e.c; }),
+    'buf-origine': async () => {
+      if (!etat.buffet) return notice('Le buffet est déjà celui d\'origine.', 'info');
+      const d = RDJ.ecartBuffet(buffetElements());
+      const pl = (n, mot) => n + ' ' + mot + (n > 1 ? 's' : '');
+      const ok = await dialogue({
+        titre: 'Remettre le buffet d\'origine ?',
+        message: 'Tous les déplacements, ajouts, suppressions et changements seront remplacés par le croquis d\'origine.\n'
+          + [pl(d.modifies, 'élément modifié').replace('élément modifiés', 'éléments modifiés'), pl(d.ajoutes, 'ajouté'), pl(d.supprimes, 'supprimé')].join(', ') + '.\n\n'
+          + 'Le buffet actuel est gardé de côté : « Annuler » juste après le remet.',
+        ok: 'Remettre l\'origine', annuler: 'Garder mon buffet', danger: true,
+      });
+      if (!ok) return;
+      buf.passe.push(JSON.stringify(buffetElements()));
+      buf.futur = [];
+      etat.buffet = null;
+      buf.sel = null;
+      enregistrer();
+      afficher();
+      notice('Buffet d\'origine remis.', 'ok');
+    },
     // feuille Commande : la liste du buffet sert de départ ; ajouts et retraits gardés dans etat.commande
     'cmd-ajouter': () => {
       const nom = ($('#cmd-nom').value || '').trim();

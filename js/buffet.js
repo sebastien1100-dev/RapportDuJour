@@ -1,14 +1,15 @@
 /* Rapport du jour — © 2026, tous droits réservés. Reproduction interdite sans autorisation (voir LICENSE). */
 /* Croquis du buffet du petit déjeuner, vue de dessus (onglet PDJ → Buffet PDJ).
    Dessiné d'après des photos du buffet et les corrections de l'équipe : proportions estimées
-   (îlot ≈ 3,0 × 2,0 m, trois tables ≈ 70 × 70 cm collées au bout fruits).
-   Pour déplacer un élément : changer ses coordonnées (en cm) et celles de son numéro, plus bas. */
+   (îlot ≈ 3,0 × 2,0 m, trois tables ≈ 70 × 70 cm collées au bout fruits). 1 unité du dessin = 1 cm.
+   Le croquis est une liste d'éléments (RDJ.buffetParDefaut) dessinée par RDJ.svgBuffet ; l'onglet
+   Buffet PDJ permet de la modifier (mode « Modifier le buffet », etat.buffet) et de revenir à l'origine. */
 (function () {
   'use strict';
   const RDJ = (window.RDJ = window.RDJ || {});
 
-  /* Légende du croquis, par zone du buffet, en deux colonnes ; reprise par la feuille Commande.
-     Pour ajouter un élément : une ligne [numéro, famille, nom].
+  /* Légende d'origine, par zone du buffet, en deux colonnes ; reprise par la feuille Commande
+     et par la liste d'éléments d'origine (noms, familles, zones).
      Familles : v viennoiseries et pains · s sucré à tartiner · f fruits et jus · l laitiers et fromages
                 o salé et œufs · c céréales · m vaisselle et matériel */
   RDJ.BUFFET_LEGENDE = [
@@ -31,6 +32,9 @@
     ],
   ];
   RDJ.BUFFET_FAMILLES = { v: '#ebcb8b', s: '#dcd2f6', f: '#bfe8d6', l: '#c8dcf4', o: '#f4c7c7', c: '#f7e7b0', m: '#e3e6ea' };
+  RDJ.BUFFET_NOMS_FAMILLES = { v: 'Viennoiseries et pains', s: 'Sucré à tartiner', f: 'Fruits et jus', l: 'Laitiers et fromages', o: 'Salé et œufs', c: 'Céréales', m: 'Vaisselle et matériel' };
+  /** Zones du buffet (légende), dans l'ordre : { titre, fond, bord }. */
+  RDJ.BUFFET_ZONES = RDJ.BUFFET_LEGENDE.flat().map(({ titre, fond, bord }) => ({ titre, fond, bord }));
 
   /** Feuille Commande, liste de départ : les produits du buffet (sans la vaisselle ni le matériel, sauf le thé
       et les serviettes en papier), chacun avec son numéro du croquis. -> [{ n, f, nom }] */
@@ -48,163 +52,168 @@
     return res;
   };
 
-  RDJ.SVG_BUFFET = `<svg class="buffet-svg" xmlns="http://www.w3.org/2000/svg" viewBox="26 42 642 262" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Plan du buffet du petit déjeuner, vue de dessus">
-  <g fill="#5f6b7a" font-size="6" font-weight="bold" text-anchor="middle">
-    <text x="190" y="52">Côté viennoiseries et pains</text>
-    <text x="190" y="274">Côté produits frais</text>
-    <text x="34" y="160" transform="rotate(-90 34 160)">Bout boissons</text>
-    <text x="379" y="274">Trois tables collées au buffet</text>
-  </g>
+  /* ---------- Éléments du croquis ----------
+     Un élément : { id, t, x, y, w, h, n, nom, z, f, c, rx, v, txt, rot, fs }
+     t : ilot (plateau noir) · fond (fond de zone) · struct (structure centrale) · bols (rangée de bols)
+         table · rect · rond · num (numéro seul, sous un groupe) · texte (titre de zone)
+     x, y, w, h : boîte en cm · n : numéro de légende · nom, z : nom et zone dans la légende
+     f : famille (couleur) · c : couleur imposée · rx : arrondi · v : figé (ne se déplace pas tant qu'il est figé)
+     txt, rot : texte et rotation (titres de zone) · fs : taille du numéro imposée */
+  const T = 4; // décalage des trois tables : 4 cm de jour avec l'îlot
 
-  <!-- îlot : plateau noir à bouts arrondis, zones, structure centrale -->
-  <rect x="40" y="60" width="300" height="200" rx="8" fill="#2b2f36"/>
-  <!-- fonds de zone très clairs : les produits ressortent par leur couleur de famille ;
-       seuls les coins extérieurs des deux bouts sont légèrement arrondis (pas de vide noir dans les coins) -->
-  <path d="M100 64 H50 A6 6 0 0 0 44 70 V250 A6 6 0 0 0 50 256 H100 Z" fill="#f4faf7"/>
-  <rect x="100" y="64" width="200" height="79" fill="#fdf9ee"/>
-  <rect x="100" y="177" width="200" height="79" fill="#f3f7fc"/>
-  <path d="M300 64 H330 A6 6 0 0 1 336 70 V250 A6 6 0 0 1 330 256 H300 Z" fill="#fdf4ef"/>
-  <rect x="100" y="145" width="200" height="30" fill="#14171c"/>
-  <rect x="100" y="145" width="9" height="30" fill="#000"/>
-  <rect x="291" y="145" width="9" height="30" fill="#000"/>
-  <!-- bols posés tout le long de la structure centrale -->
-  <g fill="#e3e6ea" stroke="#9aa3ad" stroke-width="0.6">
-    <circle cx="118" cy="160" r="5.5"/><circle cx="132" cy="160" r="5.5"/><circle cx="146" cy="160" r="5.5"/>
-    <circle cx="160" cy="160" r="5.5"/><circle cx="174" cy="160" r="5.5"/><circle cx="188" cy="160" r="5.5"/>
-    <circle cx="212" cy="160" r="5.5"/><circle cx="226" cy="160" r="5.5"/><circle cx="240" cy="160" r="5.5"/>
-    <circle cx="254" cy="160" r="5.5"/><circle cx="268" cy="160" r="5.5"/><circle cx="282" cy="160" r="5.5"/>
-  </g>
-  <text x="200" y="162" font-size="6" font-weight="bold" fill="#ffffff" text-anchor="middle">31</text>
+  /** Le croquis d'origine (celui que « Remettre le buffet d'origine » remet). */
+  RDJ.buffetParDefaut = function () {
+    // nom, famille et zone de chaque numéro, d'après la légende d'origine (premier trouvé)
+    const leg = {};
+    for (const z of RDJ.BUFFET_LEGENDE.flat()) for (const [n, f, nom] of z.items) if (!leg[n]) leg[n] = { f, nom, z: z.titre };
+    const legTables = {};
+    RDJ.BUFFET_LEGENDE[1][1].items.forEach(([n, f, nom]) => { legTables[n] = { f, nom, z: RDJ.BUFFET_LEGENDE[1][1].titre }; });
+    let id = 0;
+    const el = (o) => ({ id: 'e' + (++id), rx: 2, v: false, ...o });
+    const prod = (t, x, y, w, h, n, extra) => {
+      const L = (extra && extra.tables ? legTables[n] : null) || leg[n] || {};
+      const { tables, ...reste } = extra || {};
+      return el({ t, x, y, w, h, n, nom: L.nom || '', z: L.z || '', f: L.f || 'm', ...reste });
+    };
+    const rond = (cx, cy, r, n, extra) => prod('rond', cx - r, cy - r, 2 * r, 2 * r, n, extra);
+    const deco = (t, x, y, w, h, extra) => el({ t, x, y, w, h, n: null, nom: '', z: '', f: null, ...extra });
+    return [
+      // structure (figée au départ)
+      deco('ilot', 40, 60, 300, 200, { rx: 8, v: true, nom: 'Îlot (plateau noir)' }),
+      deco('fond', 44, 64, 56, 192, { c: '#f4faf7', rx: 0, v: true, nom: 'Fond · bout boissons' }),
+      deco('fond', 100, 64, 200, 79, { c: '#fdf9ee', rx: 0, v: true, nom: 'Fond · côté viennoiseries' }),
+      deco('fond', 100, 177, 200, 79, { c: '#f3f7fc', rx: 0, v: true, nom: 'Fond · côté produits frais' }),
+      deco('fond', 300, 64, 36, 192, { c: '#fdf4ef', rx: 0, v: true, nom: 'Fond · bout fruits' }),
+      el({ t: 'struct', x: 100, y: 145, w: 200, h: 30, n: 31, nom: 'Bols, tout le long', z: 'Structure centrale noire', f: 'm', rx: 0, v: true }),
+      deco('bols', 112, 154.5, 177, 11, { v: true, nom: 'Bols (rangée)' }),
+      deco('table', 340 + T, 55, 70, 70, { rx: 3, v: true, nom: 'Table 1' }),
+      deco('table', 340 + T, 125, 70, 70, { rx: 3, v: true, nom: 'Table 2' }),
+      deco('table', 340 + T, 195, 70, 70, { rx: 3, v: true, nom: 'Table 3' }),
+      deco('texte', 120, 46, 140, 8, { txt: 'Côté viennoiseries et pains', nom: 'Titre · côté viennoiseries' }),
+      deco('texte', 120, 268, 140, 8, { txt: 'Côté produits frais', nom: 'Titre · côté produits frais' }),
+      deco('texte', 30, 90, 8, 140, { txt: 'Bout boissons', rot: -90, nom: 'Titre · bout boissons' }),
+      deco('texte', 309, 268, 140, 8, { txt: 'Trois tables collées au buffet', nom: 'Titre · trois tables' }),
+      // bout boissons
+      prod('rect', 50, 68, 44, 28, 1), prod('rect', 50, 100, 44, 36, 2), rond(72, 154, 14, 3),
+      prod('rect', 50, 172, 44, 54, 4), prod('rect', 50, 230, 44, 20, 5),
+      // côté viennoiseries et pains
+      prod('rect', 104, 68, 30, 30, 6), prod('rect', 138, 68, 30, 30, 7), prod('rect', 172, 68, 36, 70, 8),
+      prod('rect', 212, 68, 40, 30, 9, { rx: 4 }), prod('rect', 256, 68, 40, 30, 10, { rx: 4 }),
+      prod('rect', 104, 102, 30, 36, 12), rond(153, 120, 15, 13), rond(225, 120, 13, 14),
+      prod('rect', 242, 102, 54, 36, 15, { rx: 4 }),
+      // bout fruits
+      prod('rect', 303, 68, 30, 28, 11), prod('rect', 303, 100, 30, 24, 16),
+      deco('rond', 301, 143, 34, 34, { c: '#ffffff', nom: 'Plateau du présentoir' }), rond(318, 160, 12, 17),
+      rond(318, 235, 15, 27),
+      // côté produits frais
+      rond(119, 197, 14, 18), rond(151, 197, 14, 19), prod('rect', 170, 181, 60, 32, 23),
+      prod('rect', 234, 181, 28, 69, 25), rond(119, 235, 14, 20), prod('rect', 137, 220, 26, 30, 21),
+      prod('rect', 167, 220, 18, 30, 22), prod('rect', 189, 220, 41, 30, 24),
+      deco('rond', 267, 183, 12, 12, { f: 'l', nom: 'Lait' }), deco('rond', 282, 183, 12, 12, { f: 'm', nom: 'Eau' }),
+      deco('rond', 267, 197, 12, 12, { f: 'f', nom: 'Jus' }), deco('rond', 282, 197, 12, 12, { f: 'f', nom: 'Jus' }),
+      deco('rond', 267, 211, 12, 12, { f: 'f', nom: 'Jus' }), deco('rond', 282, 211, 12, 12, { f: 'f', nom: 'Jus' }),
+      prod('num', 275.5, 232, 10, 8, 26),
+      // table 1 : plateaux, couteaux et fourchettes, serviettes, cuillères
+      prod('rect', 344 + T, 59, 34, 34, 36, { tables: true }), prod('rect', 382 + T, 59, 24, 15, 39, { tables: true }),
+      prod('rect', 382 + T, 78, 24, 15, 39, { tables: true }), prod('rect', 344 + T, 99, 16, 16, 38, { tables: true }),
+      prod('rect', 364 + T, 99, 16, 16, 37, { tables: true }), prod('rect', 384 + T, 99, 16, 16, 37, { tables: true }),
+      // table 2 : assiettes, œufs, sel et poivre, cuiseur
+      rond(356 + T, 144, 12, 35, { tables: true }), rond(356 + T, 174, 12, 35, { tables: true }),
+      prod('rect', 374 + T, 131, 32, 14, 33, { tables: true }), prod('rect', 374 + T, 149, 18, 11, 33, { tables: true, fs: 5 }),
+      prod('rect', 396 + T, 149, 10, 11, 34, { tables: true, fs: 4.5 }), prod('rect', 374 + T, 164, 32, 24, 32, { tables: true }),
+      // table 3 : bols, céréales, sucre, bocaux
+      rond(352 + T, 207, 7, 31, { tables: true }), prod('rect', 344 + T, 218, 16, 42, 28, { tables: true }),
+      deco('rond', 366 + T, 201, 8, 8, { f: 'c', nom: 'Sucre' }), deco('rond', 376 + T, 201, 8, 8, { f: 'c', nom: 'Sucre' }),
+      prod('num', 370 + T, 210, 10, 7, 30, { tables: true, fs: 5 }),
+      deco('rond', 390 + T, 205, 14, 14, { f: 'c', nom: 'Bocal' }), rond(397 + T, 230, 7, 29, { tables: true }),
+      deco('rond', 390 + T, 241, 14, 14, { f: 'c', nom: 'Bocal' }),
+    ];
+  };
 
-  <!-- trois tables contre le bout fruits ; DECALAGE_TABLES : translate(4 0) = 4 cm de jour avec l'îlot -->
-  <g fill="#e8d3b6" stroke="#9c7a52" stroke-width="0.8" transform="translate(4 0)">
-    <rect x="340" y="55" width="70" height="70" rx="3"/>
-    <rect x="340" y="125" width="70" height="70" rx="3"/>
-    <rect x="340" y="195" width="70" height="70" rx="3"/>
-  </g>
+  /* ---------- Dessin ---------- */
 
-  <!-- couleur par famille de produits (voir « Familles » dans la légende) :
-       viennoiseries et pains #ebcb8b · sucré à tartiner #dcd2f6 · fruits et jus #bfe8d6
-       laitiers et fromages #c8dcf4 · salé et œufs #f4c7c7 · céréales #f7e7b0 · vaisselle et matériel #e3e6ea -->
-  <!-- éléments posés sur une grille régulière : 4 cm de jour partout, bords alignés par rangée,
-       rectangles aux mêmes coins arrondis (rx 2, corbeilles rx 4), cercles pour ce qui est rond (bols, assiettes, fruits) -->
-  <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea">
-    <!-- bout boissons : une colonne de 44 cm de large -->
-    <rect x="50" y="68" width="44" height="28" rx="2"/>
-    <rect x="50" y="100" width="44" height="36" rx="2"/>
-    <circle cx="72" cy="154" r="14" fill="#bfe8d6"/>
-    <rect x="50" y="172" width="44" height="54" rx="2"/>
-    <rect x="50" y="230" width="44" height="20" rx="2"/>
-    <!-- côté viennoiseries et pains : rangée haute y 68 (h 30), rangée basse y 102 (h 36) -->
-    <rect x="104" y="68" width="30" height="30" rx="2" fill="#ebcb8b"/>
-    <rect x="138" y="68" width="30" height="30" rx="2" fill="#ebcb8b"/>
-    <rect x="172" y="68" width="36" height="70" rx="2" fill="#ebcb8b"/>
-    <rect x="212" y="68" width="40" height="30" rx="4" fill="#ebcb8b"/>
-    <rect x="256" y="68" width="40" height="30" rx="4" fill="#ebcb8b"/>
-    <rect x="104" y="102" width="30" height="36" rx="2"/>
-    <circle cx="153" cy="120" r="15" fill="#dcd2f6"/>
-    <circle cx="225" cy="120" r="13" fill="#ebcb8b"/>
-    <rect x="242" y="102" width="54" height="36" rx="4" fill="#ebcb8b"/>
-    <!-- bout fruits : une colonne de 30 cm de large -->
-    <rect x="303" y="68" width="30" height="28" rx="2"/>
-    <rect x="303" y="100" width="30" height="24" rx="2"/>
-    <circle cx="318" cy="160" r="17" fill="#ffffff"/>
-    <circle cx="318" cy="160" r="12" fill="#bfe8d6"/>
-    <circle cx="318" cy="235" r="15" fill="#ebcb8b"/>
-    <!-- côté produits frais : rangée haute y 181 (h 32), rangée basse y 220 (h 30) -->
-    <circle cx="119" cy="197" r="14" fill="#bfe8d6"/>
-    <circle cx="151" cy="197" r="14" fill="#bfe8d6"/>
-    <rect x="170" y="181" width="60" height="32" rx="2" fill="#f4c7c7"/>
-    <rect x="234" y="181" width="28" height="69" rx="2" fill="#c8dcf4"/>
-    <circle cx="119" cy="235" r="14" fill="#c8dcf4"/>
-    <rect x="137" y="220" width="26" height="30" rx="2" fill="#c8dcf4"/>
-    <rect x="167" y="220" width="18" height="30" rx="2" fill="#c8dcf4"/>
-    <rect x="189" y="220" width="41" height="30" rx="2" fill="#c8dcf4"/>
-    <circle cx="273" cy="189" r="6" fill="#c8dcf4"/>
-    <circle cx="288" cy="189" r="6"/>
-    <circle cx="273" cy="203" r="6" fill="#bfe8d6"/>
-    <circle cx="288" cy="203" r="6" fill="#bfe8d6"/>
-    <circle cx="273" cy="217" r="6" fill="#bfe8d6"/>
-    <circle cx="288" cy="217" r="6" fill="#bfe8d6"/>
-  </g>
-  <g stroke="#1c2a48" stroke-width="0.6" fill="#e3e6ea" transform="translate(4 0)">
-    <!-- table 1 (côté viennoiseries) : plateaux PDJ, couverts (couteaux et fourchettes), serviettes, cuillères -->
-    <rect x="344" y="59" width="34" height="34" rx="2"/>
-    <rect x="382" y="59" width="24" height="15" rx="2"/>
-    <rect x="382" y="78" width="24" height="15" rx="2"/>
-    <rect x="344" y="99" width="16" height="16" rx="2"/>
-    <rect x="364" y="99" width="16" height="16" rx="2"/>
-    <rect x="384" y="99" width="16" height="16" rx="2"/>
-    <!-- table 2 (milieu) : assiettes, œufs -->
-    <circle cx="356" cy="144" r="12"/>
-    <circle cx="356" cy="174" r="12"/>
-    <rect x="374" y="131" width="32" height="14" rx="2" fill="#f4c7c7"/>
-    <rect x="374" y="149" width="18" height="11" rx="2" fill="#f4c7c7"/>
-    <rect x="396" y="149" width="10" height="11" rx="2"/>
-    <rect x="374" y="164" width="32" height="24" rx="2"/>
-    <!-- table 3 (côté produits frais) : bols, céréales, sucre -->
-    <circle cx="352" cy="207" r="7"/>
-    <rect x="344" y="218" width="16" height="42" rx="2" fill="#f7e7b0"/>
-    <circle cx="370" cy="205" r="4" fill="#f7e7b0"/>
-    <circle cx="380" cy="205" r="4" fill="#f7e7b0"/>
-    <circle cx="397" cy="212" r="7" fill="#f7e7b0"/>
-    <circle cx="397" cy="230" r="7" fill="#f7e7b0"/>
-    <circle cx="397" cy="248" r="7" fill="#f7e7b0"/>
-  </g>
+  const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const couleur = (e) => e.c || (e.f ? RDJ.BUFFET_FAMILLES[e.f] : null) || '#e3e6ea';
+  const sombre = (hex) => {
+    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+    return m ? (0.299 * parseInt(m[1], 16) + 0.587 * parseInt(m[2], 16) + 0.114 * parseInt(m[3], 16)) < 90 : false;
+  };
+  const tailleNumero = (e) => e.fs || (e.t === 'num' ? 6 : r1(Math.max(4, Math.min(6, e.w * 0.42, e.h * 0.65))));
+  /** Éléments qu'on peut agrandir (pas les numéros seuls ni les titres). */
+  RDJ.buffetRedimensionnable = (e) => !['num', 'texte'].includes(e.t);
 
-  <!-- numéros (repris dans la légende), centrés sur leur élément -->
-  <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48">
-    <text x="72" y="84">1</text><text x="72" y="120">2</text><text x="72" y="156">3</text>
-    <text x="72" y="201">4</text><text x="72" y="242">5</text>
-    <text x="119" y="85">6</text><text x="153" y="85">7</text><text x="190" y="105">8</text>
-    <text x="232" y="85">9</text><text x="276" y="85">10</text><text x="318" y="84">11</text>
-    <text x="119" y="122">12</text><text x="153" y="122">13</text>
-    <text x="225" y="122">14</text><text x="269" y="122">15</text><text x="318" y="114">16</text>
-    <text x="318" y="162">17</text>
-    <text x="119" y="199">18</text><text x="151" y="199">19</text><text x="200" y="199">23</text><text x="248" y="217">25</text>
-    <text x="119" y="237">20</text><text x="150" y="237">21</text><text x="176" y="237">22</text><text x="209.5" y="237">24</text>
-    <text x="280.5" y="238">26</text><text x="318" y="237">27</text>
-  </g>
-  <g font-size="6" font-weight="bold" text-anchor="middle" fill="#1c2a48" transform="translate(4 0)">
-    <text x="361" y="78">36</text><text x="394" y="68.5">39</text><text x="394" y="87.5">39</text><text x="352" y="109">38</text><text x="372" y="109">37</text><text x="392" y="109">37</text>
-    <text x="356" y="146">35</text><text x="356" y="176">35</text>
-    <text x="390" y="140">33</text><text x="383" y="156.5" font-size="5">33</text><text x="401" y="156.5" font-size="4.5">34</text><text x="390" y="178">32</text>
-    <text x="352" y="241">28</text><text x="352" y="209">31</text><text x="397" y="232">29</text><text x="375" y="215" font-size="5">30</text>
-  </g>
+  function dessinElement(e) {
+    const { x, y, w, h } = e;
+    const fill = couleur(e);
+    const numero = (cx, cy, blanc) => (e.n !== null && e.n !== undefined && e.n !== ''
+      ? `<text x="${r1(cx)}" y="${r1(cy + tailleNumero(e) * 0.35)}" font-size="${tailleNumero(e)}" font-weight="bold" text-anchor="middle" fill="${blanc ? '#ffffff' : '#1c2a48'}">${esc(e.n)}</text>` : '');
+    switch (e.t) {
+      case 'ilot': return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${e.rx ?? 8}" fill="${e.c || '#2b2f36'}"/>`;
+      case 'fond': return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${e.rx || 0}" fill="${e.c || '#f6f6f2'}"/>`;
+      case 'struct': return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#14171c"/>`
+        + `<rect x="${x}" y="${y}" width="9" height="${h}" fill="#000"/><rect x="${r1(x + w - 9)}" y="${y}" width="9" height="${h}" fill="#000"/>`
+        + numero(x + w / 2, y + h / 2, true);
+      case 'bols': {
+        // un bol tous les 14 cm environ, sans celui du milieu (place du numéro de la structure centrale)
+        const nb = Math.max(1, Math.floor(w / 14) + 1);
+        const pas = nb > 1 ? (w - 11) / (nb - 1) : 0;
+        const centres = Array.from({ length: nb }, (_, i) => x + 5.5 + i * pas).filter((cx) => nb < 3 || Math.abs(cx - (x + w / 2)) >= 7);
+        return `<g fill="#e3e6ea" stroke="#9aa3ad" stroke-width="0.6">${centres.map((cx) => `<circle cx="${r1(cx)}" cy="${r1(y + h / 2)}" r="${r1(Math.min(5.5, h / 2))}"/>`).join('')}</g>`;
+      }
+      case 'table': return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${e.rx ?? 3}" fill="${e.c || '#e8d3b6'}" stroke="#9c7a52" stroke-width="0.8"/>`;
+      case 'rond': return `<circle cx="${r1(x + w / 2)}" cy="${r1(y + h / 2)}" r="${r1(Math.min(w, h) / 2)}" fill="${fill}" stroke="#1c2a48" stroke-width="0.6"/>` + numero(x + w / 2, y + h / 2, sombre(fill));
+      case 'num': return numero(x + w / 2, y + h / 2, false);
+      case 'texte': {
+        const cx = r1(x + w / 2), cy = r1(y + h / 2 + 2);
+        return `<text x="${cx}" y="${cy}" font-size="6" font-weight="bold" text-anchor="middle" fill="#5f6b7a"${e.rot ? ` transform="rotate(${e.rot} ${cx} ${r1(y + h / 2)})"` : ''}>${esc(e.txt)}</text>`;
+      }
+      default: return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${e.rx ?? 2}" fill="${fill}" stroke="#1c2a48" stroke-width="0.6"/>` + numero(x + w / 2, y + h / 2, sombre(fill));
+    }
+  }
 
-  <!-- familles de produits : une couleur par famille -->
-  <g font-size="5.6" fill="#1c2a48" stroke-width="0.5">
-    <text x="40" y="294" font-weight="bold">Familles</text>
-    <rect x="72" y="289" width="8" height="6" rx="1" fill="#ebcb8b" stroke="#1c2a48"/><text x="83" y="294">Viennoiseries et pains</text>
-    <rect x="148" y="289" width="8" height="6" rx="1" fill="#dcd2f6" stroke="#1c2a48"/><text x="159" y="294">Sucré à tartiner</text>
-    <rect x="207" y="289" width="8" height="6" rx="1" fill="#bfe8d6" stroke="#1c2a48"/><text x="218" y="294">Fruits et jus</text>
-    <rect x="257" y="289" width="8" height="6" rx="1" fill="#c8dcf4" stroke="#1c2a48"/><text x="268" y="294">Laitiers et fromages</text>
-    <rect x="331" y="289" width="8" height="6" rx="1" fill="#f4c7c7" stroke="#1c2a48"/><text x="342" y="294">Salé et œufs</text>
-    <rect x="384" y="289" width="8" height="6" rx="1" fill="#f7e7b0" stroke="#1c2a48"/><text x="395" y="294">Céréales</text>
-    <rect x="426" y="289" width="8" height="6" rx="1" fill="#e3e6ea" stroke="#1c2a48"/><text x="437" y="294">Vaisselle et matériel</text>
-  </g>
+  /** Légende calculée depuis les éléments : zones dans l'ordre de la légende d'origine (puis les autres),
+      un numéro par zone (le premier élément qui le porte), triés par numéro. -> [{ titre, fond, bord, items: [[n, f, nom]] }] */
+  RDJ.legendeBuffet = function (elements) {
+    const zones = new Map(RDJ.BUFFET_ZONES.map((z) => [z.titre, { ...z, items: [] }]));
+    const vus = new Set();
+    for (const e of elements || []) {
+      if (e.n === null || e.n === undefined || e.n === '' || !e.nom) continue;
+      const titre = e.z || 'Autres éléments';
+      const cle = titre + '|' + e.n;
+      if (vus.has(cle)) continue;
+      vus.add(cle);
+      if (!zones.has(titre)) zones.set(titre, { titre, fond: '#ffffff', items: [] });
+      zones.get(titre).items.push([e.n, e.f || 'm', e.nom]);
+    }
+    const res = [...zones.values()].filter((z) => z.items.length);
+    res.forEach((z) => z.items.sort((a, b) => (+a[0] || 0) - (+b[0] || 0)));
+    return res;
+  };
 
-  <!-- légende : un élément par ligne, numéro dans une pastille de la couleur de sa famille (construite plus bas) -->
-  ${legende()}
-</svg>`;
-
-  /* Légende du croquis, en deux colonnes (données : RDJ.BUFFET_LEGENDE, en haut du fichier). */
-  function legende() {
+  function legende(elements) {
     const FAM = RDJ.BUFFET_FAMILLES;
-    const COLONNES = RDJ.BUFFET_LEGENDE;
-    const LIGNE = 8.6;
+    const zones = RDJ.legendeBuffet(elements);
+    // deux colonnes : on remplit la première jusqu'à la moitié des lignes
+    const lignes = (z) => z.items.length + 1;
+    const total = zones.reduce((s, z) => s + lignes(z), 0);
+    const cols = [[], []];
+    let cumul = 0;
+    // une zone va dans la 1re colonne si son milieu tombe dans la 1re moitié des lignes
+    for (const z of zones) { cols[cumul + lignes(z) / 2 <= total / 2 ? 0 : 1].push(z); cumul += lignes(z); }
+    const LIGNE = Math.min(8.6, 215 / Math.max(cols[0].reduce((s, z) => s + lignes(z), 0), cols[1].reduce((s, z) => s + lignes(z), 0), 1));
     let svg = '<g fill="#1c2a48"><text x="430" y="58" font-size="7.5" font-weight="bold">Légende</text></g>';
-    COLONNES.forEach((zones, c) => {
+    cols.forEach((zs, c) => {
       const x = 430 + c * 128;
       let y = 70;
-      for (const z of zones) {
-        svg += `<rect x="${x}" y="${y - 5.2}" width="9" height="6" rx="1" fill="${z.fond}" stroke="${z.bord || '#9aa3ad'}" stroke-width="0.4"/>` +
-          `<text x="${x + 12}" y="${y}" font-size="6" font-weight="bold" fill="#1c2a48">${z.titre}</text>`;
+      for (const z of zs) {
+        svg += `<rect x="${x}" y="${r1(y - 5.2)}" width="9" height="6" rx="1" fill="${z.fond}" stroke="${z.bord || '#9aa3ad'}" stroke-width="0.4"/>` +
+          `<text x="${x + 12}" y="${r1(y)}" font-size="6" font-weight="bold" fill="#1c2a48">${esc(z.titre)}</text>`;
         y += LIGNE;
         for (const [n, f, nom] of z.items) {
-          svg += `<rect x="${x}" y="${y - 5.4}" width="10" height="7" rx="1.5" fill="${FAM[f]}" stroke="#1c2a48" stroke-width="0.4"/>` +
-            `<text x="${x + 5}" y="${y - 0.3}" font-size="5" font-weight="bold" text-anchor="middle" fill="#1c2a48">${n}</text>` +
-            `<text x="${x + 13}" y="${y}" font-size="5.8" fill="#1c2a48">${nom}</text>`;
+          svg += `<rect x="${x}" y="${r1(y - 5.4)}" width="10" height="7" rx="1.5" fill="${FAM[f] || '#e3e6ea'}" stroke="#1c2a48" stroke-width="0.4"/>` +
+            `<text x="${x + 5}" y="${r1(y - 0.3)}" font-size="5" font-weight="bold" text-anchor="middle" fill="#1c2a48">${esc(n)}</text>` +
+            `<text x="${x + 13}" y="${r1(y)}" font-size="5.8" fill="#1c2a48">${esc(nom)}</text>`;
           y += LIGNE;
         }
         y += 3.5; // espace entre deux zones
@@ -212,4 +221,46 @@
     });
     return svg;
   }
+
+  const FAMILLES_PIED = [['v', 72, 'Viennoiseries et pains'], ['s', 148, 'Sucré à tartiner'], ['f', 207, 'Fruits et jus'], ['l', 257, 'Laitiers et fromages'],
+    ['o', 331, 'Salé et œufs'], ['c', 384, 'Céréales'], ['m', 426, 'Vaisselle et matériel']];
+
+  /** Croquis complet (SVG). opts.edition : chaque élément porte data-el ; opts.sel : id de l'élément sélectionné
+      (cadre pointillé, et poignée d'agrandissement s'il n'est pas figé). */
+  RDJ.svgBuffet = function (elements, opts) {
+    const o = opts || {};
+    const els = elements || RDJ.buffetParDefaut();
+    const corps = els.map((e) => (o.edition
+      ? `<g data-el="${esc(e.id)}" class="b-el${e.v ? ' fige' : ''}">${dessinElement(e)}<rect class="b-zone" x="${e.x}" y="${e.y}" width="${e.w}" height="${e.h}" fill="transparent"/></g>`
+      : dessinElement(e))).join('\n  ');
+    const sel = o.sel && els.find((e) => e.id === o.sel);
+    const cadre = sel ? `<g class="b-sel" pointer-events="none"><rect x="${r1(sel.x - 1.5)}" y="${r1(sel.y - 1.5)}" width="${r1(sel.w + 3)}" height="${r1(sel.h + 3)}" fill="none" stroke="#157f77" stroke-width="1.2" stroke-dasharray="4 2"/></g>`
+      + (!sel.v && RDJ.buffetRedimensionnable(sel) ? `<rect class="b-poignee" data-poignee="${esc(sel.id)}" x="${r1(sel.x + sel.w - 2)}" y="${r1(sel.y + sel.h - 2)}" width="5" height="5" fill="#157f77" stroke="#fff" stroke-width="0.6"/>` : '') : '';
+    return `<svg class="buffet-svg" xmlns="http://www.w3.org/2000/svg" viewBox="26 42 642 262" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Plan du buffet du petit déjeuner, vue de dessus">
+  ${corps}
+  ${cadre}
+  <!-- familles de produits : une couleur par famille -->
+  <g font-size="5.6" fill="#1c2a48" stroke-width="0.5">
+    <text x="40" y="294" font-weight="bold">Familles</text>
+    ${FAMILLES_PIED.map(([f, x, nom]) => `<rect x="${x}" y="289" width="8" height="6" rx="1" fill="${RDJ.BUFFET_FAMILLES[f]}" stroke="#1c2a48"/><text x="${x + 11}" y="294">${nom}</text>`).join('')}
+  </g>
+  ${legende(els)}
+</svg>`;
+  };
+
+  /** Ce qui a changé par rapport au croquis d'origine (pour la confirmation de « Remettre le buffet d'origine »). */
+  RDJ.ecartBuffet = function (elements, origine) {
+    const ref = new Map((origine || RDJ.buffetParDefaut()).map((e) => [e.id, JSON.stringify(e)]));
+    const ids = new Set((elements || []).map((e) => e.id));
+    let modifies = 0, ajoutes = 0;
+    for (const e of elements || []) {
+      if (!ref.has(e.id)) ajoutes++;
+      else if (ref.get(e.id) !== JSON.stringify(e)) modifies++;
+    }
+    const supprimes = [...ref.keys()].filter((id) => !ids.has(id)).length;
+    return { modifies, ajoutes, supprimes };
+  };
+
+  // croquis d'origine (compatibilité)
+  RDJ.SVG_BUFFET = RDJ.svgBuffet(RDJ.buffetParDefaut());
 })();

@@ -959,8 +959,72 @@
       <header class="b-tete">
         <div><h1>BUFFET PDJ</h1><div class="sous">Disposition du buffet du petit déjeuner, vue de dessus</div></div>
       </header>
-      <div class="b-plan">${RDJ.SVG_BUFFET || ''}</div>
+      <div class="b-plan">${RDJ.svgBuffet(ctx.buffet)}</div>
     </div>`;
+
+  /** Buffet PDJ en mode modification (disposition A) : barre d'outils, dessin à gauche, réglages de
+      l'élément sélectionné à droite. Le dessin se met à jour seul pendant les glissements (app.js). */
+  function editeurBuffet(ctx) {
+    const els = ctx.buffet;
+    const e = els.find((x) => x.id === ctx.buffetSel);
+    const produit = e && ['rect', 'rond', 'num', 'struct'].includes(e.t);
+    const champ = (lib, html) => `<label class="be-champ">${esc(lib)}${html}</label>`;
+    const zones = [...new Set([...RDJ.BUFFET_ZONES.map((z) => z.titre), ...els.map((x) => x.z).filter(Boolean)])];
+    const TYPES = { ilot: 'Îlot', fond: 'Fond de zone', struct: 'Structure centrale', bols: 'Rangée de bols', table: 'Table', rect: 'Rectangle', rond: 'Rond', num: 'Numéro seul', texte: 'Titre de zone' };
+    // icônes de la barre et du panneau, toutes au même trait
+    const ico = (d) => `<svg class="be-ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+    const I = {
+      rect: ico('<rect x="4" y="6" width="16" height="12" rx="2"/>'),
+      rond: ico('<circle cx="12" cy="12" r="7"/>'),
+      table: ico('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16"/>'),
+      titre: ico('<path d="M6 6h12M12 6v13"/>'),
+      dupliquer: ico('<rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V6a1 1 0 0 1 1-1h9"/>'),
+      supprimer: ico('<path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/>'),
+      annuler: ico('<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'),
+      retablir: ico('<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>'),
+      aimant: ico('<path d="M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z"/>'),
+      origine: ico('<path d="M4 4v6h6"/><path d="M4.5 10A8 8 0 1 1 6 17"/>'),
+    };
+    const panneau = !e ? `<p class="be-aide">Cliquez un élément du dessin pour le régler.<br><br>Glissez-le pour le déplacer, tirez le carré vert du coin pour l'agrandir. Flèches du clavier : 1 cm (Maj : 5 cm) · Suppr : supprimer · Ctrl+Z : annuler.</p>`
+      : `<h3>${esc(TYPES[e.t] || e.t)}${e.n !== null && e.n !== undefined && e.n !== '' ? ' n° ' + esc(e.n) : ''}</h3>
+        ${produit ? champ('Nom (légende)', `<input type="text" data-buf="nom" value="${esc(e.nom)}" maxlength="60">`) : ''}
+        ${e.t === 'texte' ? champ('Texte', `<input type="text" data-buf="txt" value="${esc(e.txt)}" maxlength="60">`) : ''}
+        ${produit ? `<div class="be-deux">${champ('N° légende', `<input type="number" data-buf="n" value="${esc(e.n ?? '')}" min="1" max="99">`)}
+          ${['rect', 'rond'].includes(e.t) ? champ('Forme', `<select data-buf="t"><option value="rect"${e.t === 'rect' ? ' selected' : ''}>Rectangle</option><option value="rond"${e.t === 'rond' ? ' selected' : ''}>Rond</option></select>`) : '<span></span>'}</div>` : ''}
+        ${['rect', 'rond', 'num'].includes(e.t) ? `<div class="be-champ">Famille (couleur)<div class="be-fams">${Object.entries(RDJ.BUFFET_FAMILLES).map(([f, c]) =>
+          `<button type="button" class="${e.f === f && !e.c ? 'sel' : ''}" style="background:${c}" data-action="buf-famille" data-f="${f}" title="${esc(RDJ.BUFFET_NOMS_FAMILLES[f])}" aria-label="${esc(RDJ.BUFFET_NOMS_FAMILLES[f])}"></button>`).join('')}</div></div>` : ''}
+        ${produit ? champ('Zone (légende)', `<select data-buf="z">${zones.map((z) => `<option${z === e.z ? ' selected' : ''}>${esc(z)}</option>`).join('')}</select>`) : ''}
+        ${e.t === 'texte' ? champ('Sens', `<select data-buf="rot"><option value="0"${!e.rot ? ' selected' : ''}>Horizontal</option><option value="-90"${e.rot ? ' selected' : ''}>Vertical</option></select>`) : ''}
+        ${RDJ.buffetRedimensionnable(e) ? `<div class="be-deux">${champ(e.t === 'rond' ? 'Diamètre (cm)' : 'Largeur (cm)', `<input type="number" data-buf="w" value="${e.w}" min="4" max="400">`)}
+          ${e.t === 'rond' ? '<span></span>' : champ('Profondeur (cm)', `<input type="number" data-buf="h" value="${e.h}" min="4" max="300">`)}</div>` : ''}
+        <label class="be-fige"><input type="checkbox" data-buf="v"${e.v ? ' checked' : ''}> Figé (ne bouge pas en glissant)</label>
+        <div class="be-seg be-actions"><button type="button" class="be-btn" data-action="buf-dupliquer">${I.dupliquer}<span>Dupliquer</span></button><button type="button" class="be-btn" data-danger data-action="buf-supprimer">${I.supprimer}<span>Supprimer</span></button></div>`;
+    // barre d'outils : groupes nommés, boutons de même forme
+    const bouton = (action, icone, lib, attrs) => `<button type="button" class="be-btn" data-action="${action}"${attrs || ''}>${icone}<span>${lib}</span></button>`;
+    const AIMANTS = [[0, 'Libre'], [1, '1 cm'], [5, '5 cm'], [10, '10 cm']];
+    return `
+      <div class="be-barre">
+        <div class="be-groupe"><span class="be-lib">Ajouter</span><div class="be-seg">
+          ${bouton('buf-ajouter', I.rect, 'Rectangle', ' data-t="rect"')}${bouton('buf-ajouter', I.rond, 'Rond', ' data-t="rond"')}${bouton('buf-ajouter', I.table, 'Table', ' data-t="table"')}${bouton('buf-ajouter', I.titre, 'Titre', ' data-t="texte" title="Titre de zone"')}
+        </div></div>
+        <div class="be-groupe"><span class="be-lib">Élément</span><div class="be-seg">
+          ${bouton('buf-dupliquer', I.dupliquer, 'Dupliquer', e ? '' : ' disabled')}${bouton('buf-supprimer', I.supprimer, 'Supprimer', (e ? '' : ' disabled') + ' data-danger')}
+        </div></div>
+        <div class="be-groupe"><span class="be-lib">Historique</span><div class="be-seg">
+          ${bouton('buf-annuler', I.annuler, 'Annuler', (ctx.buffetPeutAnnuler ? '' : ' disabled') + ' title="Ctrl+Z"')}${bouton('buf-retablir', I.retablir, 'Rétablir', (ctx.buffetPeutRetablir ? '' : ' disabled') + ' title="Ctrl+Maj+Z"')}
+        </div></div>
+        <div class="be-groupe"><span class="be-lib">Aimant</span><div class="be-seg be-aimant" role="radiogroup" aria-label="Aimant">
+          ${I.aimant}${AIMANTS.map(([v, lib]) => `<button type="button" class="be-btn${ctx.buffetAimant === v ? ' actif' : ''}" role="radio" aria-checked="${ctx.buffetAimant === v}" data-action="buf-aimant" data-aimant="${v}" title="${v ? 'Aligner tous les ' + lib : 'Déplacer librement, au demi-centimètre'}"><span>${lib}</span></button>`).join('')}
+        </div></div>
+        <div class="be-groupe"><span class="be-lib">Réinitialiser</span>
+          <button type="button" class="be-btn be-reset" data-action="buf-origine" title="Remettre le buffet d'origine (avec confirmation)">${I.origine}<span>Remettre l'origine</span></button>
+        </div>
+      </div>
+      <div class="be-deux-col">
+        <div class="be-toile" id="buffet-toile">${RDJ.svgBuffet(els, { edition: true, sel: ctx.buffetSel })}</div>
+        <aside class="be-panneau">${panneau}</aside>
+      </div>`;
+  }
 
   /* ================= FEUILLE : COMMANDE PDJ ================= */
 
@@ -1033,10 +1097,17 @@
       return `
     <section class="ecran">
       ${sousOnglets}
-      ${teteEcran('pdj', 'Buffet PDJ', 'Disposition du buffet, vue de dessus',
-        'Chaque élément porte un numéro, repris dans la légende.', `
-        <button class="btn primaire" data-action="apercu-buffet">Imprimer le buffet</button>`)}
-      ${papier(V.feuilleBuffet(ctx))}
+      ${ctx.buffetEdition
+        ? `${teteEcran('pdj', 'Buffet PDJ', 'Mode modification · enregistré au fur et à mesure',
+          'Tout le buffet se modifie : îlot, tables, zones et produits. Les éléments « figés » (la structure) ne bougent pas en glissant.', `
+          <button class="btn" data-action="apercu-buffet">Imprimer le buffet</button>
+          <button class="btn primaire" data-action="buf-terminer">✓ Terminer</button>`)}
+          ${editeurBuffet(ctx)}`
+        : `${teteEcran('pdj', 'Buffet PDJ', 'Disposition du buffet, vue de dessus' + (ctx.etat.buffet ? ' · modifiée' : ''),
+          'Chaque élément porte un numéro, repris dans la légende.', `
+          <button class="btn" data-action="buf-modifier">Modifier le buffet</button>
+          <button class="btn primaire" data-action="apercu-buffet">Imprimer le buffet</button>`)}
+          ${papier(V.feuilleBuffet(ctx))}`}
     </section>`;
     }
     return `

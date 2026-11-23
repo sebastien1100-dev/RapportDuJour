@@ -45,6 +45,23 @@
         [toutes.length, toutes[0].noShow, toutes[0].modifs, c.chambres, c.clients, c.pdj, c.departs, c.nonPayees, RDJ.ligneGrille(toutes[0], '2026-11-10').noShow],
         [2, true, ['NOSHOW'], 1, 1, 0, 0, [], true]);
     }
+    // buffet : croquis d'origine en liste d'éléments, légende calculée, écart à l'origine
+    {
+      const els = RDJ.buffetParDefaut();
+      const leg = RDJ.legendeBuffet(els);
+      const nums = leg.flatMap((z) => z.items.map((i) => i[0]));
+      egal('buffet : tous les numéros 1 à 39 de la légende d\'origine sont sur le croquis',
+        Array.from({ length: 39 }, (_, i) => i + 1).every((n) => nums.includes(n)), true);
+      egal('buffet : légende par zone, dans l\'ordre d\'origine',
+        leg.map((z) => z.titre), RDJ.BUFFET_LEGENDE.flat().map((z) => z.titre));
+      egal('buffet : ids uniques et structure figée au départ',
+        [new Set(els.map((e) => e.id)).size === els.length, els.filter((e) => ['ilot', 'fond', 'table', 'struct'].includes(e.t)).every((e) => e.v)], [true, true]);
+      const modif = els.map((e) => (e.n === 10 ? { ...e, x: e.x + 5 } : e)).filter((e) => e.n !== 2);
+      modif.push({ id: 'a1', t: 'rect', x: 0, y: 0, w: 10, h: 10, n: 40, nom: 'Nouveau', z: 'Bout fruits', f: 'm' });
+      egal('buffet : écart à l\'origine (modifiés, ajoutés, supprimés)', RDJ.ecartBuffet(modif), { modifies: 1, ajoutes: 1, supprimes: 1 });
+      egal('buffet : un élément ajouté apparaît dans la légende de sa zone',
+        RDJ.legendeBuffet(modif).find((z) => z.titre === 'Bout fruits').items, [[17, 'f', 'Présentoir à fruits (3 étages)'], [40, 'm', 'Nouveau']]);
+    }
     // feuille Commande : produits du buffet sans la vaisselle, sauf thé et serviettes, sans doublon
     {
       const cmd = RDJ.commandeParDefaut();

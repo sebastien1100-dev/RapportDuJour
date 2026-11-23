@@ -20,6 +20,7 @@
     pdj: { nombre: null, type: 'business', nuit: null, complements: {} },
     recap: [],
     commande: null,                   // feuille Commande : { produits: [{ n, f, nom }] } ; null = liste du buffet
+    buffet: null,                     // croquis du buffet modifié : { elements: [...] } ; null = croquis d'origine
     derniereSauvegarde: null,
   });
 
