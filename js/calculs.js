@@ -436,7 +436,8 @@
   };
 
   /* ---------- Modifications manuelles du rapport ---------- */
-  // Une modification : { chambre, type: 'PAYE' | 'RECOUCHE' | 'DEPART' | 'PDJ' }
+  // Une modification : { chambre, type: 'PAYE' | 'RECOUCHE' | 'DEPART' | 'PDJ' | 'NOSHOW' }
+  // NOSHOW : chambre annulée (client non venu) ; elle reste dans la grille du rapport, barrée, mais ne compte plus nulle part.
   // Elle s'applique à la première réservation de la chambre (comme RECHERCHEV dans Excel).
 
   function premiereParChambre(reservations) {
@@ -453,6 +454,7 @@
       case 'PDJ': return !RDJ.avecPdj(r.mealPlan);
       case 'RECOUCHE': return !!r.depart && r.depart <= demain;
       case 'DEPART': return !!r.depart && r.depart > demain;
+      case 'NOSHOW': return true;
       default: return false;
     }
   };
@@ -473,10 +475,14 @@
       else if (m.type === 'PDJ') r.mealPlan = 'BB';
       else if (m.type === 'RECOUCHE') r.depart = RDJ.jours(nuit, 2);
       else if (m.type === 'DEPART') r.depart = RDJ.jours(nuit, 1);
+      else if (m.type === 'NOSHOW') r.noShow = true;
       r.modifs.push(m.type);
     }
     return res;
   };
+
+  /** Réservations qui comptent (chiffres, feuille de chambre, PDJ, historique) : sans les chambres en no show. */
+  RDJ.sansNoShow = (reservations) => reservations.filter((r) => !r.noShow);
 
   /* ---------- Chambres ajoutées à la main (après l'import) ---------- */
   // Saisie : { chambre, nom, nbClients, depart, pdj, paye, montantDu }, valable pour la nuit en cours.
@@ -569,6 +575,7 @@
       montantDu: r.montantDu ?? null,
       source: RDJ.sourceReservation(r.canal),
       manuel: !!r.manuel,
+      noShow: !!r.noShow,
       modifs: r.modifs || [],
     };
   };

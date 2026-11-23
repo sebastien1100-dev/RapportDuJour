@@ -35,7 +35,8 @@ Pour en changer (ou venir de Safari, qui n'a pas de mode application) : Réglage
 dans l'ancien, puis *Restaurer une sauvegarde* dans la fenêtre de l'application.
 
 Corrections à la main, comme dans Excel :
-- **Rapport** : double-clic sur *Statut* (départ ↔ recouche), *PDJ* (ajout) ou *Payé*.
+- **Rapport** : double-clic sur *Statut* (départ ↔ recouche), *PDJ* (ajout) ou *Payé* ; double-clic sur le
+  *numéro de chambre* pour la passer en **no show** (client non venu : ligne barrée, ne compte plus), et de nouveau pour la remettre.
 - **Feuille de chambre** : double-clic sur la case d'une chambre : vide → B → R → BR (blanc recouche) → HS → vide ; double-clic sur *NV*.
 - **Plan de chambre** : double-clic sur une chambre libre : libre → sale (B) → hors service (HS) → libre, reporté sur la feuille de chambre.
 - **Ajouter une chambre** (onglet Rapport) : pour une chambre absente de l'import (arrivée après l'export).

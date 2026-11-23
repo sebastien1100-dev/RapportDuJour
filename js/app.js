@@ -87,7 +87,9 @@
     const modifs = memeNuit ? etat.modifs.liste : [];
     const ajouts = memeNuit ? RDJ.nettoyerAjouts(raw, etat.modifs.ajouts).gardes : [];
     const base = RDJ.avecAjouts(raw, ajouts, nuit);
-    const eff = RDJ.appliquerModifs(base, modifs, nuit);
+    // toutes : avec les chambres passées en no show (barrées dans la grille du rapport) ; eff : celles qui comptent
+    const toutes = RDJ.appliquerModifs(base, modifs, nuit);
+    const eff = RDJ.sansNoShow(toutes);
     const chiffres = RDJ.chiffres(eff, nuit, cfg.nbChambres);
     const fdc = etat.fdc.nuit === nuit ? etat.fdc : { corrections: {}, nv: {} };
     // chambres bloquées du rapport de maintenance, s'il a été importé pour cette nuit
@@ -104,7 +106,8 @@
       aPreparer: arrivees ? RDJ.aPreparerParType(etatsFdc, cfg.types, arrivees.parType) : {},
       chambresLibres: RDJ.chambresLibres(cfg.planFdc, base),
       dateManuelle: !!etat.dateRapportManuelle,
-      grille: RDJ.grilleRapport(eff, nuit),
+      grille: RDJ.grilleRapport(toutes, nuit),
+      noShows: toutes.filter((r) => r.noShow).map((r) => r.chambre),
       compteursFdc: RDJ.compteursFdc(etatsFdc, fdc.nv),
       horsPlan: RDJ.chambresHorsPlan(cfg.planFdc, raw),
       mep: RDJ.dateMep(etat.import && etat.import.importeLe, nuit),
@@ -643,7 +646,7 @@
 
   /* ---------- Modifications du rapport (double-clic) ---------- */
 
-  function modifierRapport(col, chambre) {
+  async function modifierRapport(col, chambre) {
     const ctx = contexte();
     const nuit = ctx.nuit;
     // chambre ajoutée à la main : on rouvre sa fiche (les cases se changent dans la fiche)
@@ -654,6 +657,27 @@
     if (etat.modifs.nuit !== nuit) etat.modifs = { nuit, liste: [], ajouts: [] };
     const liste = etat.modifs.liste;
     const trouver = (types) => liste.findIndex((m) => m.chambre === chambre && types.includes(m.type));
+
+    // numéro de chambre : passer la chambre en no show (avec confirmation), ou la remettre
+    if (col === 'noshow') {
+      const i = trouver(['NOSHOW']);
+      if (i >= 0) {
+        liste.splice(i, 1);
+        notice('Chambre ' + chambre + ' remise : elle compte de nouveau.', 'ok');
+      } else {
+        const ok = await dialogue({
+          titre: 'No show · chambre ' + chambre,
+          message: 'Annuler la chambre ' + chambre + (raw.nomClient ? ' (' + raw.nomClient + ')' : '') + ' : le client n\'est pas venu.\n' +
+            'Elle restera barrée dans le rapport, mais ne comptera plus (chiffres, feuille de chambre, PDJ, historique).\nDouble-cliquez de nouveau sur le numéro pour l\'annuler.',
+          ok: 'Passer en no show', danger: true,
+        });
+        if (!ok) return;
+        liste.push({ chambre, type: 'NOSHOW' });
+        notice('Chambre ' + chambre + ' passée en no show.', 'ok');
+      }
+      return apresModifRapport();
+    }
+    if (!eff) return notice('La chambre ' + chambre + ' est en no show : double-cliquez sur son numéro pour la remettre avant de la modifier.', 'alerte');
 
     if (col === 'paye') {
       const i = trouver(['PAYE']);

@@ -36,6 +36,15 @@
     egal('change log chargé, versions uniques et dans l\'ordre',
       [cl.length > 0, new Set(cl).size === cl.length, cl.every((v, i) => i === 0 || num(cl[i - 1])[0] > num(v)[0] || (num(cl[i - 1])[0] === num(v)[0] && num(cl[i - 1])[1] > num(v)[1]))],
       [true, true, true]);
+    // no show : la chambre reste dans la liste (marquée) mais ne compte plus
+    {
+      const rs = [{ chambre: '101', depart: '2026-11-11', mealPlan: 'BB', statut: '', nbClients: 2 }, { chambre: '102', depart: '2026-11-13', mealPlan: 'RO', statut: 'P', nbClients: 1 }];
+      const toutes = RDJ.appliquerModifs(rs, [{ chambre: '101', type: 'NOSHOW' }], '2026-11-10');
+      const c = RDJ.chiffres(RDJ.sansNoShow(toutes), '2026-11-10', 81);
+      egal('no show : chambre marquée, retirée des chiffres (chambres, clients, PDJ, départs, non payées)',
+        [toutes.length, toutes[0].noShow, toutes[0].modifs, c.chambres, c.clients, c.pdj, c.departs, c.nonPayees, RDJ.ligneGrille(toutes[0], '2026-11-10').noShow],
+        [2, true, ['NOSHOW'], 1, 1, 0, 0, [], true]);
+    }
     // feuille Commande : produits du buffet sans la vaisselle, sauf thé et serviettes, sans doublon
     {
       const cmd = RDJ.commandeParDefaut();

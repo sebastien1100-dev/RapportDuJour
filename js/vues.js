@@ -25,6 +25,7 @@
     ['RECOUCHE', 'RECOUCHES (au lieu de départ)'],
     ['DEPART', 'DÉPARTS (au lieu de recouche)'],
     ['PDJ', 'PETITS DÉJ. AJOUTÉS'],
+    ['NOSHOW', 'NO SHOW'],
   ];
 
   function texteModifs(modifs, ajouts) {
@@ -64,10 +65,20 @@
         <tbody>${lignes.map((l) => {
           // une seule information par signal : fond de ligne = départ à l'écran, petit déjeuner (hachures) sur papier ;
           // case « Payé » inversée = non payée
+          // chambre en no show : ligne barrée, sans signal (ni départ, ni PDJ, ni « NON ») ; elle ne compte plus
+          if (l.noShow) {
+            return `<tr class="noshow" style="height:${hLigne}mm">
+            <td class="ch clic modifie" data-modif="noshow" data-ch="${esc(l.chambre)}" title="No show : double-clic pour remettre la chambre">${esc(l.chambre)}</td>
+            <td class="nom">${esc(l.nom)}</td>
+            <td class="c src">${esc(l.source.code)}</td>
+            <td class="c">${esc(l.pers)}</td><td class="c">${esc(l.nuitNo)}</td><td class="c">${esc(RDJ.dateCourte(l.depart))}</td>
+            <td class="c statut" colspan="3"><b>NO SHOW</b></td>
+          </tr>`;
+          }
           const cls = [l.partDemain ? 'dep' : '', l.pdj ? 'pdj' : '', l.manuel ? 'ajout' : ''].join(' ').trim();
           const mod = (t) => (l.modifs.includes(t) ? ' modifie' : '');
           return `<tr class="${cls}" style="height:${hLigne}mm"${l.manuel ? ` data-modif="fiche" data-ch="${esc(l.chambre)}" title="Chambre ajoutée à la main : double-clic pour la modifier"` : ''}>
-            <td class="ch">${esc(l.chambre)}</td>
+            <td class="ch${l.manuel ? '' : ' clic'}"${l.manuel ? '' : ` data-modif="noshow" data-ch="${esc(l.chambre)}" title="Double-clic : passer la chambre en no show"`}>${esc(l.chambre)}</td>
             <td class="nom">${esc(l.nom)}</td>
             <td class="c src" title="${esc(l.source.brut)}">${esc(l.source.code)}</td>
             <td class="c">${esc(l.pers)}</td>
@@ -350,9 +361,9 @@
     const cpt = ctx.compteursFdc;
     const val = (n) => (vierge ? '' : n);
     // liste à cocher : par chambre N° · type · état en toutes lettres · case « Fait » · case « NV » ;
-    // les chambres à faire à blanc (B, BR) ont le numéro et l'état hachurés. Place gardée en bas pour la légende.
-    const hLigne = Math.min(8.2, 118 / nbLignes);
-    const ETATS = { B: 'BLANC', R: 'Recouche', BR: 'Blanc rec.', HS: 'H. service' };
+    // les chambres à faire à blanc (B, BR) ont le numéro et l'état hachurés
+    const hLigne = Math.min(8.4, 124 / nbLignes);
+    const ETATS = { B: 'BLANC', R: 'Recouche', BR: 'Blanc rec.', HS: 'HS' };
     const types = ctx.cfg.types || {};
 
     let corps = '';
@@ -380,7 +391,7 @@
     }
     const entetes = plan.map((_, ci) => `<th class="${ci > 0 ? 'sep' : ''}">N°</th><th>Type</th><th>État</th><th>Fait</th><th>NV</th>`).join('');
     // largeurs d'un bloc de 5 colonnes (en % du bloc), répétées pour chaque colonne du plan
-    const larg = [21, 14, 39, 13, 13].map((p) => p / plan.length);
+    const larg = [19, 12, 45, 12, 12].map((p) => p / plan.length);
     const colonnes = plan.map(() => larg.map((p) => `<col style="width:${p}%">`).join('')).join('');
 
     return `
@@ -398,12 +409,6 @@
         <div class="f-corr-texte"><div class="f-corr-titre">REMARQUES</div>${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
         ${vierge ? '' : besoinsArrivees(ctx)}
       </div>
-      <footer class="f-legende">
-        <b>Légende :</b>
-        <span><i class="ech blanc"></i>à faire à blanc (départ, blanc recouche)</span>
-        <span><i class="case"></i>« Fait » : cocher quand la chambre est terminée</span>
-        <span><i class="case cochee"></i>« NV » : non vue</span>
-      </footer>
     </div>`;
   };
 
@@ -879,7 +884,7 @@
           <div class="me-colonne">
             <h4>Corrections au double-clic</h4>
             <ul class="me-astuces">
-              <li><b>Rapport</b><span>sur « Statut », « PDJ » ou « Payé » d'une chambre ; « + Ajouter une chambre » pour une arrivée après l'export.</span></li>
+              <li><b>Rapport</b><span>sur « Statut », « PDJ » ou « Payé » d'une chambre ; sur le numéro de chambre pour la passer en no show ; « + Ajouter une chambre » pour une arrivée après l'export.</span></li>
               <li><b>Feuille de chambre</b><span>sur la case d'une chambre : vide → B → R → BR → HS → vide ; sur NV pour cocher.</span></li>
               <li><b>Plan de chambre</b><span>sur une chambre libre : libre → sale → hors service → libre.</span></li>
             </ul>

@@ -8,6 +8,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.39', date: '2026-11-24', titre: 'Rapport : no show ; feuille de chambre allégée',
+      changements: [
+        ['nouveau', "Rapport : double-clic sur le numéro d'une chambre pour la passer en no show (client non venu), après confirmation. La ligne reste dans le rapport, barrée avec « NO SHOW », mais la chambre ne compte plus : chiffres, à encaisser, feuille de chambre (chambre libre), plan, petits déjeuners et historique. Un nouveau double-clic sur le numéro la remet ; « Annuler les modifications du jour » l'annule aussi."],
+        ['amelioration', "Feuille de chambre : la légende du bas est retirée (la feuille se comprend sans) et les lignes gagnent un peu de hauteur ; l'état « Recouche » ne déborde plus de sa case (colonne État plus large) ; « H. service » devient « HS »."],
+      ],
+    },
+    {
       version: '3.38', date: '2026-11-24', titre: 'PDJ : feuille Commande',
       changements: [
         ['nouveau', "Onglet PDJ → Commande : liste des produits du buffet à imprimer pour chiffrer la commande, rangée par famille (viennoiseries et pains, fruits et jus, laitiers, salé et œufs, céréales, sucré, consommables), avec le numéro du croquis du buffet et une colonne par livraison (mardi et vendredi). En haut : semaine, fournisseur, commandé par ; deux lignes vides pour écrire à la main. Une page A4 en noir et blanc."],

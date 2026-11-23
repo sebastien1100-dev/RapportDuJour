@@ -1069,6 +1069,11 @@ body.depot .voile-depot { display: grid; }
 .r-table tr.ajout td.nom { font-style: italic; }
 .r-table tr.ajout { cursor: pointer; }
 .r-table td.clic:hover { outline: .4mm solid var(--accent); outline-offset: -.4mm; }
+/* chambre en no show : ligne barrée et estompée, « NO SHOW » sur les trois dernières colonnes */
+.r-table tr.noshow td { color: #8a93a3; text-decoration: line-through; text-decoration-thickness: .25mm; background: repeating-linear-gradient(-45deg, #fff 0 1.4mm, #f1f2f4 1.4mm 2.8mm); }
+.r-table tr.noshow td.statut { text-decoration: none; letter-spacing: .08em; color: var(--rouge); }
+.nb .r-table tr.noshow td { color: #555; background: #fff; }
+.nb .r-table tr.noshow td.statut { color: #000; }
 .r-modifs { margin-top: 2mm; font-size: 7.5pt; font-weight: 600; color: var(--accent); }
 .r-legende {
   margin-top: auto; padding-top: 1.6mm; border-top: .3mm solid #999;
@@ -1274,17 +1279,13 @@ body.depot .voile-depot { display: grid; }
 .f-grille.liste td.no { font-size: 9.5pt; background: #fff; }
 .f-grille.liste td.no b, .f-grille.liste td.etat b { font-weight: 800; }
 .f-grille.liste td.ty { font-size: 6.5pt; color: #333; }
-.f-grille.liste td.etat { text-align: left; padding-left: 1.4mm; font-size: 9pt; }
+.f-grille.liste td.etat { text-align: left; padding-left: 1.2mm; font-size: 8.6pt; }
 .f-grille.liste td.vide { background: #f2f2f2; }
 .f-grille.liste td.noire { background: #000; border-color: #000; }
-.f-grille.liste td.blanc, .f-legende .ech.blanc { background: repeating-linear-gradient(-45deg, #8f8f8f 0 .35mm, #fff .35mm 1.3mm); }
+.f-grille.liste td.blanc { background: repeating-linear-gradient(-45deg, #8f8f8f 0 .35mm, #fff .35mm 1.3mm); }
 .f-grille.liste td.blanc b { background: #fff; padding: 0 .8mm; border-radius: .5mm; }
-.f-grille.liste td.etat.hs { font-size: 7.5pt; }
-.f-grille .case, .f-legende .case { display: inline-block; width: 4mm; height: 4mm; border: .35mm solid #000; border-radius: .7mm; background: #fff; vertical-align: middle; position: relative; }
-.f-grille .case.cochee::after, .f-legende .case.cochee::after { content: ''; position: absolute; left: 1.15mm; top: .2mm; width: 1.1mm; height: 2.2mm; border: solid #000; border-width: 0 .45mm .45mm 0; transform: rotate(45deg); }
-.f-legende { display: flex; gap: 5mm; flex-wrap: wrap; align-items: center; font-size: 8pt; margin-top: 1.5mm; }
-.f-legende span { display: inline-flex; align-items: center; gap: 1.5mm; }
-.f-legende .ech { display: inline-block; width: 8mm; height: 4mm; border: .3mm solid #000; }
+.f-grille .case { display: inline-block; width: 4mm; height: 4mm; border: .35mm solid #000; border-radius: .7mm; background: #fff; vertical-align: middle; position: relative; }
+.f-grille .case.cochee::after { content: ''; position: absolute; left: 1.15mm; top: .2mm; width: 1.1mm; height: 2.2mm; border: solid #000; border-width: 0 .45mm .45mm 0; transform: rotate(45deg); }
 .f-corr { margin-top: 3mm; border: .4mm solid #000; min-height: 18mm; padding: 1.5mm 3mm; font-size: 9pt; line-height: 1.45; }
 .f-corr-titre { font-weight: 700; text-decoration: underline; margin-bottom: .5mm; }
 /* bas de la feuille : corrections à gauche, arrivées du jour par type à droite */
