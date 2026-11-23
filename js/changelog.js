@@ -8,6 +8,21 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.34', date: '2026-11-23', titre: 'Feuille de chambre en liste à cocher',
+      changements: [
+        ['amelioration', "Feuille de chambre : chaque chambre a maintenant son type (PMR, 1K, 1Q, 2S), son état en toutes lettres (BLANC, Recouche, Blanc rec., H. service), une case « Fait » à cocher quand la chambre est terminée et une case « NV » (cochée quand la chambre est notée non vue)."],
+        ['amelioration', "Les chambres à faire à blanc (départs et blancs recouche) ont le numéro et l'état hachurés, comme les petits déjeuners du rapport. En-têtes de colonnes en noir, cadre « Remarques » et légende en bas ; toujours une seule page A4."],
+        ['amelioration', "Le double-clic sur l'état (vide → B → R → BR → HS) et sur NV fonctionne comme avant. La feuille vierge reprend le même modèle, avec le type de chaque chambre et toutes les cases à cocher."],
+      ],
+    },
+    {
+      version: '3.33', date: '2026-11-23', titre: 'Accueil : cartes réordonnées, dispo après arrivées',
+      changements: [
+        ['amelioration', "Accueil : nouvel ordre des cartes. Rangée du haut : Occupation, Départs, Disponibles après départ ; rangée du bas : Arrivées, Petits déjeuners, Paiements. La carte Mouvements s'appelle maintenant « Départs » (départs du jour et recouches par type)."],
+        ['nouveau', "Carte Arrivées : colonne « Après arr. » avec, par type, les chambres encore disponibles une fois les arrivées logées ; le total s'affiche sous le grand chiffre (« 7 encore dispo après »)."],
+      ],
+    },
+    {
       version: '3.32', date: '2026-11-23', titre: 'Rapport imprimé : petits déjeuners en valeur',
       changements: [
         ['amelioration', "Rapport imprimé : ce sont maintenant les petits déjeuners qui ressortent. Les lignes des chambres avec petit déjeuner sont hachurées en traits fins (visible même si l'imprimante pâlit les gris) ; les lignes de départ ne sont plus grises, « DÉPART » s'écrit en gras dans la colonne Statut. Légende du papier mise à jour ; l'écran garde ses couleurs."],

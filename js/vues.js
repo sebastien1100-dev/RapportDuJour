@@ -349,7 +349,11 @@
     const nbLignes = Math.max(...plan.map((c) => c.length));
     const cpt = ctx.compteursFdc;
     const val = (n) => (vierge ? '' : n);
-    const hLigne = Math.min(8.6, 132 / nbLignes);
+    // liste à cocher : par chambre N° · type · état en toutes lettres · case « Fait » · case « NV » ;
+    // les chambres à faire à blanc (B, BR) ont le numéro et l'état hachurés. Place gardée en bas pour la légende.
+    const hLigne = Math.min(8.2, 118 / nbLignes);
+    const ETATS = { B: 'BLANC', R: 'Recouche', BR: 'Blanc rec.', HS: 'H. service' };
+    const types = ctx.cfg.types || {};
 
     let corps = '';
     for (let i = 0; i < nbLignes; i++) {
@@ -357,20 +361,27 @@
       plan.forEach((col, ci) => {
         const cell = col[i];
         const sep = ci > 0 ? ' sep' : '';
-        if (cell === undefined) { corps += `<td class="no${sep}"></td><td></td><td></td>`; return; }
+        if (cell === undefined) { corps += `<td class="no${sep} vide"></td><td class="vide"></td><td class="vide"></td><td class="vide"></td><td class="vide"></td>`; return; }
         const no = typeof cell === 'string' ? cell : cell.no;
         const noire = typeof cell !== 'string' && cell.noir;
         const k = RDJ.normChambre(no);
-        if (noire) { corps += `<td class="no${sep}">${esc(no)}</td><td class="noire"></td><td class="noire"></td>`; return; }
+        if (noire) { corps += `<td class="no${sep}">${esc(no)}</td><td class="noire"></td><td class="noire"></td><td class="noire"></td><td class="noire"></td>`; return; }
         const e = ctx.etatsFdc[k] || { etat: '', corrige: false };
+        const etat = vierge ? '' : e.etat;
+        const blanc = etat === 'B' || etat === 'BR';
         const nv = !vierge && ctx.fdc.nv[k];
-        corps += `<td class="no${sep}">${esc(no)}</td>` +
-          `<td class="etat clic${!vierge && e.corrige ? ' corrige' : ''}${!vierge && e.etat === 'HS' ? ' hs' : ''}" data-fdc="etat" data-ch="${esc(k)}">${vierge ? '' : esc(e.etat)}</td>` +
-          `<td class="nv clic" data-fdc="nv" data-ch="${esc(k)}">${nv ? 'NV' : ''}</td>`;
+        corps += `<td class="no${sep}${blanc ? ' blanc' : ''}"><b>${esc(no)}</b></td>` +
+          `<td class="ty">${esc(types[k] || '')}</td>` +
+          `<td class="etat clic${blanc ? ' blanc' : ''}${!vierge && e.corrige ? ' corrige' : ''}${etat === 'HS' ? ' hs' : ''}" data-fdc="etat" data-ch="${esc(k)}" title="${esc(etat || 'libre')} : double-clic pour changer">${etat ? `<b>${esc(ETATS[etat] || etat)}</b>` : ''}</td>` +
+          `<td class="fait">${vierge || (etat && etat !== 'HS') ? '<i class="case"></i>' : ''}</td>` +
+          `<td class="nv clic" data-fdc="nv" data-ch="${esc(k)}" title="Non vue : double-clic pour cocher"><i class="case${nv ? ' cochee' : ''}"></i></td>`;
       });
       corps += '</tr>';
     }
-    const entetes = plan.map((_, ci) => `<th class="${ci > 0 ? 'sep' : ''}">N°</th><th></th><th>NV</th>`).join('');
+    const entetes = plan.map((_, ci) => `<th class="${ci > 0 ? 'sep' : ''}">N°</th><th>Type</th><th>État</th><th>Fait</th><th>NV</th>`).join('');
+    // largeurs d'un bloc de 5 colonnes (en % du bloc), répétées pour chaque colonne du plan
+    const larg = [21, 14, 39, 13, 13].map((p) => p / plan.length);
+    const colonnes = plan.map(() => larg.map((p) => `<col style="width:${p}%">`).join('')).join('');
 
     return `
     <div class="feuille paysage fdc">
@@ -382,11 +393,17 @@
           <tr><td>${val(cpt.total)}</td><td>${val(cpt.B)}</td><td>${val(cpt.R)}</td><td>${val(cpt.BR)}</td><td>${val(cpt.HS)}</td></tr>
         </table>`}
       </header>
-      <table class="f-grille"><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
+      <table class="f-grille liste"><colgroup>${colonnes}</colgroup><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
       <div class="f-corr">
-        <div class="f-corr-texte">${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
+        <div class="f-corr-texte"><div class="f-corr-titre">REMARQUES</div>${vierge ? '' : texteCorrections(ctx.fdc.corrections) + texteBloquees(ctx)}</div>
         ${vierge ? '' : besoinsArrivees(ctx)}
       </div>
+      <footer class="f-legende">
+        <b>Légende :</b>
+        <span><i class="ech blanc"></i>à faire à blanc (départ, blanc recouche)</span>
+        <span><i class="case"></i>« Fait » : cocher quand la chambre est terminée</span>
+        <span><i class="case cochee"></i>« NV » : non vue</span>
+      </footer>
     </div>`;
   };
 
@@ -705,30 +722,33 @@
     const prepTotal = a ? types.reduce((s, t) => s + (prep[t.code] ? prep[t.code].aPreparer : 0), 0) : 0;
     const typesManque = a ? types.filter((t) => prep[t.code] && prep[t.code].manque).map((t) => `${prep[t.code].manque} en ${t.code}`) : [];
     const nbAutres = a ? Object.values(a.autres).reduce((s, n) => s + n, 0) : 0;
+    const resteApres = a ? types.reduce((s, t) => s + Math.max(0, T(t.code).dispo - (a.parType[t.code] || 0)), 0) : 0;
     const arrivees = carteAccueil({
       cle: 'arr', vue: 'fdc', titre: a ? `Arrivées du ${RDJ.dateFr(a.date).slice(0, 5)}` : 'Arrivées',
       repere: a ? `${prepTotal} à préparer` : 'à importer',
       info: a ? `Arrivées du ${titreJour(a.date)} : les chambres libres d'abord, puis les départs à préparer — ouvrir la feuille de chambre` : 'Importer le rapport des arrivées pour voir les chambres à préparer',
       nombre: a ? a.total : '—', texte: a
-        ? `${a.total > 1 ? 'chambres' : 'chambre'}${typesManque.length ? ` · <b class="rouge">manque ${esc(typesManque.join(', '))}</b>` : ''}${nbAutres ? ` · ${nbAutres} de type inconnu` : ''}`
+        ? `${a.total > 1 ? 'chambres' : 'chambre'} · ${resteApres} encore dispo après${typesManque.length ? ` · <b class="rouge">manque ${esc(typesManque.join(', '))}</b>` : ''}${nbAutres ? ` · ${nbAutres} de type inconnu` : ''}`
         : 'rapport des arrivées non importé',
       barre: a ? [[pctBarre(a.total - nbAutres - manqueTotal, dispo || 1), 2], [pctBarre(manqueTotal, dispo || 1), 'r']] : [],
-      entetes: ['Type', 'Arrivées', 'Dispo', 'À préparer'],
+      // « Après arr. » : chambres encore disponibles une fois les arrivées logées (0 s'il en manque)
+      entetes: ['Type', 'Arrivées', 'Dispo', 'À préparer', '<span title="Chambres encore disponibles après les arrivées">Après arr.</span>'],
       lignes: types.map((t) => {
         const p = prep[t.code];
-        if (!a) return { titre: t.nom, cellules: [esc(t.code), d('—'), d(nb(T(t.code).dispo)), d('—')] };
+        if (!a) return { titre: t.nom, cellules: [esc(t.code), d('—'), d(nb(T(t.code).dispo)), d('—'), d(nb(T(t.code).dispo))] };
         const n = a.parType[t.code] || 0;
+        const reste = Math.max(0, T(t.code).dispo - n);
         return {
           cls: p && p.manque ? 'manque' : '',
-          titre: `${t.nom} : ${plur(n, 'arrivée')}, ${plur(T(t.code).dispo, 'chambre')} disponible${T(t.code).dispo > 1 ? 's' : ''}${p ? `, ${p.aPreparer} départ${p.aPreparer > 1 ? 's' : ''} à préparer${p.manque ? ', manque ' + p.manque : ''}` : ''}`,
-          cellules: [esc(t.code), String(n), d(T(t.code).dispo), p ? (p.manque ? `${p.aPreparer} · manque ${p.manque}` : String(p.aPreparer)) : '0'],
+          titre: `${t.nom} : ${plur(n, 'arrivée')}, ${plur(T(t.code).dispo, 'chambre')} disponible${T(t.code).dispo > 1 ? 's' : ''}${p ? `, ${p.aPreparer} départ${p.aPreparer > 1 ? 's' : ''} à préparer${p.manque ? ', manque ' + p.manque : ''}` : ''}, ${reste} encore disponible${reste > 1 ? 's' : ''} après les arrivées`,
+          cellules: [esc(t.code), String(n), d(T(t.code).dispo), p ? (p.manque ? `${p.aPreparer} · manque ${p.manque}` : String(p.aPreparer)) : '0', String(reste)],
         };
       }),
     });
 
-    // 4. Mouvements : départs du jour et recouches par type
-    const mouvements = carteAccueil({
-      cle: 'mvt', vue: 'fdc', titre: 'Mouvements', repere: imp ? plur(c.recouches, 'recouche') : '',
+    // 4. Départs : départs du jour et recouches par type
+    const departs = carteAccueil({
+      cle: 'mvt', vue: 'fdc', titre: 'Départs', repere: imp ? plur(c.recouches, 'recouche') : '',
       info: 'Départs du jour et recouches, par type — ouvrir la feuille de chambre',
       nombre: nb(c.departs), texte: imp ? `départ${c.departs > 1 ? 's' : ''} · ${plur(c.recouches, 'recouche')}` : 'départs',
       barre: [[pctBarre(c.departs, c.chambres), 1], [pctBarre(c.recouches, c.chambres), 4]],
@@ -766,7 +786,8 @@
       ].map(([lib, n]) => ({ cellules: [esc(lib), imp ? n : '—'] })),
     });
 
-    return `<div class="acc-cartes">${occupation}${disponibles}${arrivees}${mouvements}${pdj}${paiements}</div>`;
+    // rangée du haut : Occupation, Départs, Disponibles après départ ; rangée du bas : Arrivées, Petits déjeuners, Paiements
+    return `<div class="acc-cartes">${occupation}${departs}${disponibles}${arrivees}${pdj}${paiements}</div>`;
   }
 
   V.ecranAccueil = function (ctx) {
