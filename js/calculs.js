@@ -587,12 +587,55 @@
     return cols;
   };
 
-  RDJ.ligneRecap = (nuit, c) => ({
+  RDJ.ligneRecap = (nuit, c, parType) => ({
     date: nuit, jour: RDJ.jourSemaine(nuit), chambres: c.chambres, clients: c.clients,
     departs: c.departs, recouches: c.recouches, pdj: c.pdj, taux: c.taux,
     // chambres par source { DIR: 25, BKG: 21, … } (absent des nuits enregistrées avant la v2.2)
     sources: Object.fromEntries((c.parSource || []).map((s) => [s.code, s.chambres])),
+    // chambres occupées par type { PMR: 3, '1Q': 43, … } (absent des nuits enregistrées avant la v3.37)
+    ...(parType ? { types: Object.fromEntries(Object.entries(parType).filter(([code]) => code).map(([code, t]) => [code, t.occupees])) } : {}),
   });
+
+  /* ---------- Historique : tableau de bord et comparaison de périodes ---------- */
+
+  /** Chiffres d'une période (nuits du deb au fin inclus, dates « AAAA-MM-JJ ») : moyennes par nuit, totaux,
+      chambres par source et par type (sur les nuits qui les ont). */
+  RDJ.statsPeriode = function (lignes, deb, fin) {
+    const ls = (lignes || []).filter((l) => l.date >= deb && l.date <= fin);
+    const n = ls.length;
+    const somme = (cle) => ls.reduce((s, l) => s + (l[cle] || 0), 0);
+    const cumul = (cle) => {
+      const avec = ls.filter((l) => l[cle]);
+      const tot = {};
+      for (const l of avec) for (const [k, v] of Object.entries(l[cle])) tot[k] = (tot[k] || 0) + v;
+      return { nuits: avec.length, chambres: avec.reduce((s, l) => s + l.chambres, 0), tot };
+    };
+    return {
+      deb, fin, nuits: n,
+      taux: n ? ls.reduce((s, l) => s + l.taux, 0) / n : 0,
+      chambres: somme('chambres'), clients: somme('clients'), pdj: somme('pdj'), departs: somme('departs'), recouches: somme('recouches'),
+      sources: cumul('sources'), types: cumul('types'),
+      meilleure: n ? ls.reduce((a, b) => (b.taux > a.taux ? b : a)) : null,
+    };
+  };
+
+  /** Taux moyen par jour de la semaine, du lundi au dimanche : [{ jour, taux, nuits }] (taux null sans nuit). */
+  RDJ.moyenneParJour = function (lignes) {
+    const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    return JOURS.map((jour) => {
+      const ls = (lignes || []).filter((l) => RDJ.jourSemaine(l.date) === jour);
+      return { jour, nuits: ls.length, taux: ls.length ? ls.reduce((s, l) => s + l.taux, 0) / ls.length : null };
+    });
+  };
+
+  /** Deux périodes à comparer, terminées à la nuit « derniere » :
+      'semaine' : 7 nuits / les 7 d'avant · 'mois' : 30 nuits / les 30 d'avant · 'an' : 30 nuits / les mêmes l'an dernier. */
+  RDJ.periodesComparees = function (derniere, raccourci) {
+    const nb = raccourci === 'semaine' ? 7 : 30;
+    const a = [RDJ.jours(derniere, -(nb - 1)), derniere];
+    const b = raccourci === 'an' ? a.map((d) => RDJ.jours(d, -364)) : [RDJ.jours(a[0], -nb), RDJ.jours(a[0], -1)];
+    return { a, b };
+  };
 
   /** Ajoute ou remplace la journée dans l'historique (jamais de doublon), trié par date. */
   RDJ.majRecap = function (recap, ligne) {

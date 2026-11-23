@@ -20,6 +20,7 @@
   <script src="../js/calculs.js"></script>
   <script src="../js/changelog.js"></script>
   <script src="../js/maj.js"></script>
+  <script src="../js/buffet.js"></script>
   <script>
   (async function () {
     const resultats = [];
@@ -35,6 +36,33 @@
     egal('change log chargé, versions uniques et dans l\'ordre',
       [cl.length > 0, new Set(cl).size === cl.length, cl.every((v, i) => i === 0 || num(cl[i - 1])[0] > num(v)[0] || (num(cl[i - 1])[0] === num(v)[0] && num(cl[i - 1])[1] > num(v)[1]))],
       [true, true, true]);
+    // feuille Commande : produits du buffet sans la vaisselle, sauf thé et serviettes, sans doublon
+    {
+      const cmd = RDJ.commandeParDefaut();
+      egal('commande : produits du buffet (thé et serviettes gardés, verres et bols retirés, pas de doublon)',
+        [cmd.some((p) => p.n === 1 && /Thé/.test(p.nom)), cmd.some((p) => p.n === 38), cmd.some((p) => p.n === 2 || p.n === 31), new Set(cmd.map((p) => p.n)).size === cmd.length, cmd.find((p) => p.n === 10).f],
+        [true, true, false, true, 'v']);
+    }
+    // historique : périodes, moyennes par jour, chiffres d'une période
+    egal('historique : semaine comparée à la précédente',
+      RDJ.periodesComparees('2026-11-23', 'semaine'), { a: ['2026-11-17', '2026-11-23'], b: ['2026-11-10', '2026-11-16'] });
+    egal('historique : 30 nuits / 30 d\'avant, même période l\'an dernier (364 jours, même jour de semaine)',
+      [RDJ.periodesComparees('2026-11-23', 'mois'), RDJ.periodesComparees('2026-11-23', 'an').b],
+      [{ a: ['2026-10-25', '2026-11-23'], b: ['2026-09-25', '2026-10-24'] }, ['2025-10-26', '2025-11-24']]);
+    {
+      const ls = [
+        { date: '2026-11-16', jour: 'lundi', chambres: 60, clients: 70, departs: 20, recouches: 40, pdj: 50, taux: 0.6, sources: { DIR: 30, BKG: 30 }, types: { '1Q': 40, '1K': 20 } },
+        { date: '2026-11-17', jour: 'mardi', chambres: 80, clients: 90, departs: 30, recouches: 50, pdj: 70, taux: 0.8, sources: { DIR: 50, BKG: 30 } },
+        { date: '2026-11-23', jour: 'lundi', chambres: 70, clients: 75, departs: 25, recouches: 45, pdj: 60, taux: 0.7 },
+      ];
+      const s = RDJ.statsPeriode(ls, '2026-11-16', '2026-11-22');
+      egal('historique : chiffres d\'une période (sources et types sur les nuits qui les ont)',
+        [s.nuits, Math.round(s.taux * 100), s.chambres, s.pdj, s.sources.nuits, s.sources.chambres, s.sources.tot, s.types.nuits, s.types.tot, s.meilleure.date],
+        [2, 70, 140, 120, 2, 140, { DIR: 80, BKG: 60 }, 1, { '1Q': 40, '1K': 20 }, '2026-11-17']);
+      egal('historique : moyenne par jour de la semaine',
+        RDJ.moyenneParJour(ls).slice(0, 3).map((j) => [j.jour, j.nuits, j.taux === null ? null : Math.round(j.taux * 100)]),
+        [['lundi', 2, 65], ['mardi', 1, 80], ['mercredi', 0, null]]);
+    }
     // mise à jour depuis GitHub
     egal('maj : comparaison des versions', [RDJ.maj.comparerVersions('3.27', '3.3') > 0, RDJ.maj.comparerVersions('3.9', '3.10') < 0, RDJ.maj.comparerVersions('3.27', '3.27')], [true, true, 0]);
     egal('maj : seuls les fichiers de l\'appli sont remplacés',

@@ -8,6 +8,36 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.38', date: '2026-11-24', titre: 'PDJ : feuille Commande',
+      changements: [
+        ['nouveau', "Onglet PDJ → Commande : liste des produits du buffet à imprimer pour chiffrer la commande, rangée par famille (viennoiseries et pains, fruits et jus, laitiers, salé et œufs, céréales, sucré, consommables), avec le numéro du croquis du buffet et une colonne par livraison (mardi et vendredi). En haut : semaine, fournisseur, commandé par ; deux lignes vides pour écrire à la main. Une page A4 en noir et blanc."],
+        ['nouveau', "La liste se modifie depuis l'onglet : « Ajouter un produit » (nom, famille, numéro du buffet facultatif) et × pour retirer un produit. Elle est gardée sur ce poste et dans les sauvegardes ; « Revenir à la liste du buffet » remet la liste de départ."],
+      ],
+    },
+    {
+      version: '3.37', date: '2026-11-24', titre: 'Historique : tableau de bord et comparaison de périodes',
+      changements: [
+        ['amelioration', "Historique, tableau de bord : quatre chiffres des 30 dernières nuits (taux moyen, chambres, petits déjeuners et départs par nuit), avec l'écart en vert ou en rouge par rapport aux 30 nuits d'avant et la meilleure nuit."],
+        ['amelioration', "Courbe du taux d'occupation des 30 dernières nuits, avec les 30 nuits d'avant en pointillé pour comparer d'un coup d'œil ; à côté, la moyenne par jour de la semaine (du lundi au dimanche)."],
+        ['nouveau', "« Comparer deux périodes » : deux plages de dates au choix, ou les raccourcis « Semaine précédente », « 30 nuits précédentes » et « Même période l'an dernier ». Tableau des écarts (taux, chambres, clients, petits déjeuners, départs, part de chaque source) et occupation par type de chambre."],
+        ['nouveau', "Chaque nuit enregistrée garde maintenant les chambres occupées par type (PMR, 1K, 1Q, 2S) : l'occupation par type apparaît dans la comparaison pour les nuits importées à partir de cette version."],
+      ],
+    },
+    {
+      version: '3.36', date: '2026-11-24', titre: 'Sauvegarde automatique à chaque import',
+      changements: [
+        ['nouveau', "Après chaque import (un rapport ou plusieurs d'un coup), les données sont sauvegardées automatiquement dans le dossier « save » de l'application, si ce dossier a déjà été choisi (Chrome ou Edge). Le message de fin d'import l'indique ; sans dossier choisi, rien n'est téléchargé."],
+        ['amelioration', "Le dossier « save » garde maintenant les 30 dernières sauvegardes (environ une semaine de nuits) au lieu de 10."],
+      ],
+    },
+    {
+      version: '3.35', date: '2026-11-24', titre: 'Cuisson PDJ par fournée',
+      changements: [
+        ['amelioration', "Feuille de cuisson PDJ : les produits en cuisson sont maintenant rangés par fournée, dans l'ordre de la matinée (6h30, 7h30, réserve) : dans chaque colonne, ce qu'on enfourne à cette heure-là avec la minuterie, la température, le nombre de pièces et de plaques, et une case « Sorti ». La réserve a un en-tête hachuré (à cuire seulement si le buffet baisse)."],
+        ['amelioration', "Autres produits : liste sur deux colonnes, avec une case à cocher, la consigne de mise en place et la quantité à droite. Toujours une seule page A4 en noir et blanc."],
+      ],
+    },
+    {
       version: '3.34', date: '2026-11-23', titre: 'Feuille de chambre en liste à cocher',
       changements: [
         ['amelioration', "Feuille de chambre : chaque chambre a maintenant son type (PMR, 1K, 1Q, 2S), son état en toutes lettres (BLANC, Recouche, Blanc rec., H. service), une case « Fait » à cocher quand la chambre est terminée et une case « NV » (cochée quand la chambre est notée non vue)."],

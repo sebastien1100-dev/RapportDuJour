@@ -7,6 +7,47 @@
   'use strict';
   const RDJ = (window.RDJ = window.RDJ || {});
 
+  /* Légende du croquis, par zone du buffet, en deux colonnes ; reprise par la feuille Commande.
+     Pour ajouter un élément : une ligne [numéro, famille, nom].
+     Familles : v viennoiseries et pains · s sucré à tartiner · f fruits et jus · l laitiers et fromages
+                o salé et œufs · c céréales · m vaisselle et matériel */
+  RDJ.BUFFET_LEGENDE = [
+    [
+      { titre: 'Bout boissons', fond: '#f4faf7', items: [[1, 'm', 'Boîte à thé'], [2, 'm', 'Verres'], [3, 'f', 'Oranges à jus'], [4, 'm', 'Presse-jus'], [5, 'm', 'Oranges pressées (à jeter)']] },
+      { titre: 'Côté viennoiseries et pains', fond: '#fdf9ee', items: [[6, 'v', 'Pain de mie'], [7, 'v', 'Cake'], [8, 'v', 'Brioche'], [9, 'v', 'Pains au chocolat'],
+        [10, 'v', 'Croissants'], [11, 'm', 'Planche à pain'], [12, 'm', 'Coupelles à confiture'], [13, 's', 'Confiture, Nutella, miel'],
+        [14, 'v', 'Baguettes'], [15, 'v', 'Corbeilles de pain'], [16, 'm', 'Grille-pain']] },
+      { titre: 'Bout fruits', fond: '#fdf4ef', items: [[17, 'f', 'Présentoir à fruits (3 étages)']] },
+      { titre: 'Structure centrale noire', fond: '#14171c', items: [[31, 'm', 'Bols, tout le long']] },
+    ],
+    [
+      { titre: 'Côté produits frais', fond: '#f3f7fc', items: [[18, 'f', 'Compote de pommes'], [19, 'f', 'Salade de fruits'], [20, 'l', 'Fromage blanc'],
+        [21, 'l', 'Ardoise de fromages'], [22, 'l', 'Beurre doux et demi-sel'], [23, 'o', 'Jambon et charcuterie'], [24, 'l', 'Emmental en tranches'],
+        [25, 'l', 'Yaourts'], [26, 'f', 'Lait, eau, jus (2 pomme, 2 orange)'], [27, 'v', 'Crêpes']] },
+      { titre: 'Trois tables collées au buffet', fond: '#e8d3b6', bord: '#9c7a52', items: [[28, 'c', 'Distributeurs de céréales'],
+        [29, 'c', 'Bocaux (granola, fruits secs)'], [30, 'c', 'Sucre'], [31, 'm', 'Bols'], [32, 'm', 'Cuiseur à œufs'], [33, 'o', 'Œufs et coquetiers'],
+        [34, 'm', 'Sel et poivre'], [35, 'm', 'Assiettes'], [36, 'm', 'Plateaux PDJ'], [37, 'm', 'Petites et grandes cuillères'],
+        [38, 'm', 'Serviettes en papier'], [39, 'm', 'Couteaux et fourchettes']] },
+    ],
+  ];
+  RDJ.BUFFET_FAMILLES = { v: '#ebcb8b', s: '#dcd2f6', f: '#bfe8d6', l: '#c8dcf4', o: '#f4c7c7', c: '#f7e7b0', m: '#e3e6ea' };
+
+  /** Feuille Commande, liste de départ : les produits du buffet (sans la vaisselle ni le matériel, sauf le thé
+      et les serviettes en papier), chacun avec son numéro du croquis. -> [{ n, f, nom }] */
+  RDJ.commandeParDefaut = function () {
+    const CONSO = { 1: 'Thé (boîte à thé)', 38: 'Serviettes en papier' };
+    const vus = new Set();
+    const res = [];
+    for (const z of RDJ.BUFFET_LEGENDE.flat()) {
+      for (const [n, f, nom] of z.items) {
+        if ((f === 'm' && !CONSO[n]) || vus.has(n)) continue;
+        vus.add(n);
+        res.push({ n, f, nom: CONSO[n] || nom });
+      }
+    }
+    return res;
+  };
+
   RDJ.SVG_BUFFET = `<svg class="buffet-svg" xmlns="http://www.w3.org/2000/svg" viewBox="26 42 642 262" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Plan du buffet du petit déjeuner, vue de dessus">
   <g fill="#5f6b7a" font-size="6" font-weight="bold" text-anchor="middle">
     <text x="190" y="52">Côté viennoiseries et pains</text>
@@ -147,30 +188,10 @@
   ${legende()}
 </svg>`;
 
-  /* Légende du croquis, en deux colonnes. Pour ajouter un élément : une ligne [numéro, famille, nom].
-     Familles : v viennoiseries et pains · s sucré à tartiner · f fruits et jus · l laitiers et fromages
-                o salé et œufs · c céréales · m vaisselle et matériel */
+  /* Légende du croquis, en deux colonnes (données : RDJ.BUFFET_LEGENDE, en haut du fichier). */
   function legende() {
-    const FAM = { v: '#ebcb8b', s: '#dcd2f6', f: '#bfe8d6', l: '#c8dcf4', o: '#f4c7c7', c: '#f7e7b0', m: '#e3e6ea' };
-    const COLONNES = [
-      [
-        { titre: 'Bout boissons', fond: '#f4faf7', items: [[1, 'm', 'Boîte à thé'], [2, 'm', 'Verres'], [3, 'f', 'Oranges à jus'], [4, 'm', 'Presse-jus'], [5, 'm', 'Oranges pressées (à jeter)']] },
-        { titre: 'Côté viennoiseries et pains', fond: '#fdf9ee', items: [[6, 'v', 'Pain de mie'], [7, 'v', 'Cake'], [8, 'v', 'Brioche'], [9, 'v', 'Pains au chocolat'],
-          [10, 'v', 'Croissants'], [11, 'm', 'Planche à pain'], [12, 'm', 'Coupelles à confiture'], [13, 's', 'Confiture, Nutella, miel'],
-          [14, 'v', 'Baguettes'], [15, 'v', 'Corbeilles de pain'], [16, 'm', 'Grille-pain']] },
-        { titre: 'Bout fruits', fond: '#fdf4ef', items: [[17, 'f', 'Présentoir à fruits (3 étages)']] },
-        { titre: 'Structure centrale noire', fond: '#14171c', items: [[31, 'm', 'Bols, tout le long']] },
-      ],
-      [
-        { titre: 'Côté produits frais', fond: '#f3f7fc', items: [[18, 'f', 'Compote de pommes'], [19, 'f', 'Salade de fruits'], [20, 'l', 'Fromage blanc'],
-          [21, 'l', 'Ardoise de fromages'], [22, 'l', 'Beurre doux et demi-sel'], [23, 'o', 'Jambon et charcuterie'], [24, 'l', 'Emmental en tranches'],
-          [25, 'l', 'Yaourts'], [26, 'f', 'Lait, eau, jus (2 pomme, 2 orange)'], [27, 'v', 'Crêpes']] },
-        { titre: 'Trois tables collées au buffet', fond: '#e8d3b6', bord: '#9c7a52', items: [[28, 'c', 'Distributeurs de céréales'],
-          [29, 'c', 'Bocaux (granola, fruits secs)'], [30, 'c', 'Sucre'], [31, 'm', 'Bols'], [32, 'm', 'Cuiseur à œufs'], [33, 'o', 'Œufs et coquetiers'],
-          [34, 'm', 'Sel et poivre'], [35, 'm', 'Assiettes'], [36, 'm', 'Plateaux PDJ'], [37, 'm', 'Petites et grandes cuillères'],
-          [38, 'm', 'Serviettes en papier'], [39, 'm', 'Couteaux et fourchettes']] },
-      ],
-    ];
+    const FAM = RDJ.BUFFET_FAMILLES;
+    const COLONNES = RDJ.BUFFET_LEGENDE;
     const LIGNE = 8.6;
     let svg = '<g fill="#1c2a48"><text x="430" y="58" font-size="7.5" font-weight="bold">Légende</text></g>';
     COLONNES.forEach((zones, c) => {

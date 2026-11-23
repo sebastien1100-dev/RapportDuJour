@@ -19,6 +19,7 @@
     fdc: { nuit: null, corrections: {}, nv: {} },   // feuille femme de chambre (nuit en cours)
     pdj: { nombre: null, type: 'business', nuit: null, complements: {} },
     recap: [],
+    commande: null,                   // feuille Commande : { produits: [{ n, f, nom }] } ; null = liste du buffet
     derniereSauvegarde: null,
   });
 
@@ -93,7 +94,8 @@
      (Chrome / Edge : showDirectoryPicker), son accès est retenu dans IndexedDB, et les sauvegardes vont
      dans son sous-dossier « save ». Seules les GARDER dernières sauvegardes datées sont gardées.
      Sans cette possibilité (Safari, Firefox), la sauvegarde est téléchargée comme avant. */
-  const GARDER = 10;
+  // une sauvegarde à chaque import (3 à 4 par nuit) : les 30 dernières couvrent environ une semaine
+  const GARDER = 30;
   const MOTIF_SAUV = /^RapportDuJour_sauvegarde_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json$/;
 
   function base(mode, action) {

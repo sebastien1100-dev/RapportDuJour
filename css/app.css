@@ -345,32 +345,67 @@ button, input, select { font: inherit; }
 .reglages .types-ch { margin-bottom: 0; border-top: 4px solid #7b4fc9; }
 
 /* Historique */
-.hi-cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
-.hi-carte {
+/* tableau de bord : 4 chiffres des 30 dernières nuits, écart aux 30 d'avant */
+.hi-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+@media (max-width: 1100px) { .hi-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.hi-kpi {
   display: flex; flex-direction: column; gap: 2px; padding: 14px 18px; background: var(--surface);
   border: 1px solid var(--bord); border-top: 4px solid var(--marine); border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.05);
 }
-.hi-carte span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--doux); }
-.hi-carte b { font-size: 32px; line-height: 1.1; color: var(--marine); font-variant-numeric: tabular-nums; }
-.hi-carte small { font-size: 12px; color: var(--doux); }
-.hi-carte.taux.haut { border-top-color: #3fc1a6; } .hi-carte.taux.moyen { border-top-color: #e8b14f; } .hi-carte.taux.bas { border-top-color: #e8786a; }
+.hi-kpi > span { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--doux); }
+.hi-kpi b { font-size: 32px; line-height: 1.1; color: var(--marine); font-variant-numeric: tabular-nums; }
+.hi-kpi small { font-size: 12px; color: var(--doux); }
+.hi-kpi.taux.haut { border-top-color: #3fc1a6; } .hi-kpi.taux.moyen { border-top-color: #e8b14f; } .hi-kpi.taux.bas { border-top-color: #e8786a; }
+.hi-ecart { font-weight: 700; color: var(--doux); }
+.hi-ecart.up, .hi-table-comp td.up { color: var(--accent); }
+.hi-ecart.down, .hi-table-comp td.down { color: var(--rouge); }
+.hi-deux { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 16px; }
+.hi-deux > .hi-bloc { margin-bottom: 16px; }
+@media (max-width: 1100px) { .hi-deux { grid-template-columns: 1fr; } }
+.hi-legende i.pointille { background: repeating-linear-gradient(90deg, #9aa3b5 0 4px, transparent 4px 7px); height: 3px; border-radius: 0; }
+.hi-courbes path.avant { stroke-dasharray: 6 6; stroke-width: 2; }
+/* moyenne par jour de la semaine */
+.hi-jours { display: flex; flex-direction: column; gap: 10px; }
+.hi-jours > div { display: grid; grid-template-columns: 80px 1fr 46px; align-items: center; gap: 10px; font-size: 13px; color: var(--marine); }
+.hi-jours i { display: block; height: 12px; border-radius: 99px; background: #eef2f1; overflow: hidden; }
+.hi-jours i b { display: block; height: 100%; border-radius: 99px; background: var(--anneau-taux, #c9d2cf); }
+.hi-jours i b.haut { --anneau-taux: #3fc1a6; } .hi-jours i b.moyen { --anneau-taux: #e8b14f; } .hi-jours i b.bas { --anneau-taux: #e8786a; }
+.hi-jours em { font-style: normal; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+/* comparer deux périodes */
+.hi-choix { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 14px; font-size: 13px; color: var(--marine); }
+.hi-periode { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
+.hi-periode.p-a { background: var(--menthe); color: var(--menthe-fonce); }
+.hi-periode.p-b { background: var(--ciel); color: var(--ciel-fonce); }
+.hi-periode input { font: inherit; font-size: 13px; border: 0; background: rgba(255,255,255,.75); border-radius: 6px; padding: 2px 6px; color: inherit; }
+.hi-raccs { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.hi-racc { font: inherit; font-size: 12px; border: 1px solid var(--bord); background: var(--surface); color: var(--marine); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.hi-racc:hover { border-color: var(--accent); }
+.hi-racc.actif { background: var(--marine); border-color: var(--marine); color: #fff; }
+.hi-comp { display: grid; grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr); gap: 24px; align-items: start; }
+@media (max-width: 1100px) { .hi-comp { grid-template-columns: 1fr; } }
+.hi-table-comp th small { display: block; font-size: 10px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.hi-table-comp th i, .hi-types b.pa, .hi-types b.pb { display: inline-block; }
+.hi-table-comp th i { width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: 0; }
+.hi-table-comp td:first-child { text-align: left; font-weight: 700; }
+.hi-table-comp td { font-weight: 600; }
+.pa { background: var(--accent); } .pb { background: #9bb8e6; }
+.hi-types h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--doux); }
+.hi-type { display: grid; grid-template-columns: 70px 1fr 46px; align-items: center; gap: 4px 10px; margin-bottom: 10px; font-size: 13px; color: var(--marine); }
+.hi-type > span { font-weight: 700; }
+.hi-type > span small { font-weight: 400; color: var(--doux); }
+.hi-type i { display: block; height: 10px; border-radius: 99px; background: #eef2f1; overflow: hidden; }
+.hi-type i b { display: block; height: 100%; border-radius: 99px; }
+.hi-type em { font-style: normal; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.hi-type em.d { color: var(--doux); font-weight: 600; }
+.hi-note { margin: 0; font-size: 13px; color: var(--doux); }
 .hi-bloc { background: var(--surface); border: 1px solid var(--bord); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
 .hi-bloc h3 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--marine); }
 .hi-bloc h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--doux); margin-left: 6px; }
 .hi-graphe { display: flex; gap: 8px; height: 190px; }
 .hi-axe { display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: var(--doux); padding-bottom: 30px; text-align: right; }
-.hi-barres {
-  flex: 1; display: grid; grid-template-columns: repeat(var(--n), minmax(14px, 46px)); gap: 6px; align-items: end;
-  background: repeating-linear-gradient(to top, #eef2f1 0 1px, transparent 1px 50%) 0 0 / 100% calc(100% - 30px) no-repeat;
-}
-.hi-barre { display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
-.hi-barre i { position: relative; display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: var(--anneau-taux); min-height: 2px; }
-.hi-barre em { position: absolute; top: -16px; left: 0; right: 0; text-align: center; font-style: normal; font-size: 10px; font-weight: 700; color: var(--marine); }
-.hi-barre > span { height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--marine); line-height: 1.1; }
-.hi-barre > span small { font-weight: 400; color: var(--doux); font-size: 10px; }
-.hi-barre.haut, .hi-jauge.haut { --anneau-taux: #7fe3cf; }
-.hi-barre.moyen, .hi-jauge.moyen { --anneau-taux: #ffd27a; }
-.hi-barre.bas, .hi-jauge.bas { --anneau-taux: #ff9f8f; }
+.hi-jauge.haut { --anneau-taux: #7fe3cf; }
+.hi-jauge.moyen { --anneau-taux: #ffd27a; }
+.hi-jauge.bas { --anneau-taux: #ff9f8f; }
 .hi-legende { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; color: var(--marine); }
 .hi-legende li { display: flex; align-items: center; gap: 6px; }
 .hi-legende i { width: 12px; height: 12px; border-radius: 3px; }
@@ -725,13 +760,13 @@ body.depot .voile-depot { display: grid; }
 .types-ch label.tc-1Q { background: var(--lilas); }
 
 /* historique : cartes de synthèse pastel */
-.hi-carte { border: 0; border-radius: 18px; box-shadow: none; background: var(--lilas); }
-.hi-carte:nth-child(2) { background: var(--menthe); }
-.hi-carte:nth-child(3) { background: var(--beurre); }
-.hi-carte:nth-child(4) { background: var(--ciel); }
-.hi-carte:nth-child(5) { background: var(--peche); }
-.hi-carte.taux.haut { background: var(--menthe); } .hi-carte.taux.moyen { background: var(--beurre); } .hi-carte.taux.bas { background: var(--rose); }
-.hi-carte span, .hi-carte small { color: var(--marine); opacity: .7; }
+.hi-kpi { border: 0; border-radius: 18px; box-shadow: none; background: var(--menthe); }
+.hi-kpi:nth-child(2) { background: var(--ciel); }
+.hi-kpi:nth-child(3) { background: var(--beurre); }
+.hi-kpi:nth-child(4) { background: var(--lilas); }
+.hi-kpi.taux.haut { background: var(--menthe); } .hi-kpi.taux.moyen { background: var(--beurre); } .hi-kpi.taux.bas { background: var(--rose); }
+.hi-kpi > span, .hi-kpi > small { color: var(--marine); }
+.hi-kpi > span { opacity: .7; }
 .hi-table tbody tr:hover td { background: var(--fond); }
 .hi-vide { border: 2px dashed var(--bord); border-radius: 18px; }
 
@@ -1296,36 +1331,85 @@ body.depot .voile-depot { display: grid; }
 .p-table td.g { font-size: 11pt; }
 .p-table .q { width: 26mm; }
 .p-table td.q b { display: inline-block; min-width: 14mm; font-size: 17pt; color: var(--marine); }
-.p-cuisson .four span { display: inline-block; margin: 0 .6mm; padding: .5mm 2mm; border: .3mm solid #b9ddd8; border-radius: 3mm; font-size: 9pt; background: #fff; white-space: nowrap; }
-.p-cuisson .four em { color: #999; font-style: normal; }
-/* cuisson en fournées : total + une colonne par fournée, réserve en pointillés */
-.p-cuisson .q { width: auto; white-space: nowrap; }
-.p-cuisson td.q b { min-width: 0; font-size: 15pt; }
-.p-cuisson td.q small { display: block; font-size: 7.5pt; color: #555; line-height: 1.1; }
-.p-cuisson td.q em { color: #999; font-style: normal; }
-.p-cuisson td.tot { background: var(--marine-clair) !important; border-right: .3mm solid #9aa7b5; }
-.p-cuisson td.res { border-left: .3mm dashed #9aa7b5; }
-.p-cuisson td.res b { font-size: 12pt; color: #555; }
-.p-cuisson th.res { font-style: italic; }
-.p-fournees { margin: -3.5mm 0 5mm; font-size: 8.5pt; color: #333; }
-.nb .p-cuisson td.tot { background: #fff !important; border-right-color: #000; }
-.nb .p-cuisson td.res { border-left-color: #000; }
-.nb .p-cuisson td.q small, .nb .p-cuisson td.res b, .nb .p-fournees { color: #000; }.p-autres td.mep { text-align: left; font-size: 9.5pt; }
-.p-autres td.mep small { display: block; margin-top: .6mm; font-size: 8.5pt; font-style: italic; color: #555; }
+/* Commande PDJ : liste des produits du buffet par famille, une colonne par jour de livraison */
+.feuille.commande { padding: 11mm 12mm; display: flex; flex-direction: column; gap: 3mm; }
+.c-tete { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; border-bottom: .8mm solid var(--accent); padding-bottom: 2.5mm; }
+.c-tete h1 { font-size: 24pt; letter-spacing: .04em; line-height: 1; }
+.c-tete .sous { font-size: 8.5pt; margin-top: 1mm; }
+.c-champs { display: grid; grid-template-columns: auto 42mm; gap: 1.6mm 2.5mm; font-size: 8.5pt; align-items: end; }
+.c-champs span { text-align: right; font-weight: 700; }
+.c-champs i { display: block; height: 5mm; border-bottom: .3mm solid #000; }
+.c-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 9.5pt; }
+.c-table thead th { background: var(--marine); color: #fff; font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; padding: 1.6mm 1mm; border: .3mm solid var(--marine); }
+.c-table th.g, .c-table td.nom { text-align: left; }
+.c-table tr.fam th { background: var(--marine-clair); color: var(--marine); text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; padding: 1mm 2.5mm; border: .3mm solid #9aa7b5; }
+.c-table td { border: .3mm solid #9aa7b5; padding: 0 2mm; }
+.c-table td.n { text-align: center; padding: 0; }
+.c-table td.nom { position: relative; font-weight: 600; }
+.c-num { display: inline-flex; width: 5mm; height: 5mm; border-radius: 50%; border: .35mm solid var(--marine); align-items: center; justify-content: center; font-size: 6.5pt; font-weight: 800; }
+.c-retirer { position: absolute; right: 1mm; top: 50%; transform: translateY(-50%); width: 5.5mm; height: 5.5mm; border: 0; border-radius: 50%; background: transparent; color: #b0b7c3; font: inherit; font-size: 11pt; line-height: 1; cursor: pointer; }
+.c-retirer:hover { background: #fde8e6; color: var(--rouge); }
+.c-pied { margin: auto 0 0; font-size: 8pt; color: #333; }
+/* barre d'ajout au-dessus de la feuille (écran seulement) */
+.c-edition { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; margin: 0 0 14px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--bord); border-radius: 14px; }
+.c-edition label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--marine); }
+.c-edition input, .c-edition select { font: inherit; font-size: 14px; font-weight: 400; padding: 7px 9px; border: 1px solid var(--bord); border-radius: 8px; background: #fff; }
+.c-edition #cmd-nom { width: 260px; }
+.c-edition .c-num-saisie input { width: 90px; }
+.c-espace { flex: 1; }
+.nb .c-tete { border-bottom-color: #000; }
+.nb .c-table thead th { background: #000; border-color: #000; }
+.nb .c-table tr.fam th { background: #e6e6e6; color: #000; border-color: #000; }
+.nb .c-table td { border-color: #555; }
+.nb .c-num { border-color: #000; }
+.nb .c-retirer { display: none; }
+.nb .c-pied { color: #000; }
+
+/* Cuisson PDJ : une colonne par fournée, dans l'ordre de cuisson ; réserve à en-tête hachuré */
+.p-four { display: grid; gap: 3.5mm; margin-bottom: 2.5mm; }
+.p-fo { display: flex; flex-direction: column; border: .5mm solid var(--marine); border-radius: 2.5mm; overflow: hidden; }
+.p-fo header { display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 1.8mm 3.5mm; background: var(--marine); color: #fff; }
+.p-fo header b { font-size: 17pt; line-height: 1; }
+.p-fo header span { font-size: 7.5pt; text-align: right; line-height: 1.2; }
+.p-fo.res header { background: repeating-linear-gradient(-45deg, var(--marine) 0 .5mm, #4a5874 .5mm 1.4mm); }
+.p-fo ul { list-style: none; margin: 0; padding: 1mm 3.5mm 1.5mm; flex: 1; }
+.p-fo li { display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 2mm 0; border-bottom: .25mm solid #c9cfd8; }
+.p-fo li:last-child { border-bottom: 0; }
+.p-fo li.rien { justify-content: center; color: #777; font-style: italic; font-size: 9pt; }
+.p-fo .pr { font-size: 10.5pt; font-weight: 700; }
+.p-fo .pr small { display: block; font-size: 7.5pt; font-weight: 400; color: #444; margin-top: .3mm; }
+.p-fo .qt { text-align: right; white-space: nowrap; }
+.p-fo .qt b { display: block; font-size: 18pt; line-height: 1; color: var(--marine); }
+.p-fo .qt small { font-size: 7.5pt; color: #444; }
+.p-fo footer { display: flex; align-items: center; justify-content: space-between; border-top: .35mm solid var(--marine); padding: 1.6mm 3.5mm; font-size: 8.5pt; }
+.p-fo footer span { display: inline-flex; align-items: center; gap: 1.5mm; }
+.feuille.pdj .case { display: inline-block; flex: none; width: 4.4mm; height: 4.4mm; border: .35mm solid #000; border-radius: .7mm; background: #fff; }
+.p-fournees { margin: 0 0 5mm; font-size: 8.5pt; color: #333; }
+/* autres produits : liste sur deux colonnes, case à cocher, quantité à droite */
+.p-autres-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 0 7mm; margin-bottom: 5mm; }
+.p-autres-liste > div { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 3mm; padding: 2mm 0; border-bottom: .25mm solid #c9cfd8; }
+.p-autres-liste .pr { font-size: 10.5pt; font-weight: 700; }
+.p-autres-liste .pr small { display: block; font-size: 7.5pt; font-weight: 400; color: #444; margin-top: .3mm; }
+.p-autres-liste b { font-size: 16pt; color: var(--marine); min-width: 9mm; text-align: right; }
+.nb .p-fo, .nb .p-fo footer { border-color: #000; }
+.nb .p-fo header { background: #000; }
+.nb .p-fo.res header { background: repeating-linear-gradient(-45deg, #000 0 .5mm, #555 .5mm 1.4mm); }
+.nb .p-fo .qt b, .nb .p-autres-liste b { color: #000; }
+.nb .p-fo .pr small, .nb .p-fo .qt small, .nb .p-autres-liste .pr small, .nb .p-fournees { color: #000; }
+.nb .p-fo li, .nb .p-autres-liste > div { border-bottom-color: #888; }
 .p-note { border: .3mm solid #e0a84a; border-left: 2mm solid #e0a84a; background: #fffaf0; border-radius: 2mm; padding: 3mm 5mm; }
 .p-note h3 { margin: 0 0 1mm; font-size: 10pt; text-transform: uppercase; letter-spacing: .05em; color: #8a5a10; }
 .p-note p { margin: 0; font-size: 10pt; line-height: 1.45; }
 .p-pied { font-size: 8pt; color: #555; margin-top: 5mm; }
 /* N&B */
 .nb .p-date { border-color: #000; }
-.nb .p-date span, .nb .p-entree span, .nb .p-autres td.mep small { color: #000; }
+.nb .p-date span, .nb .p-entree span { color: #000; }
 .nb .p-entree .p-chiffre { background: #fff; border: .6mm solid #000; }
 .nb .p-entree .p-chiffre b, .nb .p-entree .p-chiffre span, .nb .p-entree .p-chiffre small { color: #000; }
 .nb .p-section i { background: #000; }
 .nb .p-table { border-color: #000; }
 .nb .p-table td { border-top-color: #777; }
 .nb .p-table tbody tr:nth-child(even) td { background: #fff; }
-.nb .p-cuisson .four span { border-color: #000; }
 .nb .p-note { background: #fff; border-color: #000; }
 .nb .p-note h3 { color: #000; }
 

@@ -116,6 +116,10 @@
       pinDefini: !!pinInfo(),
       reglagesOuverts: reglagesOuverts(),
       maj,
+      // Historique : deux périodes à comparer (par défaut, les 7 dernières nuits et les 7 d'avant)
+      histoComp: histoComp || (etat.recap.length
+        ? { ...RDJ.periodesComparees(etat.recap[etat.recap.length - 1].date, 'semaine'), raccourci: 'semaine' }
+        : { a: [nuit, nuit], b: [nuit, nuit], raccourci: null }),
     };
   }
 
@@ -236,7 +240,7 @@
   }
 
   /* ---------- Sauvegarde .json ----------
-     Dans le sous-dossier « save » du dossier de l'appli quand il a été choisi (Chrome / Edge, 10 dernières gardées),
+     Dans le sous-dossier « save » du dossier de l'appli quand il a été choisi (Chrome / Edge, 30 dernières gardées),
      sinon téléchargée. demander : true pendant un clic (le navigateur peut redemander l'accès au dossier). */
   async function sauverEtat(suffixe, demander) {
     let ou = null;
@@ -259,11 +263,16 @@
     }
   }
 
+  /** Produits de la feuille Commande (copie modifiable) : liste enregistrée, sinon celle du buffet. */
+  const listeCommande = () => ((etat.commande && etat.commande.produits) || RDJ.commandeParDefaut()).map((p) => ({ ...p }));
+
   /* ---------- Mise à jour depuis GitHub ----------
      Pastille « 3.30 disponible » dans la barre du haut (tous les onglets) ; un clic ouvre la carte
      « Nouvelle version » en haut de l'accueil ; « Installer » ouvre la fenêtre d'installation guidée.
      maj : null, { etat: 'verif' } pendant la recherche, ou { etat: 'dispo', version, nouveautes, ouvert } */
   let maj = null;
+  // Historique : périodes comparées (null = par défaut), gardées pendant la session
+  let histoComp = null;
 
   /** Pastille de la barre du haut : visible tant qu'une nouvelle version attend d'être installée. */
   function majPastille() {
@@ -404,9 +413,22 @@
   /** Fin d'un import : message et onglet, ou bilan seul quand plusieurs fichiers sont importés ensemble. */
   function finImport(bilan, niveau, vue, silencieux) {
     if (silencieux) return { bilan, niveau };
-    aller(vue);
-    notice(bilan, niveau);
-    return true;
+    return sauvegardeApresImport().then((ou) => {
+      aller(vue);
+      notice(bilan + (ou ? '\nSauvegarde automatique : ' + ou + '.' : ''), niveau);
+      return true;
+    });
+  }
+
+  /** Sauvegarde automatique après chaque import, dans le dossier « save » de l'appli quand il a été choisi
+      (Chrome / Edge) et que le navigateur y donne accès. Jamais de téléchargement : sans dossier, rien n'est fait.
+      Renvoie le chemin écrit, ou null. */
+  async function sauvegardeApresImport() {
+    if (!RDJ.dossierSauv.possible || !RDJ.dossierSauv.nom) return null;
+    let ou = null;
+    try { ou = await RDJ.dossierSauv.ecrire(etat, null, true); } catch (e) { ou = null; }
+    if (ou) { etat.derniereSauvegarde = RDJ.maintenantLocal(); enregistrer(); }
+    return ou;
   }
 
   /** opts.lignes : fichier déjà lu ; opts.silencieux : renvoie { bilan, niveau } sans message (import groupé). */
@@ -460,7 +482,7 @@
     if (etat.pdj.nuit !== nuit) { etat.pdj.nuit = nuit; etat.pdj.complements = {}; }
 
     const ctx = contexte();
-    etat.recap = RDJ.majRecap(etat.recap, RDJ.ligneRecap(nuit, ctx.chiffres));
+    etat.recap = RDJ.majRecap(etat.recap, RDJ.ligneRecap(nuit, ctx.chiffres, ctx.parType));
     enregistrer();
 
     let bilan = lu.reservations.length + ' chambres importées (nuit du ' + RDJ.dateFr(nuit) + ').\n' +
@@ -507,6 +529,8 @@
       if (r.niveau !== 'ok' && niveau !== 'erreur') niveau = r.niveau;
     }
     if (refuses.length) bilans.push('Non importé : ' + refuses.join(', ') + '.');
+    const ou = lus.length ? await sauvegardeApresImport() : null;
+    if (ou) bilans.push('Sauvegarde automatique : ' + ou + '.');
     aller('rapport');
     notice(lus.length + ' fichier(s) importé(s) sur ' + fichiers.length + ', dans l\'ordre : ' +
       lus.map((l) => NOMS_RAPPORTS[l.type]).join(', ') + '.\n\n' + bilans.join('\n\n'), lus.length ? niveau : 'erreur');
@@ -747,7 +771,7 @@
 
   function apresModifRapport() {
     const ctx = contexte();
-    if (ctx.raw.length) etat.recap = RDJ.majRecap(etat.recap, RDJ.ligneRecap(ctx.nuit, ctx.chiffres));
+    if (ctx.raw.length) etat.recap = RDJ.majRecap(etat.recap, RDJ.ligneRecap(ctx.nuit, ctx.chiffres, ctx.parType));
     enregistrer();
     afficher();
   }
@@ -914,6 +938,38 @@
     'apercu-fdc': () => { const ctx = contexte(); apercu('Feuille de chambre', RDJ.vues.feuilleFdc(ctx), ctx.cfg.nbExemplairesFdc, true); },
     'apercu-pdj': () => apercu('Cuisson PDJ', RDJ.vues.feuillePdj(contexte()), 1),
     'apercu-buffet': () => apercu('Buffet PDJ', RDJ.vues.feuilleBuffet(contexte()), 1),
+    'apercu-commande': () => apercu('Commande PDJ', RDJ.vues.feuilleCommande(contexte()), 1),
+    // feuille Commande : la liste du buffet sert de départ ; ajouts et retraits gardés dans etat.commande
+    'cmd-ajouter': () => {
+      const nom = ($('#cmd-nom').value || '').trim();
+      if (!nom) { $('#cmd-nom').focus(); return notice('Écrivez le nom du produit à ajouter.', 'alerte'); }
+      const n = parseInt($('#cmd-num').value, 10);
+      const produits = listeCommande();
+      produits.push({ n: n > 0 ? n : null, f: $('#cmd-famille').value || 'a', nom });
+      etat.commande = { produits };
+      enregistrer();
+      afficher();
+      notice('« ' + nom + ' » ajouté à la commande.', 'ok');
+      const champ = $('#cmd-nom');
+      if (champ) champ.focus();
+    },
+    'cmd-retirer': (el) => {
+      const produits = listeCommande();
+      const i = parseInt(el.dataset.i, 10);
+      if (!produits[i]) return;
+      const [retire] = produits.splice(i, 1);
+      etat.commande = { produits };
+      enregistrer();
+      afficher();
+      notice('« ' + retire.nom + ' » retiré de la commande.', 'ok');
+    },
+    'cmd-defaut': async () => {
+      const ok = await dialogue({ titre: 'Revenir à la liste du buffet', message: 'Les produits ajoutés à la main seront retirés et les produits du buffet remis.', ok: 'Revenir à la liste', danger: true });
+      if (!ok) return;
+      etat.commande = null;
+      enregistrer();
+      afficher();
+    },
     'pdj-cuisson': () => choisirPdj('cuisson'),
     'pdj-buffet': () => choisirPdj('buffet'),
     'pdj-commande': () => choisirPdj('commande'),
@@ -1057,6 +1113,12 @@
     },
     restaurer: () => $('#fichier-restaurer').click(),
 
+    'hc-raccourci': (el) => {
+      if (!etat.recap.length) return;
+      const r = el.dataset.r;
+      histoComp = { ...RDJ.periodesComparees(etat.recap[etat.recap.length - 1].date, r), raccourci: r };
+      afficher();
+    },
     'maj-verifier': () => majVerifier(false),
     'maj-ouvrir': () => {
       if (!maj || maj.etat !== 'dispo') return;
@@ -1171,11 +1233,13 @@
       return;
     }
     const el = ev.target.closest('[data-action]');
-    if (el && !el.disabled && ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action]();
+    if (el && !el.disabled && ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action](el);
   });
 
   document.addEventListener('keydown', (ev) => {
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.id === 'zone-import') { ev.preventDefault(); ACTIONS.importer(); }
+    // feuille Commande : Entrée dans le nom ou le numéro ajoute le produit
+    if (ev.key === 'Enter' && (ev.target.id === 'cmd-nom' || ev.target.id === 'cmd-num')) { ev.preventDefault(); ACTIONS['cmd-ajouter'](); }
   });
 
   document.addEventListener('dblclick', (ev) => {
@@ -1196,6 +1260,16 @@
   document.addEventListener('change', (ev) => {
     const t = ev.target;
     if (t.id === 'zoom-feuille') return; // déjà appliqué pendant le glissement (événement input)
+    // Historique, « Comparer deux périodes » : dates choisies à la main (non enregistrées)
+    if (t.dataset && t.dataset.hc) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(t.value)) return;
+      const hc = contexte().histoComp;
+      const [p, i] = [t.dataset.hc[0], +t.dataset.hc[1]];
+      hc[p][i] = t.value;
+      if (hc[p][0] > hc[p][1]) hc[p] = [hc[p][1], hc[p][0]];
+      histoComp = { ...hc, raccourci: null };
+      return afficher();
+    }
     if (t.id === 'date-rapport') {
       etat.dateRapportManuelle = /^\d{4}-\d{2}-\d{2}$/.test(t.value) ? t.value : null;
     } else if (t.id === 'pdj-nombre') {
