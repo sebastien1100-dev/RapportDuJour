@@ -8,6 +8,19 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.42', date: '2026-11-24', titre: 'Feuille de chambre : « Ne pas faire »',
+      changements: [
+        ['nouveau', "Feuille de chambre : le double-clic sur l'état d'une chambre propose « Ne pas faire » (vide → B → R → BR → Ne pas faire → HS → vide). La case s'affiche en gris clair, en italique, sans case « Fait » ; la chambre reste occupée (recouche sur le plan) et compte dans le total. Nouvelle colonne NPF dans le compteur du haut, et « NE PAS FAIRE » dans les corrections du jour."],
+      ],
+    },
+    {
+      version: '3.41', date: '2026-11-24', titre: 'Nouvelle nuit à 23 h : tous les écrans repartent à vide',
+      changements: [
+        ['amelioration', "À partir de 23 h, ce n'est plus seulement la zone d'import de l'accueil qui se vide : tous les écrans repartent à vide pour la nouvelle nuit (chiffres et cartes de l'accueil, rapport, feuille de chambre, plan, cuisson PDJ). Les rapports importés avant 23 h ne s'affichent plus ; rien n'est effacé, la nuit précédente reste dans l'historique et dans les sauvegardes."],
+        ['amelioration', "Tant que rien n'est importé, la nuit affichée est celle qui a commencé à 23 h (même après minuit). L'écran ouvert se met à jour tout seul à 23 h, avec un message. Le nombre de couverts saisi à la main et le rapport des arrivées de la nuit précédente ne sont plus repris."],
+      ],
+    },
+    {
       version: '3.40', date: '2026-11-24', titre: 'Buffet PDJ modifiable',
       changements: [
         ['nouveau', "Buffet PDJ : bouton « Modifier le buffet » (avec le code des Réglages s'il y en a un). Tout le buffet se modifie : îlot, fonds de zone, structure centrale, tables, titres et produits. On glisse un élément pour le déplacer, on tire le carré vert du coin pour l'agrandir ; flèches du clavier pour ajuster de 1 cm (Maj : 5 cm), Suppr pour supprimer, Ctrl+Z pour annuler."],

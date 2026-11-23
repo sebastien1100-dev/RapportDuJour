@@ -226,7 +226,7 @@
     const res = {};
     for (const k in etatsFdc) {
       const e = etatsFdc[k].etat;
-      if (e === 'R' || e === 'BR' || e === 'HS') continue;
+      if (e === 'R' || e === 'BR' || e === 'NPF' || e === 'HS') continue;
       const code = (typesParChambre || {})[k] || '';
       res[code] = (res[code] || 0) + 1;
     }
@@ -679,9 +679,10 @@
   };
 
   /* ---------- Feuille femme de chambre ---------- */
-  // Corrections du jour : { chambre: 'B' | 'R' | 'BR' | 'HS' | 'X' }  (BR = blanc recouche, X = chambre de l'import retirée)
+  // Corrections du jour : { chambre: 'B' | 'R' | 'BR' | 'NPF' | 'HS' | 'X' }
+  // (BR = blanc recouche, NPF = ne pas faire : chambre occupée à ne pas faire, X = chambre de l'import retirée)
 
-  RDJ.CYCLE_FDC = { '': 'B', B: 'R', R: 'BR', BR: 'HS', HS: '' };
+  RDJ.CYCLE_FDC = { '': 'B', B: 'R', R: 'BR', BR: 'NPF', NPF: 'HS', HS: '' };
   RDJ.etatSuivant = (actuel) => (actuel in RDJ.CYCLE_FDC ? RDJ.CYCLE_FDC[actuel] : 'B');
 
   /** État de chaque chambre du plan : { base (import), etat (affiché), corrige, bloquee, motif }.
@@ -861,7 +862,8 @@
       const resa = parCh.get(k) || null;
       // chambre sans client mise en B sur la feuille de chambre = chambre sale, à faire
       // BR (blanc recouche) : le client reste, la chambre est refaite à blanc -> recouche sur le plan
-      const statut = e === 'B' ? (resa ? 'depart' : 'sale') : e === 'R' || e === 'BR' ? (resa ? 'recouche' : 'sale') : e === 'HS' ? 'hs' : 'libre';
+      // NPF (ne pas faire) : le client reste et la chambre n'est pas faite -> recouche sur le plan
+      const statut = e === 'B' ? (resa ? 'depart' : 'sale') : e === 'R' || e === 'BR' || e === 'NPF' ? (resa ? 'recouche' : 'sale') : e === 'HS' ? 'hs' : 'libre';
       const r = statut === 'depart' || statut === 'recouche' ? resa : null;
       res[k] = {
         statut, corrige: etatsFdc[k].corrige, sansClient: !resa,
@@ -881,10 +883,10 @@
   RDJ.etatSuivantPlan = (actuel) => (actuel in RDJ.CYCLE_PLAN ? RDJ.CYCLE_PLAN[actuel] : '');
 
   RDJ.compteursFdc = function (etats, nv) {
-    const c = { B: 0, R: 0, BR: 0, HS: 0, NV: 0 };
+    const c = { B: 0, R: 0, BR: 0, NPF: 0, HS: 0, NV: 0 };
     for (const k in etats) if (etats[k].etat in c) c[etats[k].etat]++;
     for (const k in nv || {}) if (nv[k]) c.NV++;
-    c.total = c.B + c.R + c.BR;
+    c.total = c.B + c.R + c.BR + c.NPF;
     return c;
   };
 

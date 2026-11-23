@@ -123,7 +123,7 @@
           <h1>RAPPORT DU ${esc(titreJour(demain).toUpperCase())}</h1>
           <div class="sous">Nuit du ${esc(RDJ.dateFr(nuit))} au ${esc(RDJ.dateFr(demain))}  ·  ${esc(ctx.cfg.hotel)}</div>
         </div>
-        <div class="r-import">${ctx.etat.import ? 'Import : ' + esc(ctx.etat.import.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.etat.import.importeLe.slice(0, 10)) + ' à ' + ctx.etat.import.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Départs : ' + esc(ctx.soldes.fichier) : ''}</div>
+        <div class="r-import">${ctx.imp ? 'Import : ' + esc(ctx.imp.fichier) + '<br>le ' + esc(RDJ.dateFr(ctx.imp.importeLe.slice(0, 10)) + ' à ' + ctx.imp.importeLe.slice(11, 16)) : 'Aucune donnée importée'}${ctx.soldes ? '<br>Départs : ' + esc(ctx.soldes.fichier) : ''}</div>
       </header>
       <div class="r-tuiles">${tuiles}</div>
       <div class="r-sources"><b>Sources :</b>${c.parSource.filter((s) => s.chambres).map((s) =>
@@ -330,7 +330,7 @@
   /* ================= FEUILLE : FEMME DE CHAMBRE ================= */
 
   function texteCorrections(corrections) {
-    const libelles = [['B', 'À BLANC'], ['R', 'RECOUCHE'], ['BR', 'BLANC RECOUCHE'], ['HS', 'HORS SERVICE'], ['X', 'NO SHOW']];
+    const libelles = [['B', 'À BLANC'], ['R', 'RECOUCHE'], ['BR', 'BLANC RECOUCHE'], ['NPF', 'NE PAS FAIRE'], ['HS', 'HORS SERVICE'], ['X', 'NO SHOW']];
     const lignes = [];
     for (const [code, lib] of libelles) {
       const ch = Object.keys(corrections).filter((k) => corrections[k] === code).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
@@ -363,7 +363,7 @@
     // liste à cocher : par chambre N° · type · état en toutes lettres · case « Fait » · case « NV » ;
     // les chambres à faire à blanc (B, BR) ont le numéro et l'état hachurés
     const hLigne = Math.min(8.4, 124 / nbLignes);
-    const ETATS = { B: 'BLANC', R: 'Recouche', BR: 'Blanc rec.', HS: 'HS' };
+    const ETATS = { B: 'BLANC', R: 'Recouche', BR: 'Blanc rec.', NPF: 'Ne pas faire', HS: 'HS' };
     const types = ctx.cfg.types || {};
 
     let corps = '';
@@ -383,8 +383,9 @@
         const nv = !vierge && ctx.fdc.nv[k];
         corps += `<td class="no${sep}${blanc ? ' blanc' : ''}"><b>${esc(no)}</b></td>` +
           `<td class="ty">${esc(types[k] || '')}</td>` +
-          `<td class="etat clic${blanc ? ' blanc' : ''}${!vierge && e.corrige ? ' corrige' : ''}${etat === 'HS' ? ' hs' : ''}" data-fdc="etat" data-ch="${esc(k)}" title="${esc(etat || 'libre')} : double-clic pour changer">${etat ? `<b>${esc(ETATS[etat] || etat)}</b>` : ''}</td>` +
-          `<td class="fait">${vierge || (etat && etat !== 'HS') ? '<i class="case"></i>' : ''}</td>` +
+          `<td class="etat clic${blanc ? ' blanc' : ''}${!vierge && e.corrige ? ' corrige' : ''}${etat === 'HS' ? ' hs' : ''}${etat === 'NPF' ? ' npf' : ''}" data-fdc="etat" data-ch="${esc(k)}" title="${esc(ETATS[etat] || etat || 'libre')} : double-clic pour changer">${etat ? `<b>${esc(ETATS[etat] || etat)}</b>` : ''}</td>` +
+          // « Fait » : rien à cocher pour une chambre hors service ou à ne pas faire
+          `<td class="fait">${vierge || (etat && etat !== 'HS' && etat !== 'NPF') ? '<i class="case"></i>' : ''}</td>` +
           `<td class="nv clic" data-fdc="nv" data-ch="${esc(k)}" title="Non vue : double-clic pour cocher"><i class="case${nv ? ' cochee' : ''}"></i></td>`;
       });
       corps += '</tr>';
@@ -400,8 +401,8 @@
         <div class="f-date">${vierge ? '' : esc(maj(titreJour(RDJ.jours(ctx.nuit, 1))))}</div>
         <div class="f-titre"><h1>FEUILLE DE CHAMBRE</h1><div>${esc(ctx.cfg.hotel)}</div></div>
         ${vierge ? '<div></div>' : `<table class="f-cpt">
-          <tr><th>TOTAL</th><th>B</th><th>R</th><th>BR</th><th>HS</th></tr>
-          <tr><td>${val(cpt.total)}</td><td>${val(cpt.B)}</td><td>${val(cpt.R)}</td><td>${val(cpt.BR)}</td><td>${val(cpt.HS)}</td></tr>
+          <tr><th>TOTAL</th><th>B</th><th>R</th><th>BR</th><th title="Ne pas faire">NPF</th><th>HS</th></tr>
+          <tr><td>${val(cpt.total)}</td><td>${val(cpt.B)}</td><td>${val(cpt.R)}</td><td>${val(cpt.BR)}</td><td>${val(cpt.NPF)}</td><td>${val(cpt.HS)}</td></tr>
         </table>`}
       </header>
       <table class="f-grille liste"><colgroup>${colonnes}</colgroup><thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>
@@ -688,7 +689,7 @@
 
   function cartesAccueil(ctx) {
     const c = ctx.chiffres;
-    const imp = !!ctx.etat.import;
+    const imp = !!ctx.imp;
     const types = ctx.cfg.typesChambre;
     const pt = ctx.parType || {};
     const T = (code) => pt[code] || { total: 0, occupees: 0, departs: 0, recouches: 0, libres: 0, aFaire: 0, dispo: 0 };
@@ -796,7 +797,7 @@
 
   V.ecranAccueil = function (ctx) {
     const c = ctx.chiffres;
-    const imp = ctx.etat.import;
+    const imp = ctx.imp;
     const tuile = (lib, v, mod) => `<div class="tuile${mod ? ' ' + mod : ''}"><span>${esc(lib)}</span><b>${v}</b></div>`;
     const sauv = ctx.etat.derniereSauvegarde;
     const joursSansSauv = sauv ? RDJ.ecartJours(RDJ.aujourdhui(), sauv.slice(0, 10)) : null;
@@ -885,7 +886,7 @@
             <h4>Corrections au double-clic</h4>
             <ul class="me-astuces">
               <li><b>Rapport</b><span>sur « Statut », « PDJ » ou « Payé » d'une chambre ; sur le numéro de chambre pour la passer en no show ; « + Ajouter une chambre » pour une arrivée après l'export.</span></li>
-              <li><b>Feuille de chambre</b><span>sur la case d'une chambre : vide → B → R → BR → HS → vide ; sur NV pour cocher.</span></li>
+              <li><b>Feuille de chambre</b><span>sur la case d'une chambre : vide → B → R → BR → Ne pas faire → HS → vide ; sur NV pour cocher.</span></li>
               <li><b>Plan de chambre</b><span>sur une chambre libre : libre → sale → hors service → libre.</span></li>
             </ul>
             <p class="me-sauv"><b>Sauvegarde</b> Les données restent dans ce navigateur, sur ce poste : faites régulièrement une sauvegarde (Réglages → « Sauvegarder (.json) », rangée dans le dossier « save » de l'appli).</p>
@@ -945,7 +946,7 @@
   V.ecranFdc = (ctx) => `
     <section class="ecran">
       ${teteEcran('fdc', 'Feuille de chambre', nuitTexte(ctx),
-        'Double-clic sur la case d\'une chambre : vide → B → R → BR → HS → vide.', `
+        'Double-clic sur la case d\'une chambre : vide → B → R → BR → Ne pas faire → HS → vide.', `
         <button class="btn primaire" data-action="apercu-fdc">Imprimer la feuille (${ctx.cfg.nbExemplairesFdc} ex.)</button>
         <button class="btn" data-action="apercu-fdc-vierge">Feuille vierge</button>
         <button class="btn" data-action="annuler-corrections" ${Object.keys(ctx.fdc.corrections).length ? '' : 'disabled'}>Annuler les corrections</button>`)}

@@ -78,8 +78,11 @@
 
   function contexte() {
     const cfg = config();
-    const brut = etat.import ? etat.import.reservations : [];
-    const nuit = etat.dateRapportManuelle || RDJ.dateRapportAuto(brut);
+    // nouveau service de nuit à 23 h : le rapport clients importé avant ne s'affiche plus nulle part (il reste
+    // dans l'historique) ; tant que rien n'est importé, la nuit affichée est celle qui a commencé à 23 h
+    const imp = RDJ.importDuService(etat.import) ? etat.import : null;
+    const brut = imp ? imp.reservations : [];
+    const nuit = (imp && etat.dateRapportManuelle) || (brut.length ? RDJ.dateRapportAuto(brut) : RDJ.debutService().slice(0, 10));
     // montants dus du rapport des soldes, s'il a été importé pour cette nuit
     const soldes = etat.soldes && etat.soldes.nuit === nuit ? etat.soldes : null;
     const raw = RDJ.appliquerSoldes(brut, soldes);
@@ -95,11 +98,13 @@
     // chambres bloquées du rapport de maintenance, s'il a été importé pour cette nuit
     const maintenance = etat.maintenance && etat.maintenance.nuit === nuit ? etat.maintenance : null;
     const etatsFdc = RDJ.etatsFdc(cfg.planFdc, eff, nuit, fdc.corrections, maintenance && maintenance.chambres);
-    const pdjManuel = etat.pdj.nombre !== null && etat.pdj.nombre !== undefined;
-    // rapport des arrivées : montré tant que son jour d'arrivée n'est pas passé (le lendemain de la nuit, en général)
-    const arrivees = etat.arrivees && etat.arrivees.date && etat.arrivees.date >= nuit ? etat.arrivees : null;
+    // nombre de couverts saisi à la main : seulement pour la nuit où il a été saisi
+    const pdjManuel = etat.pdj.nombre !== null && etat.pdj.nombre !== undefined && etat.pdj.nuit === nuit;
+    // rapport des arrivées : importé pendant ce service, ou pour un jour d'arrivée après le lendemain de la nuit
+    const arrivees = etat.arrivees && etat.arrivees.date
+      && (etat.arrivees.date > RDJ.jours(nuit, 1) || (RDJ.importDuService(etat.arrivees) && etat.arrivees.date >= nuit)) ? etat.arrivees : null;
     return {
-      etat, cfg, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
+      etat, cfg, imp, raw, nuit, modifs, soldes, maintenance, arrivees, ajouts, base, eff, chiffres, fdc, etatsFdc,
       disponibles: RDJ.disponiblesParType(etatsFdc, cfg.types),
       // Buffet PDJ : éléments du croquis (modifiés, sinon d'origine) et état de l'éditeur
       buffet: buffetElements(),
@@ -117,7 +122,7 @@
       noShows: toutes.filter((r) => r.noShow).map((r) => r.chambre),
       compteursFdc: RDJ.compteursFdc(etatsFdc, fdc.nv),
       horsPlan: RDJ.chambresHorsPlan(cfg.planFdc, raw),
-      mep: RDJ.dateMep(etat.import && etat.import.importeLe, nuit),
+      mep: RDJ.dateMep(imp && imp.importeLe, nuit),
       pdjManuel,
       pdjNombre: pdjManuel ? etat.pdj.nombre : chiffres.pdj,
       pdjType: etat.pdj.type || 'business',
@@ -1457,13 +1462,16 @@
     else if (ev.target.id === 'pin-confirme') { ev.preventDefault(); ACTIONS['pin-definir'](); }
   });
   setInterval(() => { if (vue === 'reglages' && pinInfo() && !reglagesOuverts() && !$('#pin-saisie')) afficher(); }, 30000);
-  // à 23 h, la zone d'import de l'accueil se vide : on réaffiche l'accueil quand le service de nuit change
+  // à 23 h, nouveau service de nuit : tous les écrans repartent à vide (rapports de la nuit précédente
+  // dans l'historique) ; on réaffiche l'écran ouvert, sauf si une fenêtre ou l'aperçu est ouvert
   let serviceAffiche = RDJ.debutService();
   setInterval(() => {
     const s = RDJ.debutService();
     if (s === serviceAffiche) return;
     serviceAffiche = s;
-    if (vue === 'accueil') afficher();
+    if ($('#dialogue').open || !$('#apercu').hidden) return;
+    afficher();
+    if (etat.import) notice('Nouvelle nuit : les écrans repartent à vide. La nuit précédente reste dans l\'historique.', 'info');
   }, 30000);
 
   /* ---------- Événements ---------- */
@@ -1527,6 +1535,7 @@
     } else if (t.id === 'pdj-nombre') {
       const n = parseInt(t.value, 10);
       etat.pdj.nombre = n >= 0 ? n : null;
+      etat.pdj.nuit = contexte().nuit;
     } else if (t.id === 'pdj-type' || t.name === 'pdj-type') {
       etat.pdj.type = t.value;
     } else if (t.dataset.typeChambre) {

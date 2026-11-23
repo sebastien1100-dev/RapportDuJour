@@ -1284,6 +1284,9 @@ body.depot .voile-depot { display: grid; }
 .f-grille.liste td.noire { background: #000; border-color: #000; }
 .f-grille.liste td.blanc { background: repeating-linear-gradient(-45deg, #8f8f8f 0 .35mm, #fff .35mm 1.3mm); }
 .f-grille.liste td.blanc b { background: #fff; padding: 0 .8mm; border-radius: .5mm; }
+/* ne pas faire : fond gris clair et italique (lisible aussi en noir et blanc) */
+.f-grille.liste td.etat.npf { background: #e6e6e6; font-size: 8pt; }
+.f-grille.liste td.etat.npf b { font-style: italic; }
 .f-grille .case { display: inline-block; width: 4mm; height: 4mm; border: .35mm solid #000; border-radius: .7mm; background: #fff; vertical-align: middle; position: relative; }
 .f-grille .case.cochee::after { content: ''; position: absolute; left: 1.15mm; top: .2mm; width: 1.1mm; height: 2.2mm; border: solid #000; border-width: 0 .45mm .45mm 0; transform: rotate(45deg); }
 .f-corr { margin-top: 3mm; border: .4mm solid #000; min-height: 18mm; padding: 1.5mm 3mm; font-size: 9pt; line-height: 1.45; }
