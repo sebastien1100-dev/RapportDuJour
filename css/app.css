@@ -104,8 +104,6 @@ button, input, select { font: inherit; }
 .ecran:has(.papier) { max-width: none; }
 .outils { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .papier { overflow-x: auto; padding-bottom: 8px; }
-.choix-affichage { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--doux); }
-.choix-affichage select { padding: 5px 8px; border: 1px solid var(--bord); border-radius: 6px; background: var(--surface); color: var(--texte); font-size: 13px; }
 /* grands écrans (Full HD et ultra-large) : pages un peu plus larges */
 @media (min-width: 1800px) { .ecran, .notice { max-width: 1400px; } }
 @media (min-width: 2600px) { .ecran, .notice { max-width: 1680px; } #vue { padding: 24px 32px; } }
@@ -244,7 +242,6 @@ button, input, select { font: inherit; }
 .ecran-tete .et-sous { margin: 2px 0 0; font-size: 14px; font-weight: 600; color: var(--accent); }
 .ecran-tete .et-aide { margin: 4px 0 0; font-size: 13px; color: var(--doux); }
 .ecran-tete .outils { margin: 0; justify-content: flex-end; }
-.ecran-tete .choix-affichage { margin-left: 8px; padding-left: 12px; border-left: 1px solid var(--bord); }
 .et-rapport { border-left-color: #b42318; }
 .et-fdc { border-left-color: var(--marine); }
 .et-plan { border-left-color: var(--accent); }
@@ -706,7 +703,6 @@ body.depot .voile-depot { display: grid; }
 .ecran-tete .et-aide { color: var(--marine); opacity: .7; }
 .ecran-tete .btn:not(.primaire) { background: rgba(255,255,255,.7); }
 .ecran-tete .btn:not(.primaire):hover:not(:disabled) { background: #fff; }
-.ecran-tete .choix-affichage { border-left-color: rgba(28,42,72,.12); color: var(--marine); }
 /* onglet PDJ : sous-onglets Cuisson PDJ / Buffet PDJ */
 .sous-onglets { display: flex; gap: 6px; margin: 0 auto 12px; max-width: var(--largeur, 1180px); }
 .sous-onglets button {
@@ -717,20 +713,35 @@ body.depot .voile-depot { display: grid; }
 .sous-onglets button:active { transform: scale(.97); }
 .sous-onglets button.actif { background: var(--accent); color: #fff; }
 
-/* taille des feuilles : Ajuster / Largeur, curseur de zoom avec − / + */
-.choix-affichage { gap: 4px; }
-.choix-affichage .ca-lib { margin-right: 4px; font-size: 13px; }
+/* taille de l'affichage, dans la barre du haut (tous les onglets) : Ajuster / Largeur, curseur de zoom avec − / + */
+.choix-affichage { flex: none; display: flex; align-items: center; gap: 3px; padding: 3px; border-radius: 999px; background: var(--fond); border: 1px solid var(--bord); font-size: 13px; color: var(--marine); }
+.choix-affichage .ca-lib { margin: 0 4px 0 8px; font-size: 13px; color: var(--doux); }
 .ca-mode, .ca-pas {
-  border: 0; border-radius: 999px; background: rgba(255,255,255,.7); color: var(--marine); font: inherit; font-size: 13px;
+  border: 0; border-radius: 999px; background: none; color: var(--marine); font: inherit; font-size: 13px;
   cursor: pointer; transition: background .15s, transform .1s ease-out;
 }
-.ca-mode { padding: 6px 12px; }
-.ca-pas { width: 28px; height: 28px; font-size: 16px; font-weight: 700; line-height: 1; }
-.ca-mode:hover, .ca-pas:hover { background: #fff; }
+.ca-mode { padding: 6px 11px; }
+.ca-pas { width: 26px; height: 26px; font-size: 16px; font-weight: 700; line-height: 1; }
+.ca-mode:hover, .ca-pas:hover { background: var(--menthe); color: var(--menthe-fonce); }
 .ca-mode:active, .ca-pas:active { transform: scale(.94); }
 .ca-mode.actif { background: var(--accent); color: #fff; font-weight: 600; }
-.choix-affichage input[type=range] { width: 130px; margin: 0 2px; accent-color: var(--accent); cursor: pointer; }
-.ca-valeur { min-width: 44px; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--marine); }
+.choix-affichage input[type=range] { width: 90px; margin: 0 2px; accent-color: var(--accent); cursor: pointer; }
+.ca-valeur { min-width: 40px; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--marine); padding-right: 8px; }
+/* onglets sans feuille (accueil, historique, réglages) en mode « Largeur » : toute la fenêtre */
+.ecran.pleine-largeur, .ecran.pleine-largeur .sous-onglets { max-width: none; }
+/* portable (1440 px) : la barre du haut tient sur une ligne. « Taille » se lit au survol,
+   « Mettre à jour » devient une simple icône ↻ (le texte revient dès qu'une nouvelle version est là) */
+@media (max-width: 1700px) {
+  .barre { gap: 14px; }
+  .choix-affichage .ca-lib { display: none; }
+  .choix-affichage input[type=range] { width: 70px; }
+  .pastille-maj.neutre { padding: 6px 9px; }
+  .pastille-maj.neutre span { display: none; }
+}
+@media (max-width: 1250px) {
+  .choix-affichage input[type=range] { display: none; }
+  .ca-valeur { min-width: 0; padding: 0 2px; }
+}
 
 /* zone de la feuille */
 .papier { background: #ebe8e0; border-radius: 18px; }

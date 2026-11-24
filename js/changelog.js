@@ -8,6 +8,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.46', date: '2026-11-24', titre: 'Taille de l\'affichage dans la barre du haut, accueil sur toute la largeur',
+      changements: [
+        ['amelioration', "Le choix de taille (Ajuster, Largeur, − curseur +) est dans la barre du haut, le même pour tous les onglets ; il n'est plus dans l'en-tête de chaque feuille."],
+        ['amelioration', "L'accueil, l'Historique et les Réglages occupent toute la largeur de la fenêtre. « Ajuster » les agrandit sur les grands écrans (Full HD, ultra-large), « Largeur » les garde à 100 %, le curseur et − / + les agrandissent ou les réduisent."],
+        ['amelioration', "Sur le MacBook Air, la barre du haut tient sur une ligne : le bouton « Mettre à jour » n'affiche que son icône ↻ (son texte revient quand une nouvelle version est disponible)."],
+      ],
+    },
+    {
       version: '3.45', date: '2026-11-24', titre: 'Mise à jour : bouton dans la barre du haut, nouvelles versions vues tout de suite',
       changements: [
         ['correction', "Une version envoyée sur GitHub n'était pas toujours vue : GitHub garde ses fichiers en cache jusqu'à 5 minutes, et l'appli ne vérifiait toute seule qu'une fois par jour. Elle lit maintenant la toute dernière version envoyée (sans ce cache), et installe tous les fichiers de ce même envoi."],

@@ -165,7 +165,6 @@
     $('#vue').innerHTML = ECRANS[vue](ctx);
     document.querySelectorAll('#onglets button').forEach((b) => b.classList.toggle('actif', b.dataset.vue === vue));
     document.title = 'Rapport du jour · ' + RDJ.dateFr(ctx.nuit);
-    ajouterChoixAffichage();
     ajusterFeuilles();
   }
 
@@ -184,27 +183,43 @@
     ajusterFeuilles();
   }
 
-  /** Barre de taille des feuilles : « Ajuster » (à l'écran), « Largeur », curseur de zoom avec − / +. */
+  /** Choix de taille dans la barre du haut, commun à tous les onglets :
+      « Ajuster » (à la fenêtre), « Largeur », curseur de zoom avec − / +. */
   function ajouterChoixAffichage() {
-    const outils = document.querySelector('#vue .outils');
-    if (!outils || !document.querySelector('#vue .papier')) return;
-    const d = document.createElement('div');
-    d.className = 'choix-affichage';
+    const d = document.getElementById('choix-affichage');
+    if (!d || d.childElementCount) return;
+    d.title = 'Taille de l’affichage, pour tous les onglets';
     d.innerHTML = `<span class="ca-lib">Taille</span>
-      <button type="button" class="ca-mode" data-action="zoom-ajuster" title="Feuille adaptée à l'écran">Ajuster</button>
+      <button type="button" class="ca-mode" data-action="zoom-ajuster" title="Adapter la page à la fenêtre">Ajuster</button>
       <button type="button" class="ca-mode" data-action="zoom-largeur" title="Toute la largeur de la fenêtre">Largeur</button>
-      <button type="button" class="ca-pas" data-action="zoom-moins" aria-label="Réduire la feuille">−</button>
-      <input type="range" id="zoom-feuille" min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="${ZOOM_PAS}" aria-label="Taille de la feuille à l'écran">
-      <button type="button" class="ca-pas" data-action="zoom-plus" aria-label="Agrandir la feuille">+</button>
+      <button type="button" class="ca-pas" data-action="zoom-moins" aria-label="Réduire">−</button>
+      <input type="range" id="zoom-feuille" min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="${ZOOM_PAS}" aria-label="Taille de la page à l'écran">
+      <button type="button" class="ca-pas" data-action="zoom-plus" aria-label="Agrandir">+</button>
       <output class="ca-valeur" for="zoom-feuille"></output>`;
-    outils.appendChild(d);
   }
 
-  /** Zoom de la feuille affichée (en %), pour partir de la taille actuelle avec − / + ou le curseur. */
+  /** Zoom de la page affichée (en %) : la feuille, ou l'écran entier sur les onglets sans feuille
+      (accueil, historique, réglages), pour partir de la taille actuelle avec − / + ou le curseur. */
   const zoomActuel = () => {
-    const f = document.querySelector('#vue .papier .feuille');
-    return f ? Math.round((parseFloat(f.style.zoom) || 1) * 100) : 100;
+    const el = document.querySelector('#vue .papier .feuille') || document.querySelector('#vue .ecran');
+    return el ? Math.round((parseFloat(el.style.zoom) || 1) * 100) : 100;
   };
+
+  /** Onglets sans feuille (accueil, historique, réglages) : l'écran occupe toujours toute la largeur de la fenêtre.
+      « Ajuster » l'agrandit en plus sur les grands écrans (100 % jusqu'à 1 600 px de large, 160 % au plus),
+      « Largeur » le garde à 100 %, un nombre l'agrandit ou le réduit (en %). */
+  function ajusterEcran(e, mode) {
+    const v = $('#vue'), cs = getComputedStyle(v);
+    const dispoL = v.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    e.classList.add('pleine-largeur');
+    e.style.zoom = 1;
+    e.style.maxWidth = dispoL + 'px';
+    let z = 1;
+    if (/^\d+$/.test(mode)) z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, +mode)) / 100;
+    else if (mode === 'ajuster') z = Math.max(1, Math.min(dispoL / 1600, 1.6));
+    e.style.zoom = z.toFixed(3);
+    e.style.maxWidth = Math.floor(dispoL / z) + 'px';
+  }
   const pasZoom = (sens) => {
     const z = Math.round(zoomActuel() / ZOOM_PAS) * ZOOM_PAS + sens * ZOOM_PAS * 2;
     choisirAffichage(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z)));
@@ -232,6 +247,7 @@
     // toute la largeur en mode « Largeur », la largeur de la feuille en mode « Ajuster » ou au curseur
     const ecran = document.querySelector('#vue .ecran');
     const feuille = document.querySelector('#vue .papier .feuille');
+    if (ecran && !document.querySelector('#vue .papier')) ajusterEcran(ecran, mode);
     if (ecran && feuille) ecran.style.setProperty('--largeur-bandeaux', Math.max(720, Math.round(feuille.getBoundingClientRect().width)) + 'px');
     // la barre suit la taille réelle, même en mode automatique
     const z = zoomActuel();
@@ -1666,6 +1682,7 @@
   // Synchronisation si l'application est ouverte dans deux onglets
   window.addEventListener('storage', () => { etat = RDJ.store.charger(); afficher(); });
 
+  ajouterChoixAffichage();
   afficher();
 
   // Sauvegarde hebdomadaire (Réglages, désactivée par défaut) : à l'ouverture, si la dernière date de 7 jours ou plus
