@@ -131,6 +131,7 @@
       pinDefini: !!pinInfo(),
       reglagesOuverts: reglagesOuverts(),
       maj,
+      histoSous, histoPeriode, histoMois, histoNuit,
       // Historique : deux périodes à comparer (par défaut, les 7 dernières nuits et les 7 d'avant)
       histoComp: histoComp || (etat.recap.length
         ? { ...RDJ.periodesComparees(etat.recap[etat.recap.length - 1].date, 'semaine'), raccourci: 'semaine' }
@@ -171,12 +172,13 @@
   /* ---------- Taille des feuilles à l'écran ----------
      Les feuilles ont la taille d'un A4 (en mm). À l'écran on les agrandit ou réduit selon la fenêtre
      (portable, Full HD, ultra-large) ; l'impression n'est pas concernée.
-     ajuster : page paysage entière visible (largeur et hauteur) mais au moins 2/3 de la largeur de la fenêtre,
-               page portrait à la largeur (max 150 %)
-     largeur : toute la largeur de la fenêtre · un nombre (50 à 250) : zoom choisi au curseur, en % */
+     largeur (par défaut) : toute la largeur de la fenêtre · un nombre (50 à 250) : zoom choisi au curseur, en %.
+     L'ancien mode « ajuster » (retiré en 3.46) devient « largeur ». */
   const ZOOM_MIN = 50, ZOOM_MAX = 250, ZOOM_PAS = 5;
   function modeAffichage() {
-    try { return localStorage.getItem('rdj.affichage') || 'ajuster'; } catch (e) { return 'ajuster'; }
+    let m = null;
+    try { m = localStorage.getItem('rdj.affichage'); } catch (e) { /* sans importance */ }
+    return /^\d+$/.test(m || '') ? m : 'largeur';
   }
   function choisirAffichage(m) {
     try { localStorage.setItem('rdj.affichage', String(m)); } catch (e) { /* sans importance */ }
@@ -184,13 +186,12 @@
   }
 
   /** Choix de taille dans la barre du haut, commun à tous les onglets :
-      « Ajuster » (à la fenêtre), « Largeur », curseur de zoom avec − / +. */
+      « Largeur » (toute la fenêtre), curseur de zoom avec − / +. */
   function ajouterChoixAffichage() {
     const d = document.getElementById('choix-affichage');
     if (!d || d.childElementCount) return;
     d.title = 'Taille de l’affichage, pour tous les onglets';
     d.innerHTML = `<span class="ca-lib">Taille</span>
-      <button type="button" class="ca-mode" data-action="zoom-ajuster" title="Adapter la page à la fenêtre">Ajuster</button>
       <button type="button" class="ca-mode" data-action="zoom-largeur" title="Toute la largeur de la fenêtre">Largeur</button>
       <button type="button" class="ca-pas" data-action="zoom-moins" aria-label="Réduire">−</button>
       <input type="range" id="zoom-feuille" min="${ZOOM_MIN}" max="${ZOOM_MAX}" step="${ZOOM_PAS}" aria-label="Taille de la page à l'écran">
@@ -206,7 +207,6 @@
   };
 
   /** Onglets sans feuille (accueil, historique, réglages) : l'écran occupe toujours toute la largeur de la fenêtre.
-      « Ajuster » l'agrandit en plus sur les grands écrans (100 % jusqu'à 1 600 px de large, 160 % au plus),
       « Largeur » le garde à 100 %, un nombre l'agrandit ou le réduit (en %). */
   function ajusterEcran(e, mode) {
     const v = $('#vue'), cs = getComputedStyle(v);
@@ -216,7 +216,6 @@
     e.style.maxWidth = dispoL + 'px';
     let z = 1;
     if (/^\d+$/.test(mode)) z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, +mode)) / 100;
-    else if (mode === 'ajuster') z = Math.max(1, Math.min(dispoL / 1600, 1.6));
     e.style.zoom = z.toFixed(3);
     e.style.maxWidth = Math.floor(dispoL / z) + 'px';
   }
@@ -232,15 +231,9 @@
       if (!f) return;
       f.style.zoom = 1;
       if (/^\d+$/.test(mode)) { f.style.zoom = (Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, +mode)) / 100).toFixed(3); return; }
+      // « Largeur » : la feuille occupe toute la largeur de la fenêtre
       const cs = getComputedStyle(p);
-      const largeur = (p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4) / f.offsetWidth;
-      const haut = p.getBoundingClientRect().top + window.scrollY;
-      const hauteur = Math.max(300, window.innerHeight - haut - 24 - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / f.offsetHeight;
-      const paysage = f.classList.contains('paysage');
-      // page paysage : au moins les deux tiers de la fenêtre en largeur, quitte à défiler un peu
-      const deuxTiers = (window.innerWidth * 2 / 3) / f.offsetWidth;
-      let z = mode === 'largeur' ? largeur : paysage ? Math.min(largeur, Math.max(hauteur, deuxTiers)) : Math.min(largeur, 1.5);
-      z = Math.max(0.5, Math.min(z, 3));
+      const z = Math.max(0.5, Math.min(3, (p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4) / f.offsetWidth));
       f.style.zoom = z.toFixed(3);
     });
     // bandeaux du haut (en-tête, sous-onglets, réglages) à la largeur de la feuille affichée :
@@ -434,6 +427,14 @@
   let maj = null;
   // Historique : périodes comparées (null = par défaut), gardées pendant la session
   let histoComp = null;
+  /* Historique : sous-onglet ('ensemble', 'calendrier', 'comparer', 'nuits') et période de la vue d'ensemble
+     ('7', '30', '90', 'tout'), retenus pendant la session ; mois du calendrier (« AAAA-MM ») et nuit choisie
+     (null = mois et nuit de la dernière nuit enregistrée). */
+  const lireSession = (cle, def) => { try { return sessionStorage.getItem(cle) || def; } catch (e) { return def; } };
+  const ecrireSession = (cle, v) => { try { sessionStorage.setItem(cle, v); } catch (e) { /* sans importance */ } };
+  let histoSous = lireSession('rdj.histoSous', 'ensemble');
+  let histoPeriode = lireSession('rdj.histoPeriode', '30');
+  let histoMois = null, histoNuit = null;
 
   /** Pastille de la barre du haut : visible tant qu'une nouvelle version attend d'être installée. */
   /** Bouton de la barre du haut : « Mettre à jour » (chercher), « Recherche… », ou « 3.45 disponible » (voir et installer). */
@@ -1077,7 +1078,6 @@
   /* ---------- Actions des boutons ---------- */
 
   const ACTIONS = {
-    'zoom-ajuster': () => choisirAffichage('ajuster'),
     'zoom-largeur': () => choisirAffichage('largeur'),
     'zoom-moins': () => pasZoom(-1),
     'zoom-plus': () => pasZoom(1),
@@ -1397,6 +1397,15 @@
     },
     restaurer: () => $('#fichier-restaurer').click(),
 
+    'hi-sous': (el) => { histoSous = el.dataset.s; ecrireSession('rdj.histoSous', histoSous); afficher(); },
+    'hi-periode': (el) => { histoPeriode = el.dataset.p; ecrireSession('rdj.histoPeriode', histoPeriode); afficher(); },
+    'hi-mois': (el) => {
+      const derniere = etat.recap.length ? etat.recap[etat.recap.length - 1].date : contexte().nuit;
+      histoMois = RDJ.moisVoisin(histoMois || derniere.slice(0, 7), +el.dataset.d);
+      histoNuit = null;
+      afficher();
+    },
+    'hi-nuit': (el) => { histoNuit = el.dataset.date; afficher(); },
     'hc-raccourci': (el) => {
       if (!etat.recap.length) return;
       const r = el.dataset.r;

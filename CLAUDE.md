@@ -19,7 +19,7 @@ dans le navigateur (double-clic sur `index.html`). Toute la conversation avec l'
 - `js/maj.js` : mise à jour de l'appli depuis GitHub (dépôt public), bouton « Mettre à jour » de l'accueil.
 - `js/buffet.js` : croquis SVG du buffet du petit déjeuner (sous-onglet Buffet PDJ).
 - Onglets : Accueil, Rapport, Femme de chambre, Plan de chambre, PDJ (sous-onglets Cuisson PDJ, Buffet PDJ et Commande, code : `pdj`),
-  Historique (code : `recap`), Réglages (sous-onglets Paramètres et Change log).
+  Historique (code : `recap`, sous-onglets Vue d'ensemble, Calendrier, Comparer et Toutes les nuits), Réglages (sous-onglets Paramètres et Change log).
 
 ## Règles de l'utilisateur
 - **Change log** : ajouter les modifications visibles en haut de `js/changelog.js` (pas de date affichée).

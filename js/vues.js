@@ -1212,40 +1212,53 @@
       </div>` : '';
 
     const total = (cle) => lignes.reduce((s, l) => s + (l[cle] || 0), 0);
-
-    /* --- A. Tableau de bord : 30 dernières nuits comparées aux 30 d'avant --- */
     const derniere = n ? lignes[n - 1].date : ctx.nuit;
-    const pm = RDJ.periodesComparees(derniere, 'mois');
-    const P = RDJ.statsPeriode(lignes, pm.a[0], pm.a[1]), Q = RDJ.statsPeriode(lignes, pm.b[0], pm.b[1]);
+    const jj = (d) => RDJ.dateFr(d).slice(0, 5);
+
+    /* --- Vue d'ensemble : période choisie (7, 30, 90 nuits ou tout), comparée à autant de nuits d'avant --- */
+    const choixP = ['7', '30', '90', 'tout'].includes(ctx.histoPeriode) ? ctx.histoPeriode : '30';
+    const per = RDJ.periodeNuits(lignes, derniere, choixP);
+    const P = RDJ.statsPeriode(lignes, per.a[0], per.a[1]);
+    const Q = per.b ? RDJ.statsPeriode(lignes, per.b[0], per.b[1]) : { nuits: 0 };
+    const lignesP = lignes.filter((l) => l.date >= per.a[0] && l.date <= per.a[1]);
+    const nomAvant = choixP === 'tout' ? '' : `${per.nb} nuits d'avant`;
     const parNuit = (s, cle) => (s.nuits ? s[cle] / s.nuits : 0);
     // écart affiché seulement si la période d'avant a des nuits
     const ecart = (v, ref, unite, inverse) => {
+      if (choixP === 'tout') return `<span class="hi-ecart">depuis le ${esc(RDJ.dateFr(per.a[0]))}</span>`;
       if (!Q.nuits) return '<span class="hi-ecart">pas de période d\'avant à comparer</span>';
-      const d = v - ref;
-      const r = Math.round(d * (unite === ' pts' ? 100 : 1));
-      if (!r) return '<span class="hi-ecart">= au mois d\'avant</span>';
-      return `<span class="hi-ecart ${(r > 0) !== !!inverse ? 'up' : 'down'}">${r > 0 ? '▲ +' : '▼ −'}${Math.abs(r)}${unite || ''}</span> vs 30 nuits d'avant`;
+      const r = Math.round((v - ref) * (unite === ' pts' ? 100 : 1));
+      if (!r) return `<span class="hi-ecart">=</span> vs ${nomAvant}`;
+      return `<span class="hi-ecart ${(r > 0) !== !!inverse ? 'up' : 'down'}">${r > 0 ? '▲ +' : '▼ −'}${Math.abs(r)}${unite || ''}</span> vs ${nomAvant}`;
     };
-    const kpi = (titre, valeur, detail, cls) => `<div class="hi-kpi ${cls || ''}"><span>${esc(titre)}</span><b>${valeur}</b><small>${detail}</small></div>`;
-    const tableauDeBord = `
+    // mini-courbe d'une valeur par nuit sur la période (aire claire, trait vert)
+    const sparkline = (cle) => {
+      const v = lignesP.map((l) => l[cle] || 0);
+      if (v.length < 2) return '';
+      const W = 300, H = 34, mn = Math.min(...v), mx = Math.max(...v);
+      const p = v.map((x, i) => [(i / (v.length - 1)) * W, H - 3 - ((x - mn) / (mx - mn || 1)) * (H - 6)]);
+      const d = p.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('');
+      return `<svg class="hi-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}L${W} ${H}L0 ${H}Z" class="aire"/><path d="${d}" class="trait"/></svg>`;
+    };
+    const kpi = (titre, valeur, detail, cle, cls) => `<div class="hi-kpi ${cls || ''}"><span>${esc(titre)}</span><b>${valeur}</b><small>${detail}</small>${sparkline(cle)}</div>`;
+    const tuiles = `
       <div class="hi-kpis">
-        ${kpi(`Taux moyen · ${P.nuits} nuit${P.nuits > 1 ? 's' : ''}`, pct(P.taux), ecart(P.taux, Q.taux, ' pts'), 'taux ' + niveauTaux(P.taux))}
-        ${kpi('Chambres par nuit', arrondi(parNuit(P, 'chambres')), ecart(parNuit(P, 'chambres'), parNuit(Q, 'chambres')) + (P.meilleure ? ` · record ${P.meilleure.chambres} (${esc(P.meilleure.jour.slice(0, 3))}. ${esc(RDJ.dateFr(P.meilleure.date).slice(0, 5))})` : ''))}
-        ${kpi('Petits déjeuners par nuit', arrondi(parNuit(P, 'pdj')), ecart(parNuit(P, 'pdj'), parNuit(Q, 'pdj')))}
-        ${kpi('Départs par nuit', arrondi(parNuit(P, 'departs')), `recouches ${arrondi(parNuit(P, 'recouches'))} par nuit · ${arrondi(total('clients'))} clients en tout`)}
+        ${kpi(`Taux moyen · ${P.nuits} nuit${P.nuits > 1 ? 's' : ''}`, pct(P.taux), ecart(P.taux, Q.taux, ' pts'), 'taux', 'taux ' + niveauTaux(P.taux))}
+        ${kpi('Chambres par nuit', arrondi(parNuit(P, 'chambres')), ecart(parNuit(P, 'chambres'), parNuit(Q, 'chambres')) + (P.meilleure ? ` · record ${P.meilleure.chambres} (${esc(P.meilleure.jour.slice(0, 3))}. ${esc(jj(P.meilleure.date))})` : ''), 'chambres')}
+        ${kpi('Petits déjeuners par nuit', arrondi(parNuit(P, 'pdj')), ecart(parNuit(P, 'pdj'), parNuit(Q, 'pdj')), 'pdj')}
+        ${kpi('Départs par nuit', arrondi(parNuit(P, 'departs')), `recouches ${arrondi(parNuit(P, 'recouches'))} par nuit`, 'departs')}
       </div>`;
 
-    // courbe du taux : 30 dernières nuits (trait plein), les 30 d'avant en pointillé, mêmes positions
-    const serie = (deb) => Array.from({ length: 30 }, (_, i) => {
-      const d = RDJ.jours(deb, i);
-      const l = lignes.find((x) => x.date === d);
+    // courbe du taux : la période (trait plein), celle d'avant en pointillé, mêmes positions ; coupée là où une nuit manque
+    const NB = per.nb;
+    const serie = (deb) => Array.from({ length: NB }, (_, i) => {
+      const l = lignes.find((x) => x.date === RDJ.jours(deb, i));
       return l ? l.taux : null;
     });
-    const sA = serie(pm.a[0]), sB = serie(pm.b[0]);
+    const sA = serie(per.a[0]), sB = per.b ? serie(per.b[0]) : null;
     const LGc = 1000, HTc = 170;
     const yT = (t) => HTc - 6 - Math.min(1, t) * (HTc - 12);
-    const pointsSerie = (s) => s.map((t, i) => (t === null ? null : [((i + 0.5) / 30) * LGc, yT(t)]));
-    // tracé coupé là où une nuit manque
+    const pointsSerie = (s) => s.map((t, i) => (t === null ? null : [((i + 0.5) / NB) * LGc, yT(t)]));
     const trace = (pts) => {
       const morceaux = [];
       let cur = [];
@@ -1253,30 +1266,96 @@
       if (cur.length) morceaux.push(cur);
       return morceaux.map((m) => (m.length > 1 ? courbeLisse(m) : `M${m[0][0] - 4},${m[0][1]}h8`)).join(' ');
     };
+    const pasEtiq = Math.max(1, Math.round(NB / 7));
     const courbeTaux = `
-      <ul class="hi-legende"><li><i style="background:var(--accent)"></i>30 dernières nuits<small>${esc(RDJ.dateFr(pm.a[0]).slice(0, 5))} → ${esc(RDJ.dateFr(pm.a[1]).slice(0, 5))}</small></li>
-        <li><i class="pointille"></i>30 nuits d'avant<small>${esc(RDJ.dateFr(pm.b[0]).slice(0, 5))} → ${esc(RDJ.dateFr(pm.b[1]).slice(0, 5))}</small></li></ul>
-      <div class="hi-graphe hi-graphe-src" role="img" aria-label="Taux d'occupation des 30 dernières nuits et des 30 d'avant">
+      <ul class="hi-legende"><li><i style="background:var(--accent)"></i>${choixP === 'tout' ? 'Toutes les nuits' : `${NB} dernières nuits`}<small>${esc(jj(per.a[0]))} → ${esc(jj(per.a[1]))}</small></li>
+        ${per.b ? `<li><i class="pointille"></i>${esc(nomAvant)}<small>${esc(jj(per.b[0]))} → ${esc(jj(per.b[1]))}</small></li>` : ''}</ul>
+      <div class="hi-graphe hi-graphe-src" role="img" aria-label="Taux d'occupation de la période${per.b ? ' et de la précédente' : ''}">
         <div class="hi-axe"><span>100 %</span><span>50 %</span><span>0 %</span></div>
         <div class="hi-courbes">
           <svg viewBox="0 0 ${LGc} ${HTc}" preserveAspectRatio="none" aria-hidden="true">
             ${[0.5, 1].map((f) => `<line x1="0" x2="${LGc}" y1="${yT(f)}" y2="${yT(f)}" class="grille"/>`).join('')}
             <line x1="0" x2="${LGc}" y1="${yT(0)}" y2="${yT(0)}" class="base"/>
-            <path d="${trace(pointsSerie(sB))}" stroke="#9aa3b5" class="avant"/>
+            ${sB ? `<path d="${trace(pointsSerie(sB))}" stroke="#9aa3b5" class="avant"/>` : ''}
             <path d="${trace(pointsSerie(sA))}" stroke="var(--accent)"/>
           </svg>
-          <div class="hi-colonnes" style="--n:30">
+          <div class="hi-colonnes" style="--n:${NB}">
             ${sA.map((t, i) => {
-              const d = RDJ.jours(pm.a[0], i);
-              return `<div title="${esc(maj(RDJ.jourSemaine(d)))} ${esc(RDJ.dateFr(d))} : ${t === null ? 'pas de nuit' : pct(t)}${sB[i] !== null ? ` · 30 nuits avant : ${pct(sB[i])}` : ''}">${i % 5 === 0 || i === 29 ? `<span>${esc(d.slice(8, 10))}<small>${esc(RDJ.jourSemaine(d).slice(0, 3))}</small></span>` : ''}</div>`;
+              const d = RDJ.jours(per.a[0], i);
+              return `<div title="${esc(maj(RDJ.jourSemaine(d)))} ${esc(RDJ.dateFr(d))} : ${t === null ? 'pas de nuit' : pct(t)}${sB && sB[i] !== null ? ` · ${esc(nomAvant)} : ${pct(sB[i])}` : ''}">${i % pasEtiq === 0 || i === NB - 1 ? `<span>${esc(NB > 31 ? jj(d) : d.slice(8, 10))}<small>${esc(RDJ.jourSemaine(d).slice(0, 3))}</small></span>` : ''}</div>`;
             }).join('')}
           </div>
         </div>
       </div>`;
-    // moyenne par jour de la semaine (toutes les nuits enregistrées)
-    const parJour = RDJ.moyenneParJour(lignes);
+    // moyenne par jour de la semaine, sur la période
+    const parJour = RDJ.moyenneParJour(lignesP);
     const barresJours = `<div class="hi-jours">${parJour.map((j) => `<div title="${esc(maj(j.jour))} : ${j.nuits} nuit${j.nuits > 1 ? 's' : ''}">
         <span>${esc(maj(j.jour))}</span><i><b class="${j.taux === null ? '' : niveauTaux(j.taux)}" style="width:${j.taux === null ? 0 : Math.round(Math.min(1, j.taux) * 100)}%"></b></i><em>${j.taux === null ? '—' : pct(j.taux)}</em></div>`).join('')}</div>`;
+    // sources de la période : barre empilée et parts
+    const srcP = sources.filter((s) => P.sources.tot && P.sources.tot[s.code]);
+    const sourcesBarre = P.sources.chambres ? `
+      <div class="hi-pile">${srcP.map((s) => `<i style="width:${(P.sources.tot[s.code] / P.sources.chambres * 100).toFixed(2)}%;background:${couleurSource(s.code)}" title="${esc(s.nom)} : ${P.sources.tot[s.code]} ch."></i>`).join('')}</div>
+      <ul class="hi-legende hi-legende-pile">${srcP.map((s) => `<li><i style="background:${couleurSource(s.code)}"></i>${esc(s.nom)} <b>${pct(P.sources.tot[s.code] / P.sources.chambres)}</b><small>${P.sources.tot[s.code]} ch.</small></li>`).join('')}</ul>`
+      : '<p class="hi-note">Pas de source enregistrée sur cette période.</p>';
+    // part des clients qui prennent le petit déjeuner
+    const partPdj = (s) => (s.clients ? s.pdj / s.clients : 0);
+    const pdjPris = P.clients ? `
+      <div class="hi-pdj"><i><b style="width:${Math.round(Math.min(1, partPdj(P)) * 100)}%"></b></i><em>${pct(partPdj(P))}</em></div>
+      <p class="hi-note">${arrondi(parNuit(P, 'pdj'))} PDJ pour ${arrondi(parNuit(P, 'clients'))} clients par nuit · ${ecart(partPdj(P), Q.clients ? partPdj(Q) : 0, ' pts')}</p>`
+      : '<p class="hi-note">Pas de client enregistré sur cette période.</p>';
+
+    /* --- Calendrier : un mois, chaque nuit colorée selon son taux ; clic = détail de la nuit --- */
+    const moisMin = n ? lignes[0].date.slice(0, 7) : derniere.slice(0, 7), moisMax = derniere.slice(0, 7);
+    const mois = ctx.histoMois && ctx.histoMois >= moisMin && ctx.histoMois <= moisMax ? ctx.histoMois : moisMax;
+    const cal = RDJ.calendrierMois(lignes, mois);
+    const nuitsMois = cal.jours.filter((j) => j.ligne).map((j) => j.ligne);
+    const choisie = nuitsMois.find((l) => l.date === ctx.histoNuit) || nuitsMois[nuitsMois.length - 1] || null;
+    const niveauCal = (t) => (t >= 0.9 ? 'plein' : t >= 0.7 ? 'haut' : t >= 0.5 ? 'moyen' : 'bas');
+    const NOMS_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const nomMois = (m) => maj(NOMS_MOIS[+m.slice(5, 7) - 1]) + ' ' + m.slice(0, 4);
+    const grille = `
+      <div class="hi-cal">
+        ${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((j) => `<div class="hc-j">${j}</div>`).join('')}
+        ${'<div></div>'.repeat(cal.decalage)}
+        ${cal.jours.map((j) => {
+          if (!j.ligne) return `<div class="hc-c ${j.date > derniere ? 'avenir' : 'sans'}"><span>${j.jour}</span><small>${j.date > derniere ? '' : 'pas de nuit'}</small></div>`;
+          const l = j.ligne;
+          return `<button type="button" class="hc-c ${niveauCal(l.taux)}${choisie && choisie.date === l.date ? ' choisie' : ''}" data-action="hi-nuit" data-date="${esc(l.date)}"
+            title="${esc(maj(l.jour))} ${esc(RDJ.dateFr(l.date))} : ${pct(l.taux)} · ${l.chambres} ch. · ${l.pdj} PDJ"><span>${j.jour}</span><b>${pct(l.taux)}</b><small>${l.chambres} ch.</small></button>`;
+        }).join('')}
+      </div>
+      <div class="hi-echelle">Taux : <i class="bas"></i>moins de 50 % <i class="moyen"></i>50 à 70 % <i class="haut"></i>70 à 90 % <i class="plein"></i>90 % et plus</div>`;
+    const M = RDJ.statsPeriode(lignes, mois + '-01', mois + '-31');
+    const moisAvant = (+mois.slice(0, 4) - 1) + mois.slice(4);
+    const M1 = RDJ.statsPeriode(lignes, moisAvant + '-01', moisAvant + '-31');
+    const calme = nuitsMois.length ? nuitsMois.reduce((a, b) => (b.taux < a.taux ? b : a)) : null;
+    const kv = (k, v) => `<div class="hi-kv"><span>${k}</span><b>${v}</b></div>`;
+    const ecartMois = M1.nuits ? (() => {
+      const r = Math.round((M.taux - M1.taux) * 100);
+      return r ? ` <span class="hi-ecart ${r > 0 ? 'up' : 'down'}">${r > 0 ? '▲ +' : '▼ −'}${Math.abs(r)} pts</span>` : ' <span class="hi-ecart">=</span>';
+    })() : '';
+    const jourCourt = (l) => `${esc(l.jour.slice(0, 3))}. ${+l.date.slice(8, 10)}`;
+    const resumeMois = M.nuits ? `
+      <h3>${esc(nomMois(mois))} <small>${M.nuits} nuit${M.nuits > 1 ? 's' : ''}${M1.nuits ? ` · écart : ${esc(nomMois(moisAvant).toLowerCase())}` : ''}</small></h3>
+      ${kv('Taux moyen', pct(M.taux) + ecartMois)}
+      ${kv('Chambres vendues', arrondi(M.chambres))}
+      ${kv('Petits déjeuners', arrondi(M.pdj))}
+      ${kv('Meilleure nuit', `${jourCourt(M.meilleure)} · ${pct(M.meilleure.taux)}`)}
+      ${kv('Plus calme', `${jourCourt(calme)} · ${pct(calme.taux)}`)}`
+      : `<h3>${esc(nomMois(mois))}</h3><p class="hi-note">Aucune nuit enregistrée ce mois-ci.</p>`;
+    const detailNuit = choisie ? `
+      <h3>Nuit du ${esc(jj(choisie.date))} <small>${esc(choisie.jour)} · clic sur une case</small></h3>
+      ${kv('Occupation', pct(choisie.taux))}
+      ${kv('Chambres', `${choisie.chambres} / ${ctx.cfg.nbChambres}`)}
+      ${kv('Clients', choisie.clients)}
+      ${kv('Départs · recouches', `${choisie.departs} · ${choisie.recouches}`)}
+      ${kv('Petits déjeuners', choisie.pdj)}
+      ${choisie.sources ? kv(sources.filter((s) => choisie.sources[s.code]).map((s) => esc(s.nom)).join(' · ') || 'Sources', sources.filter((s) => choisie.sources[s.code]).map((s) => choisie.sources[s.code]).join(' · ') || '—') : ''}`
+      : '';
+    const navMois = `<span class="hi-mois">
+        <button type="button" class="hi-mois-pas" data-action="hi-mois" data-d="-1" ${mois <= moisMin ? 'disabled' : ''} aria-label="Mois précédent">‹</button>
+        <b>${esc(nomMois(mois))}</b>
+        <button type="button" class="hi-mois-pas" data-action="hi-mois" data-d="1" ${mois >= moisMax ? 'disabled' : ''} aria-label="Mois suivant">›</button></span>`;
 
     /* --- C. Comparer deux périodes --- */
     const hc = ctx.histoComp;
@@ -1330,37 +1409,56 @@
         </div>
       </div>`;
 
-    return `
-    <section class="ecran historique">
-      ${teteEcran('historique', 'Historique', n ? n + ' nuit' + (n > 1 ? 's' : '') + ' enregistrée' + (n > 1 ? 's' : '') : 'Aucune nuit enregistrée',
-        'Une ligne par nuit, ajoutée ou mise à jour à chaque import.', `
+    const sous = ['ensemble', 'calendrier', 'comparer', 'nuits'].includes(ctx.histoSous) ? ctx.histoSous : 'ensemble';
+    const ongletH = (s, lib) => `<button type="button" role="tab" class="${sous === s ? 'actif' : ''}" aria-selected="${sous === s}" data-action="hi-sous" data-s="${s}">${lib}</button>`;
+    const choixPeriode = `<span class="hi-per" role="group" aria-label="Période">${[['7', '7 nuits'], ['30', '30 nuits'], ['90', '90 nuits'], ['tout', 'Tout']].map(([p, lib]) =>
+      `<button type="button" class="${choixP === p ? 'actif' : ''}" aria-pressed="${choixP === p}" data-action="hi-periode" data-p="${p}">${lib}</button>`).join('')}</span>`;
+    const boutons = `
+        ${n && sous === 'ensemble' ? choixPeriode : ''}${n && sous === 'calendrier' ? navMois : ''}
         <button class="btn primaire" data-action="apercu-recap" ${n ? '' : 'disabled'}>Imprimer l'historique</button>
-        <button class="btn" data-action="recap-csv" ${n ? '' : 'disabled'}>Exporter pour Excel (.csv)</button>`)}
+        <button class="btn" data-action="recap-csv" ${n ? '' : 'disabled'}>Exporter pour Excel (.csv)</button>`;
+    const AIDES = {
+      ensemble: 'Chiffres moyens de la période choisie, comparés à autant de nuits juste avant.',
+      calendrier: 'Chaque nuit colorée selon son taux d\'occupation ; cliquez sur une nuit pour son détail.',
+      comparer: 'Choisissez deux périodes, ou un raccourci.',
+      nuits: 'Une ligne par nuit, ajoutée ou mise à jour à chaque import.',
+    };
 
-      ${n ? `
-      ${tableauDeBord}
-
+    const contenu = {
+      ensemble: () => `
+      ${tuiles}
       <div class="hi-deux">
         <section class="hi-bloc">
-          <h3>Taux d'occupation <small>30 dernières nuits, comparées aux 30 d'avant</small></h3>
+          <h3>Taux d'occupation <small>${per.b ? `pointillé : les ${esc(nomAvant)}` : 'toutes les nuits enregistrées'}</small></h3>
           ${courbeTaux}
         </section>
         <section class="hi-bloc">
-          <h3>Moyenne par jour de la semaine <small>${n} nuit${n > 1 ? 's' : ''}</small></h3>
+          <h3>Par jour de la semaine <small>${P.nuits} nuit${P.nuits > 1 ? 's' : ''}</small></h3>
           ${barresJours}
         </section>
       </div>
-
+      <div class="hi-deux egal">
+        <section class="hi-bloc"><h3>Sources des chambres</h3>${sourcesBarre}</section>
+        <section class="hi-bloc"><h3>Petits déjeuners pris <small>part des clients</small></h3>${pdjPris}</section>
+      </div>`,
+      calendrier: () => `
+      <div class="hi-deux hi-deux-cal">
+        <section class="hi-bloc">${grille}</section>
+        <div>
+          <section class="hi-bloc">${resumeMois}</section>
+          ${detailNuit ? `<section class="hi-bloc">${detailNuit}</section>` : ''}
+        </div>
+      </div>`,
+      comparer: () => `
       <section class="hi-bloc">
         <h3>Comparer deux périodes</h3>
         ${comparaison}
-      </section>
-
+      </section>`,
+      nuits: () => `
       ${grapheSources ? `<section class="hi-bloc">
-        <h3>Sources des chambres ${recentesSrc.length < avecSources.length ? `<small>${recentesSrc.length} dernières nuits</small>` : ''}</h3>
+        <h3>Sources des chambres par nuit ${recentesSrc.length < avecSources.length ? `<small>${recentesSrc.length} dernières nuits</small>` : ''}</h3>
         ${grapheSources}
       </section>` : ''}
-
       <section class="hi-bloc">
         <h3>Détail des nuits <small>la plus récente en haut</small></h3>
         <div class="hi-table-conteneur">
@@ -1375,7 +1473,17 @@
             </tr>`).join('')}</tbody>
           </table>
         </div>
-      </section>` : `
+      </section>`,
+    };
+
+    return `
+    <section class="ecran historique">
+      <nav class="sous-onglets" role="tablist" aria-label="Historique">
+        ${ongletH('ensemble', 'Vue d\'ensemble')}${ongletH('calendrier', 'Calendrier')}${ongletH('comparer', 'Comparer')}${ongletH('nuits', 'Toutes les nuits')}
+      </nav>
+      ${teteEcran('historique', 'Historique', n ? n + ' nuit' + (n > 1 ? 's' : '') + ' enregistrée' + (n > 1 ? 's' : '') + ` · ${arrondi(total('clients'))} clients` : 'Aucune nuit enregistrée',
+        AIDES[sous], boutons)}
+      ${n ? contenu[sous]() : `
       <div class="hi-vide"><b>Aucune nuit enregistrée pour l'instant.</b><span>Chaque import du rapport clients présents ajoute sa nuit à l'historique.</span></div>`}
     </section>`;
   };

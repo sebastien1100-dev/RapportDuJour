@@ -80,6 +80,18 @@
     egal('historique : 30 nuits / 30 d\'avant, même période l\'an dernier (364 jours, même jour de semaine)',
       [RDJ.periodesComparees('2026-11-23', 'mois'), RDJ.periodesComparees('2026-11-23', 'an').b],
       [{ a: ['2026-10-25', '2026-11-23'], b: ['2026-09-25', '2026-10-24'] }, ['2025-10-26', '2025-11-24']]);
+    egal('historique : période de la vue d\'ensemble (7 / 90 nuits et celles d\'avant, toutes les nuits)',
+      [RDJ.periodeNuits([], '2026-11-23', '7'), RDJ.periodeNuits([], '2026-11-23', '90').b,
+        RDJ.periodeNuits([{ date: '2026-11-01' }, { date: '2026-11-23' }], '2026-11-23', 'tout')],
+      [{ a: ['2026-11-17', '2026-11-23'], b: ['2026-11-10', '2026-11-16'], nb: 7 }, ['2026-05-28', '2026-08-25'],
+        { a: ['2026-11-01', '2026-11-23'], b: null, nb: 23 }]);
+    {
+      const cal = RDJ.calendrierMois([{ date: '2026-11-14', taux: 1 }], '2026-11');
+      egal('historique : calendrier du mois (novembre 2026 commence un dimanche, 30 jours, nuit enregistrée)',
+        [cal.decalage, cal.jours.length, cal.jours[13].ligne && cal.jours[13].ligne.taux, cal.jours[0].ligne, RDJ.calendrierMois([], '2026-02').jours.length,
+          RDJ.moisVoisin('2026-01', -1), RDJ.moisVoisin('2026-12', 1)],
+        [6, 30, 1, null, 28, '2025-12', '2027-01']);
+    }
     {
       const ls = [
         { date: '2026-11-16', jour: 'lundi', chambres: 60, clients: 70, departs: 20, recouches: 40, pdj: 50, taux: 0.6, sources: { DIR: 30, BKG: 30 }, types: { '1Q': 40, '1K': 20 } },

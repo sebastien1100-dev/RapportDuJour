@@ -8,10 +8,19 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.47', date: '2026-11-24', titre: 'Historique en sous-onglets, avec un calendrier',
+      changements: [
+        ['amelioration', "L'Historique a quatre sous-onglets : Vue d'ensemble, Calendrier, Comparer et Toutes les nuits. Chacun tient sur l'écran, sans long défilement."],
+        ['nouveau', "Vue d'ensemble : choix de la période (7, 30 ou 90 nuits, ou tout), comparée à autant de nuits juste avant. Chaque chiffre a sa mini-courbe ; dessous, la courbe du taux, la moyenne par jour de la semaine, la part de chaque source et la part des clients qui prennent le petit déjeuner."],
+        ['nouveau', "Calendrier : un mois à la fois (flèches ‹ ›), chaque nuit colorée selon son taux d'occupation. À droite, le résumé du mois (comparé au même mois l'an dernier) et le détail de la nuit cliquée."],
+        ['amelioration', "Le graphique des sources par nuit et le tableau de toutes les nuits sont dans « Toutes les nuits » ; « Comparer » garde le choix libre de deux périodes."],
+      ],
+    },
+    {
       version: '3.46', date: '2026-11-24', titre: 'Taille de l\'affichage dans la barre du haut, accueil sur toute la largeur',
       changements: [
-        ['amelioration', "Le choix de taille (Ajuster, Largeur, − curseur +) est dans la barre du haut, le même pour tous les onglets ; il n'est plus dans l'en-tête de chaque feuille."],
-        ['amelioration', "L'accueil, l'Historique et les Réglages occupent toute la largeur de la fenêtre. « Ajuster » les agrandit sur les grands écrans (Full HD, ultra-large), « Largeur » les garde à 100 %, le curseur et − / + les agrandissent ou les réduisent."],
+        ['amelioration', "Le choix de taille (Largeur, − curseur +) est dans la barre du haut, le même pour tous les onglets ; il n'est plus dans l'en-tête de chaque feuille. L'option « Ajuster » est retirée : par défaut, les pages prennent toute la largeur de la fenêtre."],
+        ['amelioration', "L'accueil, l'Historique et les Réglages occupent toute la largeur de la fenêtre ; le curseur et − / + les agrandissent ou les réduisent, comme les feuilles."],
         ['amelioration', "Sur le MacBook Air, la barre du haut tient sur une ligne : le bouton « Mettre à jour » n'affiche que son icône ↻ (son texte revient quand une nouvelle version est disponible)."],
       ],
     },

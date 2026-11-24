@@ -644,6 +644,39 @@
     return { a, b };
   };
 
+  /** Période de la vue d'ensemble, terminée à la nuit « derniere » : '7', '30' ou '90' nuits et les autant d'avant
+      (b), ou 'tout' : de la première nuit enregistrée à la dernière, sans période d'avant (b null). */
+  RDJ.periodeNuits = function (lignes, derniere, choix) {
+    if (choix === 'tout') {
+      const deb = lignes && lignes.length ? lignes[0].date : derniere;
+      return { a: [deb, derniere], b: null, nb: RDJ.ecartJours(derniere, deb) + 1 };
+    }
+    const nb = [7, 30, 90].includes(+choix) ? +choix : 30;
+    const a = [RDJ.jours(derniere, -(nb - 1)), derniere];
+    return { a, b: [RDJ.jours(a[0], -nb), RDJ.jours(a[0], -1)], nb };
+  };
+
+  /** Mois « AAAA-MM » décalé de delta mois. */
+  RDJ.moisVoisin = function (mois, delta) {
+    const [a, m] = mois.split('-').map(Number);
+    const t = a * 12 + (m - 1) + delta;
+    return Math.floor(t / 12) + '-' + String((t % 12) + 1).padStart(2, '0');
+  };
+
+  /** Calendrier d'un mois « AAAA-MM » : cases vides avant le 1er (semaine du lundi au dimanche),
+      puis une case par jour { date, jour (1 à 31), ligne (nuit enregistrée ou null) }. */
+  RDJ.calendrierMois = function (lignes, mois) {
+    const premier = mois + '-01';
+    const decalage = (new Date(premier + 'T12:00:00Z').getUTCDay() + 6) % 7;
+    const nbJours = RDJ.ecartJours(RDJ.moisVoisin(mois, 1) + '-01', premier);
+    const parDate = new Map((lignes || []).map((l) => [l.date, l]));
+    const jours = Array.from({ length: nbJours }, (_, i) => {
+      const date = RDJ.jours(premier, i);
+      return { date, jour: i + 1, ligne: parDate.get(date) || null };
+    });
+    return { mois, decalage, jours };
+  };
+
   /** Ajoute ou remplace la journée dans l'historique (jamais de doublon), trié par date. */
   RDJ.majRecap = function (recap, ligne) {
     const res = (recap || []).filter((l) => l.date !== ligne.date);

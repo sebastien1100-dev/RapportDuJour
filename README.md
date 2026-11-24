@@ -44,8 +44,8 @@ Corrections à la main, comme dans Excel :
   un nouvel import, c'est l'import qui l'emporte.
 - Les corrections valent pour la nuit en cours, restent si l'on réimporte le même fichier et sont oubliées la nuit suivante.
 
-Affichage : les feuilles s'adaptent à la fenêtre (choix « Affichage » dans la barre d'outils :
-ajuster, toute la largeur ou 100 %). Testé en 1440 × 900 (MacBook Air), 1920 × 1080 et 3440 × 1440.
+Affichage : choix « Taille » dans la barre du haut, commun à tous les onglets (« Largeur » : toute la
+fenêtre, par défaut ; ou zoom de 50 à 250 % avec le curseur et − / +). Testé en 1440 × 900 (MacBook Air), 1920 × 1080 et 3440 × 1440.
 
 ## Mettre à jour l'application
 
