@@ -228,6 +228,11 @@
       z = Math.max(0.5, Math.min(z, 3));
       f.style.zoom = z.toFixed(3);
     });
+    // bandeaux du haut (en-tête, sous-onglets, réglages) à la largeur de la feuille affichée :
+    // toute la largeur en mode « Largeur », la largeur de la feuille en mode « Ajuster » ou au curseur
+    const ecran = document.querySelector('#vue .ecran');
+    const feuille = document.querySelector('#vue .papier .feuille');
+    if (ecran && feuille) ecran.style.setProperty('--largeur-bandeaux', Math.max(720, Math.round(feuille.getBoundingClientRect().width)) + 'px');
     // la barre suit la taille réelle, même en mode automatique
     const z = zoomActuel();
     const curseur = document.getElementById('zoom-feuille');

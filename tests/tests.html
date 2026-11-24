@@ -38,9 +38,9 @@
       [true, true, true]);
     // feuille de chambre : « Ne pas faire » dans le cycle, compté dans le total, pas disponible
     egal('ne pas faire : cycle du double-clic, compteurs, pas disponible pour les arrivées',
-      [RDJ.etatSuivant('BR'), RDJ.etatSuivant('NPF'), RDJ.compteursFdc({ '001': { etat: 'NPF' }, '002': { etat: 'B' } }, {}).total,
-        RDJ.compteursFdc({ '001': { etat: 'NPF' } }, {}).NPF, RDJ.disponiblesParType({ '001': { etat: 'NPF' } }, { '001': '1Q' })],
-      ['NPF', 'HS', 2, 1, {}]);
+      [RDJ.etatSuivant('BR'), RDJ.etatSuivant('NPF'), RDJ.compteursFdc({ '001': { etat: 'NPF' }, '002': { etat: 'B' }, '003': { etat: 'NPD' } }, {}).total,
+        RDJ.compteursFdc({ '001': { etat: 'NPF' }, '002': { etat: 'NPD' } }, {}).NPD, RDJ.disponiblesParType({ '001': { etat: 'NPF' }, '002': { etat: 'NPD' } }, { '001': '1Q', '002': '1Q' })],
+      ['NPF', 'NPD', 3, 1, {}]);
     // no show : la chambre reste dans la liste (marquée) mais ne compte plus
     {
       const rs = [{ chambre: '101', depart: '2026-11-11', mealPlan: 'BB', statut: '', nbClients: 2 }, { chambre: '102', depart: '2026-11-13', mealPlan: 'RO', statut: 'P', nbClients: 1 }];
@@ -143,7 +143,7 @@
     egal('fournées 38 pièces 60/30/10 : chaque fournée a sa part', RDJ.fournees(38, [60, 30, 10]), [23, 12, 3]);
     egal('PDJ croissants business 6', RDJ.quantitePdj(croissant, 6, 'business'), 5);
     egal('fournées 5 croissants (6 couverts) : pas de plaque entière imposée', RDJ.fournees(5, [60, 30, 10]), [3, 2, 0]);
-    egal('cycle FDC', ['', 'B', 'R', 'BR', 'NPF', 'HS', 'X'].map(RDJ.etatSuivant), ['B', 'R', 'BR', 'NPF', 'HS', '', 'B']);
+    egal('cycle FDC', ['', 'B', 'R', 'BR', 'NPF', 'NPD', 'HS', 'X'].map(RDJ.etatSuivant), ['B', 'R', 'BR', 'NPF', 'NPD', 'HS', '', 'B']);
     egal('correction = import -> supprimée', RDJ.correctionApres('B', 'B'), null);
     egal('correction vide sur chambre importée -> X', RDJ.correctionApres('', 'R'), 'X');
     egal('CSV point-virgule', RDJ._lireCsv('a;b\n"x;y";2\n'), [['a', 'b'], ['x;y', '2']]);

@@ -8,6 +8,20 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.44', date: '2026-11-24', titre: '« Ne pas déranger » ; bandeaux à la largeur des feuilles',
+      changements: [
+        ['nouveau', "Feuille de chambre : « Ne pas déranger » s'ajoute au double-clic (vide → B → R → BR → Ne pas faire → Ne pas déranger → HS → vide). La chambre reste occupée, compte dans le total, garde sa case « Fait » (à faire plus tard) ; colonne NPD dans le compteur du haut et « NE PAS DÉRANGER » dans les corrections du jour."],
+        ['amelioration', "« Ne pas faire » et « Ne pas déranger » s'écrivent maintenant comme les autres états (gras, droit, même taille), sur fond gris clair, et passent sur deux lignes si besoin pour rester dans leur case."],
+        ['amelioration', "Onglets à feuille (rapport, feuille de chambre, plan, cuisson PDJ, buffet, commande, historique) : les bandeaux du haut prennent la largeur de la feuille affichée, toute la largeur de l'écran en mode « Largeur », la largeur de la feuille en mode « Ajuster » ou au curseur."],
+      ],
+    },
+    {
+      version: '3.43', date: '2026-11-24', titre: 'Accueil : impressions en haut',
+      changements: [
+        ['amelioration', "Accueil : le bandeau des impressions (« Tout imprimer » et une pastille par feuille) est remonté juste sous l'en-tête, avant la zone d'import et les cartes, pour être accessible tout de suite."],
+      ],
+    },
+    {
       version: '3.42', date: '2026-11-24', titre: 'Feuille de chambre : « Ne pas faire »',
       changements: [
         ['nouveau', "Feuille de chambre : le double-clic sur l'état d'une chambre propose « Ne pas faire » (vide → B → R → BR → Ne pas faire → HS → vide). La case s'affiche en gris clair, en italique, sans case « Fait » ; la chambre reste occupée (recouche sur le plan) et compte dans le total. Nouvelle colonne NPF dans le compteur du haut, et « NE PAS FAIRE » dans les corrections du jour."],
