@@ -22,17 +22,7 @@
       <button data-vue="reglages">Réglages</button>
     </nav>
     <div id="choix-affichage" class="choix-affichage" role="group" aria-label="Taille de l'affichage"></div>
-    <button id="pastille-maj"class="pastille-maj" data-action="maj-ouvrir" hidden><span></span></button>
-    <div class="menu-import">
-      <button class="btn primaire" data-action="menu-import" aria-haspopup="true" aria-expanded="false">Importer ▾</button>
-      <div class="menu-import-liste" id="menu-import" hidden>
-        <button data-action="importer"><b>Rapport clients présents</b><small>chambres, clients, départs, PDJ, paiement</small></button>
-        <button data-action="importer-soldes"><b>Rapport des départs</b><small>montant dû des chambres en départ</small></button>
-        <button data-action="importer-maintenance"><b>Rapport de maintenance</b><small>chambres bloquées : hors service sur le plan et la feuille de chambre</small></button>
-        <button data-action="importer-arrivees"><b>Rapport des arrivées</b><small>nombre d'arrivées par type de chambre, sur l'accueil</small></button>
-        <p class="menu-import-note">Exports en français ou en anglais : les deux sont reconnus.</p>
-      </div>
-    </div>
+    <button id="pastille-maj" class="pastille-maj" data-action="maj-ouvrir" hidden><span></span></button>
   </header>
 
   <div id="notice" class="notice" hidden role="status"></div>
@@ -44,9 +34,6 @@
   <div class="voile-depot">Déposez les rapports exportés (en français ou en anglais) pour les importer</div>
 
   <input type="file" id="fichier-import" accept=".xlsx,.xlsm,.csv" multiple hidden>
-  <input type="file" id="fichier-soldes" accept=".xlsx,.xlsm,.csv" hidden>
-  <input type="file" id="fichier-maintenance" accept=".xlsx,.xlsm,.csv" hidden>
-  <input type="file" id="fichier-arrivees" accept=".xlsx,.xlsm,.csv" hidden>
   <input type="file" id="fichier-restaurer" accept=".json,application/json" hidden>
 
   <script src="js/config.js"></script>

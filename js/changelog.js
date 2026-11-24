@@ -8,6 +8,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.49', date: '2026-11-24', titre: 'Bouton « Importer » retiré de la barre du haut',
+      changements: [
+        ['amelioration', "Le menu « Importer ▾ » de la barre du haut est retiré : les rapports s'importent par la zone de dépôt de l'accueil (clic ou glisser-déposer), qui reconnaît toute seule chaque rapport. Glisser un fichier sur n'importe quel onglet marche toujours."],
+        ['amelioration', "Avec la place gagnée, le bouton « Mettre à jour » garde son texte sur le MacBook Air."],
+      ],
+    },
+    {
       version: '3.48', date: '2026-11-24', titre: 'Mise à jour : le bouton « Installer » répond toujours',
       changements: [
         ['correction', "« Installer » ne faisait parfois rien : quand le navigateur refusait de redonner l'accès au dossier de l'application, l'erreur restait invisible. L'appli demande maintenant de choisir le dossier (ce qui redonne l'accès), et affiche le message en cas de problème."],

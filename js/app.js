@@ -1084,15 +1084,8 @@
     'zoom-largeur': () => choisirAffichage('largeur'),
     'zoom-moins': () => pasZoom(-1),
     'zoom-plus': () => pasZoom(1),
-    importer: () => { fermerMenuImport(); $('#fichier-import').click(); },
-    'importer-soldes': () => { fermerMenuImport(); $('#fichier-soldes').click(); },
-    'importer-maintenance': () => { fermerMenuImport(); $('#fichier-maintenance').click(); },
-    'importer-arrivees': () => { fermerMenuImport(); $('#fichier-arrivees').click(); },
-    'menu-import': () => {
-      const m = $('#menu-import');
-      m.hidden = !m.hidden;
-      document.querySelector('[data-action="menu-import"]').setAttribute('aria-expanded', String(!m.hidden));
-    },
+    // zone de dépôt de l'accueil : un ou plusieurs rapports, reconnus tout seuls
+    importer: () => $('#fichier-import').click(),
     'ajouter-chambre': ajouterChambre,
     'types-depuis-import': () => {
       const ctx = contexte();
@@ -1488,13 +1481,6 @@
     },
   };
 
-  function fermerMenuImport() {
-    const m = $('#menu-import');
-    if (m && !m.hidden) { m.hidden = true; document.querySelector('[data-action="menu-import"]').setAttribute('aria-expanded', 'false'); }
-  }
-  // clic ailleurs ou Échap : le menu se ferme
-  document.addEventListener('click', (ev) => { if (!ev.target.closest('.menu-import')) fermerMenuImport(); }, true);
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermerMenuImport(); });
   // cartes de l'accueil (role="link") : Entrée ou Espace ouvre l'onglet, comme un clic
   document.addEventListener('keydown', (ev) => {
     const carte = ev.target.closest && ev.target.closest('[role="link"][data-vue-aller]');
@@ -1608,21 +1594,6 @@
       const fs = Array.from(t.files);
       t.value = '';
       if (fs.length) importerPlusieurs(fs);
-      return;
-    } else if (t.id === 'fichier-soldes') {
-      const f = t.files[0];
-      t.value = '';
-      if (f) importerSoldes(f);
-      return;
-    } else if (t.id === 'fichier-maintenance') {
-      const f = t.files[0];
-      t.value = '';
-      if (f) importerMaintenance(f);
-      return;
-    } else if (t.id === 'fichier-arrivees') {
-      const f = t.files[0];
-      t.value = '';
-      if (f) importerArrivees(f);
       return;
     } else if (t.id === 'fichier-restaurer') {
       const f = t.files[0];

@@ -38,8 +38,6 @@ button, input, select { font: inherit; }
   padding: 10px 20px; background: var(--accent); color: #fff;
   box-shadow: 0 2px 10px rgba(10,80,75,.25);
 }
-.barre .btn.primaire { background: #fff; border-color: #fff; color: var(--accent); }
-.barre .btn.primaire:hover { filter: none; background: #eefaf8; }
 .marque { display: flex; align-items: center; gap: 10px; }
 .marque b { display: block; font-size: 16px; }
 .marque small { display: block; opacity: .75; font-size: 12px; }
@@ -55,22 +53,6 @@ button, input, select { font: inherit; }
 }
 #onglets button:hover { background: rgba(255,255,255,.14); color: #fff; }
 #onglets button.actif { background: #fff; color: var(--accent); font-weight: 600; }
-
-/* Menu « Importer » (rapport clients présents / rapport des soldes) */
-.menu-import { position: relative; flex: none; }
-.menu-import-liste {
-  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 290px;
-  background: #fff; border: 1px solid var(--bord); border-radius: 10px; box-shadow: 0 12px 32px rgba(17,24,39,.2); padding: 6px;
-}
-.menu-import-liste[hidden] { display: none; }
-.menu-import-liste button {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left;
-  border: 0; background: none; padding: 9px 12px; border-radius: 7px; cursor: pointer; color: var(--texte);
-}
-.menu-import-liste button:hover { background: var(--marine-clair); }
-.menu-import-liste b { color: var(--marine); font-size: 14px; }
-.menu-import-liste small { color: var(--doux); font-size: 12px; }
-.menu-import-note { margin: 4px 0 0; padding: 8px 12px 4px; border-top: 1px solid var(--bord); font-size: 12px; color: var(--doux); }
 
 /* ====== Boutons ====== */
 .btn {
@@ -113,8 +95,6 @@ button, input, select { font: inherit; }
   #onglets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   #onglets::-webkit-scrollbar { display: none; }
   #onglets button { padding: 7px 8px; font-size: 14px; }
-  .barre .btn.primaire { padding: 7px 10px; font-size: 14px; }
-  .barre .btn.primaire .long { display: none; }
 }
 .papier .feuille { margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 6px 24px rgba(0,0,0,.06); }
 .bandeau-sauv {
@@ -715,11 +695,6 @@ body.depot .voile-depot { display: grid; }
 #onglets button { color: var(--doux); border-radius: 999px; padding: 8px 14px; font-weight: 500; }
 #onglets button:hover { background: var(--menthe); color: var(--menthe-fonce); }
 #onglets button.actif { background: var(--accent); color: #fff; font-weight: 600; }
-.barre .btn.primaire { background: var(--accent); border-color: var(--accent); color: #fff; }
-.barre .btn.primaire:hover { background: var(--accent-fonce); }
-.menu-import-liste { border: 0; border-radius: 16px; padding: 8px; box-shadow: 0 16px 40px rgba(28,42,72,.16); }
-.menu-import-liste button { border-radius: 10px; }
-.menu-import-liste button:hover { background: var(--menthe); }
 
 /* boutons à plat */
 .btn { border: 0; background: var(--gris-btn); border-radius: 10px; padding: 9px 16px; font-weight: 500; transition: background .15s; }
@@ -787,14 +762,11 @@ body.depot .voile-depot { display: grid; }
 .ca-valeur { min-width: 40px; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--marine); padding-right: 8px; }
 /* onglets sans feuille (accueil, historique, réglages) en mode « Largeur » : toute la fenêtre */
 .ecran.pleine-largeur, .ecran.pleine-largeur .sous-onglets { max-width: none; }
-/* portable (1440 px) : la barre du haut tient sur une ligne. « Taille » se lit au survol,
-   « Mettre à jour » devient une simple icône ↻ (le texte revient dès qu'une nouvelle version est là) */
+/* portable (1440 px) : la barre du haut tient sur une ligne, « Taille » se lit au survol */
 @media (max-width: 1700px) {
   .barre { gap: 14px; }
   .choix-affichage .ca-lib { display: none; }
   .choix-affichage input[type=range] { width: 70px; }
-  .pastille-maj.neutre { padding: 6px 9px; }
-  .pastille-maj.neutre span { display: none; }
 }
 @media (max-width: 1250px) {
   .choix-affichage input[type=range] { display: none; }

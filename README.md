@@ -97,15 +97,15 @@ Dans le navigateur, sur ce poste (stockage local). Conséquences :
 reconnue dans `js/config.js` (`sourcesReservation`). Une nouvelle source s'y ajoute en une ligne ;
 en attendant, elle apparaît dans « Autre » avec son nom d'origine.
 
-**Rapport des départs** (menu *Importer ▾*, anciennement « rapport des soldes ») : second export avec une colonne de montant (*Solde*, *Montant dû*,
+**Rapport des départs** (zone de dépôt de l'accueil, anciennement « rapport des soldes ») : second export avec une colonne de montant (*Solde*, *Montant dû*,
 *Reste à payer*, *Balance*…) et une colonne *Chambre* ou *Réservation*. Les montants sont reportés sur les
 départs non payés de la nuit en cours.
 
-**Rapport des arrivées** (menu *Importer ▾*, facultatif) : export des arrivées avec une colonne *Arrivée* (date)
+**Rapport des arrivées** (zone de dépôt de l'accueil, facultatif) : export des arrivées avec une colonne *Arrivée* (date)
 et une colonne *Description* (ou *Type de chambre*, *Room type*) ; *TotalReservations* sert de nombre de chambres.
 L'accueil montre le nombre d'arrivées par type (PMR, 1K, 1Q, 2S), comparé aux chambres disponibles de chaque type.
 
-**Rapport de maintenance** (menu *Importer ▾*, facultatif) : export avec une colonne *Chambre* (ou *N° chambre*, *Room*),
+**Rapport de maintenance** (zone de dépôt de l'accueil, facultatif) : export avec une colonne *Chambre* (ou *N° chambre*, *Room*),
 et si possible *Motif* (ou *Commentaire*, *Description*…) et les dates *Début* / *Fin*. Les chambres bloquées passent en HS
 sur la feuille de chambre et le plan pour la nuit en cours ; le motif apparaît au survol et en bas de la feuille de chambre.
 Une chambre dont la date de fin est passée est ignorée, une chambre occupée garde son client.
