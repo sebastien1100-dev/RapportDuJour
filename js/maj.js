@@ -135,8 +135,13 @@
     const h = await RDJ.dossierSauv.poignee();
     if (!h) return null;
     const opts = { mode: 'readwrite' };
-    let perm = await h.queryPermission(opts);
-    if (perm !== 'granted') perm = await h.requestPermission(opts);
+    // le navigateur peut refuser de redemander l'accès (clic trop ancien, fichier ouvert en file://) :
+    // on renvoie null, et l'appli fait choisir le dossier à nouveau, ce qui redonne l'accès
+    let perm;
+    try {
+      perm = await h.queryPermission(opts);
+      if (perm !== 'granted') perm = await h.requestPermission(opts);
+    } catch (e) { return null; }
     if (perm !== 'granted') return null;
     try { await h.getFileHandle('index.html'); } catch (e) { return null; }
     return h;

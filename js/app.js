@@ -515,7 +515,10 @@
       ok: 'Choisir le dossier',
     });
     if (!ok) return null;
-    try { await RDJ.dossierSauv.choisir(); } catch (e) { return null; }
+    try { await RDJ.dossierSauv.choisir(); } catch (e) {
+      if (e && e.name !== 'AbortError') notice('Choix du dossier impossible : ' + e.message, 'erreur');
+      return null;
+    }
     h = await RDJ.maj.racineAppli();
     if (!h) notice("Ce dossier ne contient pas index.html : choisissez le dossier de l'application.", 'erreur');
     return h;
@@ -1425,9 +1428,15 @@
       afficher();
     },
     'maj-fenetre-fermer': () => $('#maj-fenetre').close(),
-    'maj-installer': async () => {
-      if (!maj || maj.etat !== 'dispo') return;
-      const racine = await majRacine();
+    'maj-installer': async (el) => {
+      if (!maj || maj.etat !== 'dispo') return notice('Cherchez d\'abord la nouvelle version avec « Mettre à jour ».', 'alerte');
+      if (el) el.disabled = true;  // pas de double clic pendant la préparation
+      let racine;
+      try { racine = await majRacine(); } catch (e) {
+        if (el) el.disabled = false;
+        return notice("Accès au dossier de l'application impossible : " + e.message, 'erreur');
+      }
+      if (el) el.disabled = false;
       if (!racine) return notice("Mise à jour annulée : pas d'accès au dossier de l'application.", 'alerte');
       const version = maj.version;
       let phase = 'sauvegarde';
@@ -1439,7 +1448,7 @@
         enregistrer();
         await RDJ.maj.installer(racine, (p, i, n) => { phase = p; fenetreMaj(version, p, i, n); }, maj.ref);
       } catch (e) {
-        fenetreMaj(version, phase, 0, 0, 'Mise à jour interrompue : ' + e.message);
+        try { fenetreMaj(version, phase, 0, 0, 'Mise à jour interrompue : ' + e.message); } catch (e2) { notice('Mise à jour interrompue : ' + e.message, 'erreur'); }
         return;
       }
       try { sessionStorage.setItem('rdj.majFaite', version); } catch (e) { /* sans importance */ }
@@ -1690,6 +1699,14 @@
 
   // Synchronisation si l'application est ouverte dans deux onglets
   window.addEventListener('storage', () => { etat = RDJ.store.charger(); afficher(); });
+
+  // une erreur imprévue dans un bouton (mise à jour, sauvegarde…) s'affiche au lieu de ne rien faire
+  window.addEventListener('unhandledrejection', (ev) => {
+    const r = ev.reason;
+    if (r && r.name === 'AbortError') return;  // fenêtre de choix fermée par l'utilisateur
+    console.error(r);
+    notice('Erreur inattendue : ' + ((r && r.message) || r), 'erreur');
+  });
 
   ajouterChoixAffichage();
   afficher();

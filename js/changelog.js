@@ -8,6 +8,13 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.48', date: '2026-11-24', titre: 'Mise à jour : le bouton « Installer » répond toujours',
+      changements: [
+        ['correction', "« Installer » ne faisait parfois rien : quand le navigateur refusait de redonner l'accès au dossier de l'application, l'erreur restait invisible. L'appli demande maintenant de choisir le dossier (ce qui redonne l'accès), et affiche le message en cas de problème."],
+        ['amelioration', "Une erreur imprévue sur un bouton s'affiche en bandeau rouge au lieu de ne rien faire."],
+      ],
+    },
+    {
       version: '3.47', date: '2026-11-24', titre: 'Historique en sous-onglets, avec un calendrier',
       changements: [
         ['amelioration', "L'Historique a quatre sous-onglets : Vue d'ensemble, Calendrier, Comparer et Toutes les nuits. Chacun tient sur l'écran, sans long défilement."],
