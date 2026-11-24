@@ -1089,11 +1089,12 @@ body.depot .voile-depot { display: grid; }
 .r-table.petite { font-size: 7pt; }
 .r-table th { background: var(--marine); color: #fff; font-weight: 600; font-size: 7pt; padding: .8mm .5mm; }
 .r-table td { border: .2mm solid #b5b5b5; padding: 0 .8mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.r-table th:nth-child(1) { width: 8%; } .r-table th:nth-child(2) { width: 26%; }
+.r-table th:nth-child(1) { width: 8%; } .r-table th:nth-child(2) { width: 23%; }
 .r-table th:nth-child(3) { width: 8%; }
 .r-table th:nth-child(4), .r-table th:nth-child(5) { width: 6%; }
-.r-table th:nth-child(6) { width: 10%; } .r-table th:nth-child(7) { width: 15%; }
-.r-table th:nth-child(8) { width: 10%; } .r-table th:nth-child(9) { width: 11%; }
+/* « Statut » assez large pour « Recouche » et « DÉPART » en gras, aussi avec la police de Windows */
+.r-table th:nth-child(6) { width: 10%; } .r-table th:nth-child(7) { width: 20%; }
+.r-table th:nth-child(8) { width: 8%; } .r-table th:nth-child(9) { width: 11%; }
 .r-table td.src { font-size: 6.5pt; font-weight: 700; letter-spacing: .02em; padding: 0 .3mm; }
 .r-sources { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5mm 4mm; margin-top: 1.6mm; font-size: 7.5pt; }
 .r-sources > b { color: var(--marine); }

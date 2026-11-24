@@ -8,6 +8,12 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.50', date: '2026-11-25', titre: 'Rapport : « Recouche » et « DÉPART » en entier',
+      changements: [
+        ['correction', "Dans le tableau du rapport, la colonne « Statut » coupait « Recouche » et « DÉPART » (surtout sous Windows). Elle est plus large ; la colonne « Client » et la colonne « PDJ » sont un peu plus étroites."],
+      ],
+    },
+    {
       version: '3.49', date: '2026-11-24', titre: 'Bouton « Importer » retiré de la barre du haut',
       changements: [
         ['amelioration', "Le menu « Importer ▾ » de la barre du haut est retiré : les rapports s'importent par la zone de dépôt de l'accueil (clic ou glisser-déposer), qui reconnaît toute seule chaque rapport. Glisser un fichier sur n'importe quel onglet marche toujours."],
