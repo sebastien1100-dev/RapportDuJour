@@ -8,6 +8,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.45', date: '2026-11-24', titre: 'Mise à jour : bouton dans la barre du haut, nouvelles versions vues tout de suite',
+      changements: [
+        ['correction', "Une version envoyée sur GitHub n'était pas toujours vue : GitHub garde ses fichiers en cache jusqu'à 5 minutes, et l'appli ne vérifiait toute seule qu'une fois par jour. Elle lit maintenant la toute dernière version envoyée (sans ce cache), et installe tous les fichiers de ce même envoi."],
+        ['amelioration', "Le bouton « Mettre à jour » est dans la barre du haut, à côté d'« Importer », sur tous les onglets. Il devient « 3.46 disponible » (en jaune, avec un point rouge) quand une nouvelle version existe ; un clic montre les nouveautés et le bouton « Installer ». Le lien « Version précédente » reste en bas de l'accueil."],
+        ['amelioration', "Vérification automatique à l'ouverture puis toutes les heures (au lieu d'une fois par jour), seulement s'il y a Internet."],
+      ],
+    },
+    {
       version: '3.44', date: '2026-11-24', titre: '« Ne pas déranger » ; bandeaux à la largeur des feuilles',
       changements: [
         ['nouveau', "Feuille de chambre : « Ne pas déranger » s'ajoute au double-clic (vide → B → R → BR → Ne pas faire → Ne pas déranger → HS → vide). La chambre reste occupée, compte dans le total, garde sa case « Fait » (à faire plus tard) ; colonne NPD dans le compteur du haut et « NE PAS DÉRANGER » dans les corrections du jour."],

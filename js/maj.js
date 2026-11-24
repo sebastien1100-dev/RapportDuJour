@@ -55,22 +55,36 @@
 
   /* ---------- Accès à GitHub ---------- */
 
-  const urlBrute = (chemin) => `https://raw.githubusercontent.com/${DEPOT}/${BRANCHE}/${chemin.split('/').map(encodeURIComponent).join('/')}`;
+  // ref : identifiant du dernier envoi (commit) ; les fichiers d'un commit ne sont jamais servis périmés,
+  // alors que ceux de la branche « main » restent jusqu'à 5 minutes en cache chez GitHub
+  const urlBrute = (chemin, ref) => `https://raw.githubusercontent.com/${DEPOT}/${ref || BRANCHE}/${chemin.split('/').map(encodeURIComponent).join('/')}`;
 
-  async function telecharger(chemin, type) {
-    // paramètre « t » : évite une ancienne copie gardée en cache
+  async function telecharger(chemin, type, ref) {
     let rep;
-    try { rep = await fetch(urlBrute(chemin) + '?t=' + Date.now(), { cache: 'no-store' }); } catch (e) {
+    try { rep = await fetch(urlBrute(chemin, ref), { cache: 'no-store' }); } catch (e) {
       throw new Error('connexion à GitHub perdue (' + chemin + '). Vérifiez Internet, puis réessayez.');
     }
     if (!rep.ok) throw new Error(chemin + ' : HTTP ' + rep.status);
     return type === 'texte' ? rep.text() : new Uint8Array(await rep.arrayBuffer());
   }
 
-  /** Version publiée : { version, nouveautes: [{ version, titre }] plus récentes que la version installée }. */
+  /** Identifiant du dernier commit de la branche (null si l'API ne répond pas : on lit alors la branche). */
+  async function dernierCommit() {
+    let rep;
+    try { rep = await fetch(`https://api.github.com/repos/${DEPOT}/commits/${BRANCHE}`, { cache: 'no-store', headers: { Accept: 'application/vnd.github.sha' } }); } catch (e) {
+      throw new Error('Pas de connexion à GitHub. Vérifiez Internet, puis réessayez.');
+    }
+    if (rep.status === 404) throw new Error("Dépôt GitHub introuvable : il doit être public (" + DEPOT + ')');
+    if (!rep.ok) return null; // limite de l'API atteinte, par exemple
+    const sha = (await rep.text()).trim();
+    return /^[0-9a-f]{40}$/.test(sha) ? sha : null;
+  }
+
+  /** Version publiée : { version, nouveautes: [{ version, titre }] plus récentes que la version installée, ref }. */
   async function verifier() {
+    const ref = await dernierCommit();
     let texte;
-    try { texte = await telecharger('js/changelog.js', 'texte'); } catch (e) {
+    try { texte = await telecharger('js/changelog.js', 'texte', ref); } catch (e) {
       throw new Error(/HTTP 404/.test(e.message)
         ? "Dépôt GitHub introuvable : il doit être public (" + DEPOT + ')'
         : 'Pas de connexion à GitHub. Vérifiez Internet, puis réessayez.');
@@ -80,11 +94,12 @@
     return {
       version: versions[0].version,
       nouveautes: versions.filter((v) => comparerVersions(v.version, RDJ.VERSION) > 0),
+      ref,
     };
   }
 
-  async function listeFichiers() {
-    const rep = await fetch(`https://api.github.com/repos/${DEPOT}/git/trees/${BRANCHE}?recursive=1`, { cache: 'no-store' });
+  async function listeFichiers(ref) {
+    const rep = await fetch(`https://api.github.com/repos/${DEPOT}/git/trees/${ref || BRANCHE}?recursive=1`, { cache: 'no-store' });
     if (!rep.ok) throw new Error('Liste des fichiers indisponible (GitHub : HTTP ' + rep.status + ').');
     const arbre = await rep.json();
     if (arbre.truncated) throw new Error('Liste des fichiers incomplète.');
@@ -138,17 +153,17 @@
 
   /** Télécharge tous les fichiers, copie l'ancienne version, puis écrit la nouvelle.
       etape(phase, i, n) : progression ('telechargement' | 'copie' | 'installation', fichier i sur n).
-      Renvoie { fichiers, copie }. */
-  async function installer(racine, etape) {
+      ref : commit trouvé par verifier() (tous les fichiers viennent de ce même envoi). Renvoie { fichiers, copie }. */
+  async function installer(racine, etape, ref) {
     etape('telechargement', 0, 0);
-    const chemins = await listeFichiers();
+    const chemins = await listeFichiers(ref);
     if (!chemins.includes('index.html') || !chemins.includes('js/app.js')) throw new Error('Version en ligne incomplète.');
     const n = chemins.length;
     // 1. tout télécharger avant d'écrire quoi que ce soit : une coupure ne laisse pas l'appli à moitié à jour
     const nouveaux = {};
     for (let i = 0; i < n; i++) {
       etape('telechargement', i, n);
-      nouveaux[chemins[i]] = await telecharger(chemins[i]);
+      nouveaux[chemins[i]] = await telecharger(chemins[i], 'octets', ref);
     }
     // 2. copie de la version installée (fichiers remplacés seulement)
     const copie = ANCIENNES + '/' + RDJ.VERSION + '_' + RDJ.maintenantLocal().replace('T', '_').replace(':', 'h');

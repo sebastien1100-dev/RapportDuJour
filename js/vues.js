@@ -902,8 +902,7 @@
             <li><span>${esc(h.nom)}</span><b>${esc(ctx.cfg.horairesValeurs[h.id])}</b></li>`).join('')}
         </ul>
         <span class="acc-pied-version"><span title="Reproduction, modification ou diffusion interdites sans autorisation (fichier LICENSE)">© 2026 · tous droits réservés</span> · version ${esc(RDJ.VERSION || '')}${RDJ.maj && RDJ.maj.possible()
-          ? ` <button class="acc-pied-maj" data-action="maj-verifier"${ctx.maj && ctx.maj.etat === 'verif' ? ' disabled' : ''} title="Chercher sur GitHub si une nouvelle version existe (Internet nécessaire)">${ctx.maj && ctx.maj.etat === 'verif' ? 'Recherche…' : 'Mettre à jour'}</button>
-             <button class="acc-pied-retour" data-action="maj-revenir" title="Remettre la version gardée avant la dernière mise à jour">Version précédente</button>` : ''}</span>
+          ? ` <button class="acc-pied-retour" data-action="maj-revenir" title="Remettre la version gardée avant la dernière mise à jour">Version précédente</button>` : ''}</span>
       </footer>
     </section>`;
   };

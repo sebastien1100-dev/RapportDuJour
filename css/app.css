@@ -285,6 +285,12 @@ button, input, select { font: inherit; }
 .pastille-maj::after { content: ''; position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--rouge); border: 2px solid #fff; }
 .pastille-maj.vue::after { display: none; }
 .pastille-maj:hover { background: #ffefc2; }
+/* sans nouvelle version : simple bouton « Mettre à jour », sans point rouge */
+.pastille-maj.neutre { color: var(--accent); background: #fff; border-color: #cfe5e2; font-weight: 600; }
+.pastille-maj.neutre::before { content: '↻'; font-weight: 700; font-size: 15px; line-height: 1; }
+.pastille-maj.neutre::after { display: none; }
+.pastille-maj.neutre:hover { background: #eef7f5; }
+.pastille-maj:disabled { opacity: .7; cursor: default; }
 .pastille-maj[hidden] { display: none; }
 
 /* Accueil : carte « Nouvelle version disponible » */

@@ -420,26 +420,30 @@
   let histoComp = null;
 
   /** Pastille de la barre du haut : visible tant qu'une nouvelle version attend d'être installée. */
+  /** Bouton de la barre du haut : « Mettre à jour » (chercher), « Recherche… », ou « 3.45 disponible » (voir et installer). */
   function majPastille() {
     const p = $('#pastille-maj');
     if (!p) return;
+    p.hidden = !RDJ.maj.possible();
     const dispo = !!(maj && maj.etat === 'dispo');
-    p.hidden = !dispo;
-    if (dispo) {
-      p.querySelector('span').textContent = maj.version + ' disponible';
-      p.title = 'Nouvelle version ' + maj.version + ' : voir les nouveautés et installer';
-      p.classList.toggle('vue', !!maj.ouvert);
-    }
+    const cherche = !!(maj && maj.etat === 'verif');
+    p.classList.toggle('neutre', !dispo);
+    p.classList.toggle('vue', dispo && !!maj.ouvert);
+    p.disabled = cherche;
+    p.dataset.action = dispo ? 'maj-ouvrir' : 'maj-verifier';
+    p.querySelector('span').textContent = dispo ? maj.version + ' disponible' : cherche ? 'Recherche…' : 'Mettre à jour';
+    p.title = dispo ? 'Nouvelle version ' + maj.version + ' : voir les nouveautés et installer'
+      : 'Version ' + RDJ.VERSION + ' installée : chercher sur GitHub si une nouvelle version existe (Internet nécessaire)';
   }
 
   async function majVerifier(silencieux) {
-    if (!silencieux) { maj = { etat: 'verif' }; if (vue === 'accueil') afficher(); }
+    if (!silencieux) { maj = { etat: 'verif' }; majPastille(); if (vue === 'accueil') afficher(); }
     try {
       const r = await RDJ.maj.verifier();
-      try { localStorage.setItem('rapportDuJour.majVerifiee', RDJ.aujourdhui()); } catch (e) { /* sans importance */ }
+      try { localStorage.setItem('rapportDuJour.majVerifiee', new Date().toISOString()); } catch (e) { /* sans importance */ }
       if (r.nouveautes.length) {
         // recherche à la main : la carte s'ouvre ; vérification automatique : seulement la pastille
-        maj = { etat: 'dispo', version: r.version, nouveautes: r.nouveautes, ouvert: !silencieux };
+        maj = { etat: 'dispo', version: r.version, nouveautes: r.nouveautes, ref: r.ref, ouvert: !silencieux };
       } else {
         maj = null;
         if (!silencieux) notice("L'application est à jour (version " + RDJ.VERSION + ').', 'ok');
@@ -501,11 +505,13 @@
   }
 
   /** Vérification automatique à l'ouverture, au plus une fois par jour ; sans Internet, rien n'est signalé. */
+  /** Vérification automatique : à l'ouverture puis toutes les heures, au plus une fois par heure
+      (une version envoyée dans la journée est annoncée sans attendre le lendemain). Sans Internet, rien. */
   function majAuto() {
-    if (!RDJ.maj.possible() || !navigator.onLine) return;
-    let deja = null;
-    try { deja = localStorage.getItem('rapportDuJour.majVerifiee'); } catch (e) { /* sans importance */ }
-    if (deja !== RDJ.aujourdhui()) majVerifier(true);
+    if (!RDJ.maj.possible() || !navigator.onLine || (maj && maj.etat === 'dispo')) return;
+    let deja = 0;
+    try { deja = Date.parse(localStorage.getItem('rapportDuJour.majVerifiee')) || 0; } catch (e) { /* sans importance */ }
+    if (Date.now() - deja > 55 * 60 * 1000) majVerifier(true);
   }
 
   let minuterie = null;
@@ -1406,7 +1412,7 @@
         etat.derniereSauvegarde = RDJ.maintenantLocal();
         await sauverEtat(null, true);
         enregistrer();
-        await RDJ.maj.installer(racine, (p, i, n) => { phase = p; fenetreMaj(version, p, i, n); });
+        await RDJ.maj.installer(racine, (p, i, n) => { phase = p; fenetreMaj(version, p, i, n); }, maj.ref);
       } catch (e) {
         fenetreMaj(version, phase, 0, 0, 'Mise à jour interrompue : ' + e.message);
         return;
@@ -1686,4 +1692,6 @@
   try { majFaite = sessionStorage.getItem('rdj.majFaite'); sessionStorage.removeItem('rdj.majFaite'); } catch (e) { /* sans importance */ }
   if (majFaite) notice(majFaite === 'retour' ? 'Version précédente remise : version ' + RDJ.VERSION + '.' : 'Mise à jour installée : version ' + RDJ.VERSION + '.', 'ok');
   else setTimeout(majAuto, 3000);
+  setInterval(majAuto, 60 * 60 * 1000);
+  majPastille();
 })();
