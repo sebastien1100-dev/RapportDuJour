@@ -915,6 +915,54 @@ body.depot .voile-depot { display: grid; }
 /* accueil : anneau neutre tant que rien n'est importé */
 .hero.attente { --anneau: #c9d3e0; }
 
+/* réglages (3.51) : cartes par thème sur deux colonnes, icône de couleur et voyant dans l'en-tête */
+.rg-colonnes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+@media (max-width: 1000px) { .rg-colonnes { grid-template-columns: 1fr; } }
+.rg-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.reglages .rg-col > .carte.rg-carte { margin: 0; }
+.rg-tete { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.reglages .carte.rg-carte .rg-tete h3 { margin: 0; padding: 0; background: none; font-size: 13px; color: var(--marine); }
+.reglages .carte.rg-carte.danger .rg-tete h3 { color: var(--rose-fonce); }
+.rg-ico { flex: none; width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; line-height: 1; }
+.rg-sauge { background: var(--sauge-net); } .rg-ciel { background: var(--ciel); } .rg-beurre { background: var(--beurre); }
+.rg-menthe { background: var(--menthe); } .rg-lilas { background: var(--lilas); } .rg-peche { background: var(--peche); } .rg-rose { background: var(--rose); }
+.rg-droite { margin-left: auto; display: inline-flex; align-items: center; }
+.rg-voyant { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.rg-voyant.ok { background: var(--menthe); color: var(--menthe-fonce); }
+.rg-voyant.att { background: var(--beurre); color: var(--beurre-fonce); }
+.rg-voyant.non { background: var(--fond); color: var(--doux); }
+.reglages .carte.rg-carte .aide { margin: 0 0 10px; }
+.reglages .carte.rg-carte .aide.rg-sous { margin: 10px 0 0; }
+.rg-col .rg-horaires-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rg-col .rg-horaires-grille.rg-trois { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reglages .rg-col .rg-carte > label.rg-case { margin-top: 12px; }
+/* chambres : une case par chambre, colorée selon le type ; le menu des types est posé, invisible, sur la case */
+.reglages .carte.rg-carte label.tc-nombre { flex-direction: row; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: var(--marine); }
+.reglages .carte.rg-carte .tc-nombre input { width: 64px; padding: 4px 8px; font-size: 14px; font-weight: 700; }
+.rg-chambres .tc-etages { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.rg-chambres .tc-etage { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 8px; align-items: start; }
+.rg-chambres .tc-nom { padding-top: 5px; font-size: 12px; font-weight: 700; color: var(--doux); }
+.rg-chambres .tc-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 3px; }
+.reglages .carte.rg-carte label.tc {
+  position: relative; flex-direction: row; align-items: center; justify-content: center; margin: 0; padding: 5px 0;
+  border: 0; border-radius: 6px; background: var(--fond); font-size: 11.5px; font-weight: 700; color: var(--marine); cursor: pointer;
+}
+.reglages .carte.rg-carte label.tc select { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+.reglages .carte.rg-carte label.tc:hover, .reglages .carte.rg-carte label.tc:focus-within { box-shadow: 0 0 0 2px var(--accent); }
+.rg-chambres .tc-PMR { background: var(--ciel); color: var(--ciel-fonce); }
+.rg-chambres .tc-1K { background: var(--menthe); color: var(--menthe-fonce); }
+.rg-chambres .tc-2S { background: var(--beurre); color: var(--beurre-fonce); }
+.rg-chambres .tc-1Q { background: var(--lilas); color: var(--lilas-fonce); }
+.reglages .carte.rg-carte label.tc.tc-PMR { background: var(--ciel); color: var(--ciel-fonce); }
+.reglages .carte.rg-carte label.tc.tc-1K { background: var(--menthe); color: var(--menthe-fonce); }
+.reglages .carte.rg-carte label.tc.tc-2S { background: var(--beurre); color: var(--beurre-fonce); }
+.reglages .carte.rg-carte label.tc.tc-1Q { background: var(--lilas); color: var(--lilas-fonce); }
+.reglages .carte.rg-carte label.tc.tc-vide { background: #fff; box-shadow: inset 0 0 0 1.5px #e2a29c; }
+.rg-chambres .tc-compte { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 10px; font-size: 12.5px; color: var(--doux); }
+.rg-chambres .tc-compte i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.rg-chambres .tc-compte b { color: var(--marine); }
+.rg-chambres .tc-sans { color: var(--rouge); font-weight: 600; }
+
 /* réglages : code d'accès (carte) et écran de verrouillage */
 .reglages .carte.rg-carte.rg-code { margin: 0 0 14px; }
 .rg-code-ligne { display: flex; align-items: flex-end; gap: 10px 12px; flex-wrap: wrap; }

@@ -1536,128 +1536,138 @@
     </section>`;
   };
 
-  /** Carte « Types de chambre » des réglages : un choix par chambre, rangé par étage. */
+  /** Carte « Chambres » des réglages : une case par chambre, rangée par étage et colorée selon son type ;
+      un clic sur la case ouvre la liste des types (menu invisible posé sur la case). */
   function typesChambresReglages(ctx) {
     const types = ctx.cfg.typesChambre;
     const t = ctx.cfg.types;
     const etages = RDJ.planEtages(ctx.cfg.planFdc, ctx.cfg.dispositionEtages);
-    const compte = types.map((x) => `<span title="${esc(x.nom)}"><b>${esc(x.code)}</b> ${Object.values(t).filter((v) => v === x.code).length}</span>`).join('');
-    const sans = etages.flatMap((e) => RDJ.chambresEtage(e)).filter((n) => !t[n]).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
-    // repliée par défaut : on modifie rarement les types ; ouverte, une ligne par étage
+    const tri = (a, b) => a.localeCompare(b, 'fr', { numeric: true });
+    const sans = etages.flatMap((e) => RDJ.chambresEtage(e)).filter((n) => !t[n]).sort(tri);
+    const compte = types.map((x) => `<span title="${esc(x.nom)}"><i class="tc-${esc(x.code)}"></i><b>${esc(x.code)}</b> ${Object.values(t).filter((v) => v === x.code).length}</span>`).join('');
     return `
-      <details class="carte types-ch"${V.typesOuvert ? ' open' : ''}>
-        <summary>
-          <b>Chambres</b>
-          <label class="tc-nombre" title="Sert au calcul du taux d'occupation"><input type="number" min="1" data-reglage="nbChambres" value="${ctx.cfg.nbChambres}" aria-label="Nombre de chambres de l'hôtel"> chambres <small>(taux d'occupation)</small></label>
-          <span class="tc-compte">${compte}${sans.length ? `<span class="tc-sans" title="${esc(sans.join(', '))}">${sans.length} chambre${sans.length > 1 ? 's' : ''} sans type</span>` : ''}</span>
-          <span class="tc-ouvrir">Modifier les types</span>
-        </summary>
+      <section class="carte rg-carte rg-chambres">
+        ${teteCarte('🛏', 'Chambres', 'menthe', `<label class="tc-nombre" title="Sert au calcul du taux d'occupation"><input type="number" min="1" data-reglage="nbChambres" value="${ctx.cfg.nbChambres}" aria-label="Nombre de chambres de l'hôtel"> chambres</label>`)}
+        <p class="aide">Cliquez sur une chambre pour changer son type.</p>
         <div class="tc-etages">
           ${etages.map((e) => `
             <div class="tc-etage">
-              <h3>${esc(e.nom.replace(' étage', '').replace('Rez-de-chaussée', 'RDC'))}</h3>
-              <div class="tc-grille">${RDJ.chambresEtage(e).slice().sort((a, b) => a.localeCompare(b, 'fr', { numeric: true })).map((n) => `
-                <label class="tc${t[n] ? ' tc-' + esc(t[n]) : ' tc-vide'}"><span>${esc(n)}</span><select data-type-chambre="${esc(n)}">
-                    <option value="">—</option>${types.map((x) => `<option value="${esc(x.code)}" ${t[n] === x.code ? 'selected' : ''}>${esc(x.code)}</option>`).join('')}
+              <span class="tc-nom">${esc(e.nom.replace(' étage', '').replace('Rez-de-chaussée', 'RDC'))}</span>
+              <div class="tc-grille">${RDJ.chambresEtage(e).slice().sort(tri).map((n) => `
+                <label class="tc${t[n] ? ' tc-' + esc(t[n]) : ' tc-vide'}" title="Chambre ${esc(n)} : ${t[n] ? esc(t[n]) : 'sans type'}"><span>${esc(n)}</span><select data-type-chambre="${esc(n)}" aria-label="Type de la chambre ${esc(n)}">
+                    <option value="">—</option>${types.map((x) => `<option value="${esc(x.code)}" ${t[n] === x.code ? 'selected' : ''}>${esc(x.code)} · ${esc(x.nom)}</option>`).join('')}
                   </select></label>`).join('')}
               </div>
             </div>`).join('')}
         </div>
-      </details>`;
+        <div class="tc-compte">${compte}${sans.length ? `<span class="tc-sans" title="${esc(sans.join(', '))}">${sans.length} chambre${sans.length > 1 ? 's' : ''} sans type</span>` : ''}</div>
+      </section>`;
   }
+
+  /** En-tête d'une carte des réglages : icône de couleur, titre, puis à droite un voyant ou un champ. */
+  const teteCarte = (icone, titre, couleur, droite) => `
+        <header class="rg-tete"><span class="rg-ico rg-${couleur}" aria-hidden="true">${icone}</span><h3>${esc(titre)}</h3>${droite ? `<span class="rg-droite">${droite}</span>` : ''}</header>`;
 
   V.ecranReglages = (ctx) => {
     const r = ctx.cfg;
     const sauv = ctx.etat.derniereSauvegarde;
+    // voyant de la sauvegarde : vert si elle a moins de 7 jours
+    const joursSauv = sauv ? RDJ.ecartJours(RDJ.aujourdhui(), sauv.slice(0, 10)) : null;
+    const quandSauv = !sauv ? 'jamais' : joursSauv === 0 ? 'aujourd\'hui à ' + sauv.slice(11, 16).replace(':', 'h')
+      : joursSauv === 1 ? 'hier à ' + sauv.slice(11, 16).replace(':', 'h') : 'le ' + RDJ.dateFr(sauv.slice(0, 10)).slice(0, 5);
+    const voyantSauv = `<span class="rg-voyant ${sauv && joursSauv < 7 ? 'ok' : 'att'}">${sauv && joursSauv < 7 ? '✓ ' : ''}${esc(quandSauv)}</span>`;
+    const voyantCode = `<span class="rg-voyant ${ctx.pinDefini ? 'ok' : 'non'}">${ctx.pinDefini ? '✓ activé' : 'pas de code'}</span>`;
+    const dossier = !RDJ.dossierSauv.possible
+      ? '<b>Téléchargements</b><small class="rg-note">Ce navigateur ne permet pas de choisir un dossier : pour enregistrer dans le dossier « save » de l\'appli, ouvrez-la avec Chrome ou Edge.</small>'
+      : RDJ.dossierSauv.nom
+        ? `<b>${esc(RDJ.dossierSauv.nom.toLowerCase() === 'save' ? RDJ.dossierSauv.nom : RDJ.dossierSauv.nom + '/save')}</b> <small>· ${RDJ.dossierSauv.GARDER} dernières gardées</small>`
+        : '<b>pas encore choisi</b> <small>(demandé à la première sauvegarde)</small>';
     return `
     <section class="ecran reglages">
       ${sousReglages(ctx)}
       ${teteEcran('reglages', 'Réglages', 'Version ' + esc(RDJ.VERSION || ''),
         'Les changements sont enregistrés tout de suite.', '')}
 
-      <div class="rg-grille">
-        <section class="carte rg-carte">
-          <h3>En-tête</h3>
-          <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
-        </section>
+      <div class="rg-colonnes">
+        <div class="rg-col">
+          <section class="carte rg-carte">
+            ${teteCarte('🏨', 'Hôtel', 'sauge')}
+            <label>Nom de l'hôtel <input type="text" data-reglage="hotel" value="${esc(r.hotel)}"></label>
+            <p class="aide">Pied de page de l'accueil : horaires clés (case vide = non affiché).</p>
+            <div class="rg-horaires-grille">
+              ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
+            </div>
+          </section>
 
-        <section class="carte rg-carte">
-          <h3>Sauvegarde</h3>
-          <p>Les données sont enregistrées dans ce navigateur, sur ce poste${RDJ.store.disponible ? '' : ' — <b class="rouge">stockage indisponible : les données seront perdues à la fermeture</b>'}.</p>
-          <p class="rg-etat">Dernière sauvegarde : <b>${sauv ? esc(RDJ.dateFr(sauv.slice(0, 10)) + ' à ' + sauv.slice(11, 16)) : 'jamais'}</b></p>
-          <p class="rg-etat">Dossier : ${!RDJ.dossierSauv.possible
-            ? '<b>Téléchargements</b><small class="rg-note">Ce navigateur ne permet pas de choisir un dossier : pour enregistrer dans le dossier « save » de l\'appli, ouvrez-la avec Chrome ou Edge.</small>'
-            : RDJ.dossierSauv.nom
-              ? `<b>${esc(RDJ.dossierSauv.nom.toLowerCase() === 'save' ? RDJ.dossierSauv.nom : RDJ.dossierSauv.nom + '/save')}</b> <small>(${RDJ.dossierSauv.GARDER} dernières gardées)</small>`
-              : '<b>pas encore choisi</b> <small>(demandé à la première sauvegarde)</small>'}</p>
-          <div class="boutons">
-            <button class="btn primaire" data-action="sauvegarder">Sauvegarder (.json)</button>
-            <button class="btn" data-action="restaurer">Restaurer une sauvegarde…</button>
-            ${RDJ.dossierSauv.possible ? '<button class="btn" data-action="dossier-sauv">Changer de dossier…</button>' : ''}
-          </div>
-          <label class="rg-case"><input type="checkbox" data-reglage="sauvegardeHebdo"${ctx.etat.reglages.sauvegardeHebdo ? ' checked' : ''}>
-            <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture de l'application, une sauvegarde est faite si la dernière date de 7 jours ou plus.</small></span></label>
-        </section>
+          <section class="carte rg-carte rg-impressions">
+            ${teteCarte('🖨', 'Impressions de la nuit', 'ciel')}
+            <p class="aide">Feuilles imprimées par « Tout imprimer » sur l'accueil, dans cet ordre.</p>
+            <div class="rg-feuilles">
+              ${FEUILLES_NUIT.map(([k, lib]) => `
+                <div class="rg-feuille f-${k}${r.impressionNuit[k] ? ' coche' : ''}">
+                  <label><input type="checkbox" data-reglage="impression-${k}"${r.impressionNuit[k] ? ' checked' : ''}>${esc(lib)}</label>
+                  ${k === 'fdc' ? `<label class="rg-ex">× <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}" aria-label="Exemplaires de la feuille de chambre"></label>` : ''}
+                </div>`).join('')}
+            </div>
+            <label class="rg-case"><input type="checkbox" data-reglage="rectoVerso"${r.rectoVerso ? ' checked' : ''}>
+              <span><b>L'imprimante imprime en recto verso</b><small>Chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière). Le rapport, la cuisson PDJ, le plan et l'historique peuvent partager une feuille (rapport au recto, cuisson au verso).</small></span></label>
+          </section>
+
+          <section class="carte rg-carte">
+            ${teteCarte('🥐', 'Cuisson PDJ', 'beurre')}
+            <p class="aide">Croissants et pains au chocolat : quantité arrondie à la plaque entière, puis répartie en fournées.</p>
+            <div class="rg-horaires-grille rg-trois">
+              <label>Pièces par plaque<input type="number" min="1" max="60" data-reglage="piecesParPlaque" value="${r.piecesParPlaque}"></label>
+              <label>Fournée de ${esc(r.fournees[0].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee1" value="${r.fournees[0].part}"></label>
+              <label>Fournée de ${esc(r.fournees[1].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee2" value="${r.fournees[1].part}"></label>
+            </div>
+            <p class="aide rg-sous">Réserve : ${r.fournees[2].part} %, cuite seulement si le buffet baisse.</p>
+          </section>
+        </div>
+
+        <div class="rg-col">
+          ${typesChambresReglages(ctx)}
+
+          <section class="carte rg-carte">
+            ${teteCarte('💾', 'Sauvegarde', 'lilas', voyantSauv)}
+            <p class="rg-etat">Données enregistrées dans ce navigateur, sur ce poste${RDJ.store.disponible ? '' : ' — <b class="rouge">stockage indisponible : les données seront perdues à la fermeture</b>'}. Dossier : ${dossier}</p>
+            <div class="boutons">
+              <button class="btn primaire" data-action="sauvegarder">Sauvegarder (.json)</button>
+              <button class="btn" data-action="restaurer">Restaurer…</button>
+              ${RDJ.dossierSauv.possible ? '<button class="btn" data-action="dossier-sauv">Changer de dossier…</button>' : ''}
+            </div>
+            <label class="rg-case"><input type="checkbox" data-reglage="sauvegardeHebdo"${ctx.etat.reglages.sauvegardeHebdo ? ' checked' : ''}>
+              <span><b>Sauvegarde hebdomadaire automatique</b><small>À l'ouverture, une sauvegarde est faite si la dernière date de 7 jours ou plus.</small></span></label>
+          </section>
+
+          <section class="carte rg-carte rg-code">
+            ${teteCarte('🔒', 'Code d\'accès', 'peche', voyantCode)}
+            ${ctx.pinDefini ? `
+            <p class="aide">Les Réglages et le Change log se reverrouillent seuls après 10 minutes sans action, ou à la fermeture de l'appli.</p>
+            <div class="rg-code-ligne">
+              <button class="btn primaire" data-action="verrouiller-reglages">Verrouiller maintenant</button>
+              <button class="btn danger" data-action="pin-supprimer">Supprimer le code</button>
+            </div>
+            <div class="rg-code-ligne">
+              <label>Nouveau code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
+              <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+              <button class="btn" data-action="pin-definir">Changer le code</button>
+            </div>` : `
+            <p class="aide">Réservez les Réglages et le Change log : un code de 4 à 8 chiffres sera demandé à chaque ouverture, sur ce poste.</p>
+            <div class="rg-code-ligne">
+              <label>Code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
+              <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
+              <button class="btn primaire" data-action="pin-definir">Protéger les Réglages</button>
+            </div>`}
+          </section>
+
+          <section class="carte rg-carte danger">
+            ${teteCarte('⚠️', 'Supprimer toutes les données', 'rose')}
+            <p class="aide">Efface les données importées, tout l'historique des nuits, les corrections et les saisies. Une sauvegarde est faite juste avant.</p>
+            <button class="btn danger" data-action="tout-supprimer">Supprimer toutes les données…</button>
+          </section>
+        </div>
       </div>
-
-      <section class="carte rg-carte rg-code">
-        <h3>Code d'accès</h3>
-        ${ctx.pinDefini ? `
-        <p>Les Réglages et le Change log sont protégés par un code sur ce poste. Ils se reverrouillent tout seuls après 10 minutes sans action, ou à la fermeture de l'appli.</p>
-        <div class="rg-code-ligne">
-          <button class="btn primaire" data-action="verrouiller-reglages">Verrouiller maintenant</button>
-          <label>Nouveau code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
-          <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
-          <button class="btn" data-action="pin-definir">Changer le code</button>
-          <button class="btn danger" data-action="pin-supprimer">Supprimer le code</button>
-        </div>` : `
-        <p>Réservez les Réglages et le Change log : choisissez un code de 4 à 8 chiffres. Il sera demandé à chaque ouverture des Réglages, sur ce poste.</p>
-        <div class="rg-code-ligne">
-          <label>Code<input type="password" id="pin-nouveau" inputmode="numeric" autocomplete="new-password" maxlength="8" placeholder="4 à 8 chiffres"></label>
-          <label>Confirmer<input type="password" id="pin-confirme" inputmode="numeric" autocomplete="new-password" maxlength="8"></label>
-          <button class="btn primaire" data-action="pin-definir">Protéger les Réglages</button>
-        </div>`}
-      </section>
-
-      <section class="carte rg-carte rg-horaires">
-        <h3>Pied de page</h3>
-        <p class="aide">Horaires clés affichés en bas de l'accueil. Laisser une case vide pour ne pas l'afficher.</p>
-        <div class="rg-horaires-grille">
-          ${r.horaires.map((h) => `<label>${esc(h.nom)}<input type="text" data-reglage="horaire-${h.id}" value="${esc(r.horairesValeurs[h.id])}" placeholder="non affiché"></label>`).join('')}
-        </div>
-      </section>
-
-      <section class="carte rg-carte rg-horaires rg-cuisson">
-        <h3>Cuisson PDJ</h3>
-        <p class="aide">Croissants et pains au chocolat : quantité arrondie à la plaque entière, puis répartie en fournées. La réserve (le reste) n'est cuite que si le buffet baisse.</p>
-        <div class="rg-horaires-grille">
-          <label>Pièces par plaque<input type="number" min="1" max="60" data-reglage="piecesParPlaque" value="${r.piecesParPlaque}"></label>
-          <label>Fournée de ${esc(r.fournees[0].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee1" value="${r.fournees[0].part}"></label>
-          <label>Fournée de ${esc(r.fournees[1].heure)} (%)<input type="number" min="0" max="100" data-reglage="fournee2" value="${r.fournees[1].part}"><small>réserve : ${r.fournees[2].part} %</small></label>
-        </div>
-      </section>
-
-      <section class="carte rg-carte rg-impressions">
-        <h3>Impressions de la nuit</h3>
-        <p class="aide">Feuilles imprimées par le bandeau « Impressions de la nuit » de l'accueil, dans cet ordre.</p>
-        <div class="rg-feuilles">
-          ${FEUILLES_NUIT.map(([k, lib]) => `
-            <div class="rg-feuille f-${k}${r.impressionNuit[k] ? ' coche' : ''}">
-              <label><input type="checkbox" data-reglage="impression-${k}"${r.impressionNuit[k] ? ' checked' : ''}>${esc(lib)}</label>
-              ${k === 'fdc' ? `<label class="rg-ex">× <input type="number" min="1" max="50" data-reglage="nbExemplairesFdc" value="${r.nbExemplairesFdc}" aria-label="Exemplaires de la feuille de chambre"></label>` : ''}
-            </div>`).join('')}
-        </div>
-        <label class="rg-case"><input type="checkbox" data-reglage="rectoVerso"${r.rectoVerso ? ' checked' : ''}>
-          <span><b>L'imprimante imprime en recto verso</b><small>Chaque feuille de chambre reste seule sur sa feuille (une page blanche est ajoutée derrière). Le rapport, la cuisson PDJ, le plan et l'historique sont imprimés d'abord et peuvent partager une feuille (rapport au recto, cuisson au verso).</small></span></label>
-      </section>
-
-      ${typesChambresReglages(ctx)}
-
-      <section class="carte rg-carte danger">
-        <h3>Supprimer toutes les données</h3>
-        <p>Efface les données importées, tout l'historique des nuits, les corrections et les saisies. Une sauvegarde est faite juste avant.</p>
-        <button class="btn danger" data-action="tout-supprimer">Supprimer toutes les données…</button>
-      </section>
     </section>`;
   };
 })();

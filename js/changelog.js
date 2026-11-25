@@ -8,6 +8,14 @@
 
   RDJ.CHANGELOG = [
     {
+      version: '3.51', date: '2026-11-25', titre: 'Réglages en cartes par thème',
+      changements: [
+        ['amelioration', "Réglages rangés en deux colonnes de cartes, chacune avec son icône : à gauche Hôtel (nom et pied de page), Impressions de la nuit et Cuisson PDJ ; à droite Chambres, Sauvegarde, Code d'accès et Supprimer les données."],
+        ['amelioration', "Chambres : une grille par étage, chaque chambre colorée selon son type, toujours visible ; un clic sur une chambre ouvre la liste des types. Le compte par type est dessous."],
+        ['amelioration', "Voyants dans l'en-tête des cartes : date de la dernière sauvegarde (vert si elle a moins de 7 jours) et code d'accès activé ou non."],
+      ],
+    },
+    {
       version: '3.50', date: '2026-11-25', titre: 'Rapport : « Recouche » et « DÉPART » en entier',
       changements: [
         ['correction', "Dans le tableau du rapport, la colonne « Statut » coupait « Recouche » et « DÉPART » (surtout sous Windows). Elle est plus large ; la colonne « Client » et la colonne « PDJ » sont un peu plus étroites."],
